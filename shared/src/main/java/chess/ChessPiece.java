@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Represents a single chess piece
@@ -46,6 +47,32 @@ public class ChessPiece {
     }
 
     /**
+     * @return Unicode String representation of ChessPiece object
+     */
+    @Override
+    public String toString() {
+        return this.getTeamColor() == ChessGame.TeamColor.WHITE
+                ? whitePieceToChar.get(this.getPieceType())
+                : blackPieceToChar.get(this.getPieceType());
+    }
+
+    final static Map<PieceType, String> whitePieceToChar = Map.of(
+            ChessPiece.PieceType.PAWN, "♙",    // White Pawn
+            ChessPiece.PieceType.KNIGHT, "♘",  // White Knight
+            ChessPiece.PieceType.ROOK, "♖",    // White Rook
+            ChessPiece.PieceType.QUEEN, "♕",   // White Queen
+            ChessPiece.PieceType.KING, "♔",    // White King
+            ChessPiece.PieceType.BISHOP, "♗"); // White Bishop
+
+    final static Map<ChessPiece.PieceType, String> blackPieceToChar = Map.of(
+            ChessPiece.PieceType.PAWN, "♟",    // Black Pawn
+            ChessPiece.PieceType.KNIGHT, "♞",  // Black Knight
+            ChessPiece.PieceType.ROOK, "♜",    // Black Rook
+            ChessPiece.PieceType.QUEEN, "♛",   // Black Queen
+            ChessPiece.PieceType.KING, "♚",    // Black King
+            ChessPiece.PieceType.BISHOP, "♝"); // Black Bishop
+
+    /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
      * danger
@@ -53,6 +80,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+
         return new ArrayList<>();
     }
 }
