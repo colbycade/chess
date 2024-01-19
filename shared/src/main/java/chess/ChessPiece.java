@@ -114,8 +114,37 @@ public class ChessPiece {
                     }
                 }
 
-                // capture left/right
-                
+                // capture left
+                var front_left = new ChessPosition(row + direction, col - direction);
+                if (isInbounds(front_left) && !board.squareIsEmpty(front_left) &&
+                        board.getPiece(front_left).getTeamColor() != piece.getTeamColor()) {
+                    if (front_left.getRow() == endingRow) {
+                        // promote to Rook, Knight, Bishop, or Queen (they cannot stay a Pawn)
+                        PieceType[] promotions = {PieceType.ROOK, PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN};
+                        for (PieceType type : promotions) {
+                            moves.add(new ChessMove(myPosition, front_left, type));
+                        }
+                    } else {
+                        // no promotion
+                        moves.add(new ChessMove(myPosition, front_left, null));
+                    }
+                }
+
+                // capture right
+                var front_right = new ChessPosition(row + direction, col + direction);
+                if (isInbounds(front_right) && !board.squareIsEmpty(front_right) &&
+                        board.getPiece(front_right).getTeamColor() != piece.getTeamColor()) {
+                    if (front_right.getRow() == endingRow) {
+                        // promote to Rook, Knight, Bishop, or Queen (they cannot stay a Pawn)
+                        PieceType[] promotions = {PieceType.ROOK, PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN};
+                        for (PieceType type : promotions) {
+                            moves.add(new ChessMove(myPosition, front_right, type));
+                        }
+                    } else {
+                        // no promotion
+                        moves.add(new ChessMove(myPosition, front_right, null));
+                    }
+                }
 
                 // en passant
 
@@ -135,7 +164,9 @@ public class ChessPiece {
         return moves;
     }
 
-    private boolean checkBounds(int row, int col) {
+    private boolean isInbounds(ChessPosition position) {
+        int row = position.getRow();
+        int col = position.getColumn();
         return (1 <= row) && (row <= 8) && (1 <= col) && (col <= 8);
     }
 }
