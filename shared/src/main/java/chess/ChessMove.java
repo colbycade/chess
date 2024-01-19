@@ -42,4 +42,16 @@ public class ChessMove {
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
     }
+
+    /**
+     * @return String representation of move
+     */
+    @Override
+    public String toString() {
+        var move = String.format("Starting Position: %s Ending Position: %s", startPosition, endPosition);
+        if (promotionPiece != null) {
+            move += String.format(" Promoted to: %s", promotionPiece);
+        }
+        return move;
+    }
 }
