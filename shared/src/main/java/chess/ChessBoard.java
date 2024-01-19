@@ -60,6 +60,10 @@ public class ChessBoard {
         return board[8 - position.getRow()][position.getColumn() - 1];
     }
 
+    public boolean squareIsEmpty(ChessPosition position) {
+        return this.getPiece(position) == null;
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
