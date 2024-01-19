@@ -15,7 +15,7 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
     }
@@ -56,21 +56,21 @@ public class ChessPiece {
                 : blackPieceToChar.get(this.getPieceType());
     }
 
-    final static Map<PieceType, String> whitePieceToChar = Map.of(
-            ChessPiece.PieceType.PAWN, "♙",    // White Pawn
-            ChessPiece.PieceType.KNIGHT, "♘",  // White Knight
-            ChessPiece.PieceType.ROOK, "♖",    // White Rook
-            ChessPiece.PieceType.QUEEN, "♕",   // White Queen
-            ChessPiece.PieceType.KING, "♔",    // White King
-            ChessPiece.PieceType.BISHOP, "♗"); // White Bishop
+    private final static Map<PieceType, String> whitePieceToChar = Map.of(
+            PieceType.PAWN, "♙",    // White Pawn
+            PieceType.KNIGHT, "♘",  // White Knight
+            PieceType.ROOK, "♖",    // White Rook
+            PieceType.QUEEN, "♕",   // White Queen
+            PieceType.KING, "♔",    // White King
+            PieceType.BISHOP, "♗"); // White Bishop
 
-    final static Map<ChessPiece.PieceType, String> blackPieceToChar = Map.of(
-            ChessPiece.PieceType.PAWN, "♟",    // Black Pawn
-            ChessPiece.PieceType.KNIGHT, "♞",  // Black Knight
-            ChessPiece.PieceType.ROOK, "♜",    // Black Rook
-            ChessPiece.PieceType.QUEEN, "♛",   // Black Queen
-            ChessPiece.PieceType.KING, "♚",    // Black King
-            ChessPiece.PieceType.BISHOP, "♝"); // Black Bishop
+    private final static Map<PieceType, String> blackPieceToChar = Map.of(
+            PieceType.PAWN, "♟",    // Black Pawn
+            PieceType.KNIGHT, "♞",  // Black Knight
+            PieceType.ROOK, "♜",    // Black Rook
+            PieceType.QUEEN, "♛",   // Black Queen
+            PieceType.KING, "♚",    // Black King
+            PieceType.BISHOP, "♝"); // Black Bishop
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -80,7 +80,62 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        var moves = new ArrayList<ChessMove>();
+        ChessPiece piece = board.getPiece(myPosition);
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
 
-        return new ArrayList<>();
+        switch (piece.getPieceType()) {
+            case PAWN:
+                int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+                int startingRow = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
+                int endingRow = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
+
+                // move one forward
+                var one_forward = new ChessPosition(row + direction, col);
+                if (board.squareIsEmpty(one_forward)) {
+                    if (one_forward.getRow() == endingRow) {
+                        // promote to Rook, Knight, Bishop, or Queen (they cannot stay a Pawn)
+                        PieceType[] promotions = {PieceType.ROOK, PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN};
+                        for (PieceType type : promotions) {
+                            moves.add(new ChessMove(myPosition, one_forward, type));
+                        }
+                    } else {
+                        // no promotion
+                        moves.add(new ChessMove(myPosition, one_forward, null));
+                    }
+
+                    // first move can go two forward (but one forward must also be empty)
+                    if (row == startingRow) {
+                        var two_forward = new ChessPosition(row + 2 * direction, col);
+                        if (board.squareIsEmpty(two_forward)) {
+                            moves.add(new ChessMove(myPosition, two_forward, null));
+                        }
+                    }
+                }
+
+                // capture left/right
+                
+
+                // en passant
+
+                // promotion
+
+            case BISHOP:
+
+            case KNIGHT:
+
+            case ROOK:
+
+            case QUEEN:
+
+            case KING:
+        }
+
+        return moves;
+    }
+
+    private boolean checkBounds(int row, int col) {
+        return (1 <= row) && (row <= 8) && (1 <= col) && (col <= 8);
     }
 }
