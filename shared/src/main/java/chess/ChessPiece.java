@@ -151,6 +151,31 @@ public class ChessPiece {
                 // promotion
 
             case BISHOP:
+                int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}}; // each diagonal
+                for (int[] pair : directions) {
+                    int rowDirection = pair[0];
+                    int colDirection = pair[1];
+                    int stepSize = 1;
+                    var currPosition = new ChessPosition(myPosition.getRow() + rowDirection * stepSize, myPosition.getColumn() + colDirection * stepSize);
+                    while (isInbounds(currPosition)) {
+                        ChessPiece pieceAtPosition = board.getPiece(currPosition);
+                        // position is unoccupied; add to moves and continue searching this direction
+                        if (pieceAtPosition == null) {
+                            moves.add(new ChessMove(myPosition, currPosition, null));
+                            stepSize++;
+                            currPosition = new ChessPosition(myPosition.getRow() + rowDirection * stepSize, myPosition.getColumn() + colDirection * stepSize);
+                        }
+                        // position is occupied; capture if possible and stop searching this direction
+                        else {
+                            // add to moves if capture is possible
+                            if (pieceAtPosition.getTeamColor() != piece.getTeamColor()) {
+                                moves.add(new ChessMove(myPosition, currPosition, null));
+                            }
+                            break;
+                        }
+                    }
+                }
+
 
             case KNIGHT:
 
