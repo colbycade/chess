@@ -34,6 +34,16 @@ public class ChessPosition {
         return col;
     }
 
+
+    /**
+     * @return true if position is in bounds; false otherwise
+     */
+    public boolean isInbounds() {
+        int row = this.getRow();
+        int col = this.getColumn();
+        return (1 <= row) && (row <= 8) && (1 <= col) && (col <= 8);
+    }
+
     /**
      * @return String representation of position
      */
