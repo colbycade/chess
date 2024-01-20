@@ -54,6 +54,7 @@ public class ChessMove {
         if (promotionPiece != null) {
             move += String.format(" Promoted to: %s", promotionPiece);
         }
+        move += '\n';
         return move;
     }
 
