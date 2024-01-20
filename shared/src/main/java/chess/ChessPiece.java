@@ -86,7 +86,7 @@ public class ChessPiece {
         int col = myPosition.getColumn();
 
         switch (piece.getPieceType()) {
-            case PAWN:
+            case PAWN: {
                 int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
                 int startingRow = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
                 int endingRow = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
@@ -116,7 +116,7 @@ public class ChessPiece {
 
                 // capture left
                 var front_left = new ChessPosition(row + direction, col - direction);
-                if (isInbounds(front_left) && !board.squareIsEmpty(front_left) &&
+                if (front_left.isInbounds() && !board.squareIsEmpty(front_left) &&
                         board.getPiece(front_left).getTeamColor() != piece.getTeamColor()) {
                     if (front_left.getRow() == endingRow) {
                         // promote to Rook, Knight, Bishop, or Queen (they cannot stay a Pawn)
@@ -132,7 +132,7 @@ public class ChessPiece {
 
                 // capture right
                 var front_right = new ChessPosition(row + direction, col + direction);
-                if (isInbounds(front_right) && !board.squareIsEmpty(front_right) &&
+                if (front_right.isInbounds() && !board.squareIsEmpty(front_right) &&
                         board.getPiece(front_right).getTeamColor() != piece.getTeamColor()) {
                     if (front_right.getRow() == endingRow) {
                         // promote to Rook, Knight, Bishop, or Queen (they cannot stay a Pawn)
@@ -150,14 +150,18 @@ public class ChessPiece {
 
                 // promotion
 
-            case BISHOP:
+                break;
+            }
+
+            case BISHOP: {
                 int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}}; // each diagonal
-                for (int[] pair : directions) {
-                    int rowDirection = pair[0];
-                    int colDirection = pair[1];
+
+                for (int[] directionPair : directions) {
+                    int rowDirection = directionPair[0];
+                    int colDirection = directionPair[1];
                     int stepSize = 1;
                     var currPosition = new ChessPosition(myPosition.getRow() + rowDirection * stepSize, myPosition.getColumn() + colDirection * stepSize);
-                    while (isInbounds(currPosition)) {
+                    while (currPosition.isInbounds()) {
                         ChessPiece pieceAtPosition = board.getPiece(currPosition);
                         // position is unoccupied; add to moves and continue searching this direction
                         if (pieceAtPosition == null) {
@@ -175,23 +179,117 @@ public class ChessPiece {
                         }
                     }
                 }
+                break;
+            }
 
+            case KNIGHT: {
+                int[][] jumps = {   // all L-shapes
+                        {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                        {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+                };
 
-            case KNIGHT:
+                for (int[] offsetPair : jumps) {
+                    int rowOffset = offsetPair[0];
+                    int colOffset = offsetPair[1];
+                    var currPosition = new ChessPosition(myPosition.getRow() + rowOffset, myPosition.getColumn() + colOffset);
+                    if (currPosition.isInbounds()) {
+                        ChessPiece pieceAtPosition = board.getPiece(currPosition);
+                        if (pieceAtPosition == null || pieceAtPosition.getTeamColor() != piece.getTeamColor()) {
+                            // position is empty or capture is possible
+                            moves.add(new ChessMove(myPosition, currPosition, null));
+                        }
+                    }
+                }
+                break;
+            }
 
-            case ROOK:
+            case ROOK: {
+                int[][] directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}}; // up down left right
 
-            case QUEEN:
+                for (int[] directionPair : directions) {
+                    int rowDirection = directionPair[0];
+                    int colDirection = directionPair[1];
+                    int stepSize = 1;
+                    var currPosition = new ChessPosition(myPosition.getRow() + rowDirection * stepSize, myPosition.getColumn() + colDirection * stepSize);
+                    while (currPosition.isInbounds()) {
+                        ChessPiece pieceAtPosition = board.getPiece(currPosition);
+                        // position is unoccupied; add to moves and continue searching this direction
+                        if (pieceAtPosition == null) {
+                            moves.add(new ChessMove(myPosition, currPosition, null));
+                            stepSize++;
+                            currPosition = new ChessPosition(myPosition.getRow() + rowDirection * stepSize, myPosition.getColumn() + colDirection * stepSize);
+                        }
+                        // position is occupied; capture if possible and stop searching this direction
+                        else {
+                            // add to moves if capture is possible
+                            if (pieceAtPosition.getTeamColor() != piece.getTeamColor()) {
+                                moves.add(new ChessMove(myPosition, currPosition, null));
+                            }
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
 
-            case KING:
+            case QUEEN: {
+                int[][] directions = {
+                        {0, 1}, {0, -1}, {-1, 0}, {1, 0},   // up down left right
+                        {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
+                };
+
+                for (int[] directionPair : directions) {
+                    int rowDirection = directionPair[0];
+                    int colDirection = directionPair[1];
+                    int stepSize = 1;
+                    var currPosition = new ChessPosition(myPosition.getRow() + rowDirection * stepSize, myPosition.getColumn() + colDirection * stepSize);
+                    while (currPosition.isInbounds()) {
+                        ChessPiece pieceAtPosition = board.getPiece(currPosition);
+                        // position is unoccupied; add to moves and continue searching this direction
+                        if (pieceAtPosition == null) {
+                            moves.add(new ChessMove(myPosition, currPosition, null));
+                            stepSize++;
+                            currPosition = new ChessPosition(myPosition.getRow() + rowDirection * stepSize, myPosition.getColumn() + colDirection * stepSize);
+                        }
+                        // position is occupied; capture if possible and stop searching this direction
+                        else {
+                            // add to moves if capture is possible
+                            if (pieceAtPosition.getTeamColor() != piece.getTeamColor()) {
+                                moves.add(new ChessMove(myPosition, currPosition, null));
+                            }
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+
+            case KING: {
+                int[][] directions = {
+                        {0, 1}, {0, -1}, {-1, 0}, {1, 0},   // up down left right
+                        {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
+                };
+
+                for (int[] offsetPair : directions) {
+                    int rowOffset = offsetPair[0];
+                    int colOffset = offsetPair[1];
+                    var currPosition = new ChessPosition(myPosition.getRow() + rowOffset, myPosition.getColumn() + colOffset);
+                    if (currPosition.isInbounds()) {
+                        ChessPiece pieceAtPosition = board.getPiece(currPosition);
+                        // position is unoccupied; add to moves
+                        if (pieceAtPosition == null) {
+                            moves.add(new ChessMove(myPosition, currPosition, null));
+                        }
+                        // position is occupied; capture if possible
+                        else if (pieceAtPosition.getTeamColor() != piece.getTeamColor()) {
+                            moves.add(new ChessMove(myPosition, currPosition, null));
+                        }
+                    }
+                }
+                break;
+            }
         }
 
         return moves;
-    }
-
-    private boolean isInbounds(ChessPosition position) {
-        int row = position.getRow();
-        int col = position.getColumn();
-        return (1 <= row) && (row <= 8) && (1 <= col) && (col <= 8);
     }
 }
