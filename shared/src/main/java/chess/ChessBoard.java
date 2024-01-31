@@ -20,7 +20,7 @@ public class ChessBoard {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("    1 2 3 4 5 6 7 8\n"); // Column labels
+        sb.append("    a b c d e f g h\n"); // Column labels
         sb.append("  +-----------------+\n"); // Buffer
         for (int row = 8; row >= 1; row--) { // Start from the top (row 8) and go down to row 1
             sb.append(row).append(" | "); // Row number
@@ -35,7 +35,7 @@ public class ChessBoard {
             sb.append("| ").append(row).append("\n"); // Row number
         }
         sb.append("  +-----------------+\n"); // Buffer
-        sb.append("    1 2 3 4 5 6 7 8\n"); // Column labels
+        sb.append("    a b c d e f g h\n"); // Column labels
 
         return sb.toString();
     }
