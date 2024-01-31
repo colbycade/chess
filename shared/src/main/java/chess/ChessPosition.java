@@ -47,7 +47,8 @@ public class ChessPosition {
      */
     @Override
     public String toString() {
-        return String.format("(row: %s, col: %s)", row, col);
+        char[] letterCoordinates = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        return String.format("%s%s", letterCoordinates[col - 1], row);
     }
 
     @Override
