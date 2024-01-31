@@ -22,17 +22,17 @@ public class ChessBoard {
         StringBuilder sb = new StringBuilder();
         sb.append("    1 2 3 4 5 6 7 8\n"); // Column labels
         sb.append("  +-----------------+\n"); // Buffer
-        for (int row = 7; row >= 0; row--) { // Start from the top (row 8) and go down to row 1
-            sb.append(row + 1).append(" | "); // Row number
-            for (int col = 0; col < 8; col++) {
-                ChessPiece piece = board[row][col];
+        for (int row = 8; row >= 1; row--) { // Start from the top (row 8) and go down to row 1
+            sb.append(row).append(" | "); // Row number
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = getPiece(new ChessPosition(row, col));
                 if (piece == null) {
                     sb.append("- "); // No piece at this position
                 } else {
                     sb.append(piece).append(" "); // Get the symbol of the piece
                 }
             }
-            sb.append("| ").append(row + 1).append("\n"); // Row number
+            sb.append("| ").append(row).append("\n"); // Row number
         }
         sb.append("  +-----------------+\n"); // Buffer
         sb.append("    1 2 3 4 5 6 7 8\n"); // Column labels
