@@ -50,7 +50,7 @@ public class ChessMove {
      */
     @Override
     public String toString() {
-        var move = String.format("Starting Position: %s Ending Position: %s", startPosition, endPosition);
+        var move = String.format("%s -> %s", startPosition, endPosition);
         if (promotionPiece != null) {
             move += String.format(" Promoted to: %s", promotionPiece);
         }
