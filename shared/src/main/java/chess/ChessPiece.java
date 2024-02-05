@@ -13,20 +13,6 @@ import java.util.Objects;
  */
 public class ChessPiece {
 
-    private final static Map<PieceType, String> whitePieceToChar = Map.of(
-            PieceType.PAWN, "♙",    // White Pawn
-            PieceType.KNIGHT, "♘",  // White Knight
-            PieceType.ROOK, "♖",    // White Rook
-            PieceType.QUEEN, "♕",   // White Queen
-            PieceType.KING, "♔",    // White King
-            PieceType.BISHOP, "♗"); // White Bishop
-    private final static Map<PieceType, String> blackPieceToChar = Map.of(
-            PieceType.PAWN, "♟",    // Black Pawn
-            PieceType.KNIGHT, "♞",  // Black Knight
-            PieceType.ROOK, "♜",    // Black Rook
-            PieceType.QUEEN, "♛",   // Black Queen
-            PieceType.KING, "♚",    // Black King
-            PieceType.BISHOP, "♝"); // Black Bishop
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
@@ -58,6 +44,21 @@ public class ChessPiece {
                 ? whitePieceToChar.get(this.getPieceType())
                 : blackPieceToChar.get(this.getPieceType());
     }
+
+    private final static Map<PieceType, String> whitePieceToChar = Map.of(
+            PieceType.PAWN, "♙",    // White Pawn
+            PieceType.KNIGHT, "♘",  // White Knight
+            PieceType.ROOK, "♖",    // White Rook
+            PieceType.QUEEN, "♕",   // White Queen
+            PieceType.KING, "♔",    // White King
+            PieceType.BISHOP, "♗"); // White Bishop
+    private final static Map<PieceType, String> blackPieceToChar = Map.of(
+            PieceType.PAWN, "♟",    // Black Pawn
+            PieceType.KNIGHT, "♞",  // Black Knight
+            PieceType.ROOK, "♜",    // Black Rook
+            PieceType.QUEEN, "♛",   // Black Queen
+            PieceType.KING, "♚",    // Black King
+            PieceType.BISHOP, "♝"); // Black Bishop
 
     /**
      * Calculates all the positions a chess piece can move to
