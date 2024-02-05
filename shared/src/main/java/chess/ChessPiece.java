@@ -15,10 +15,12 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
+    private boolean hasMoved;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+        this.hasMoved = false;
     }
 
     /**
@@ -33,6 +35,15 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return type;
+    }
+
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
+
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
     }
 
     /**
@@ -132,10 +143,6 @@ public class ChessPiece {
                         moves.add(new ChessMove(myPosition, frontRight, null));
                     }
                 }
-
-                // en passant
-
-                // promotion
 
             }
 

@@ -12,6 +12,7 @@ import java.util.Collection;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor teamColor;
+    private ChessMove lastMove;
 
     public ChessGame() {
     }
@@ -54,8 +55,49 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         var allValidMoves = new ArrayList<ChessMove>();
         for (var ChessMove : ChessPiece.pieceMoves(board, startPosition)) {
-            if (canEscapeFromCheck(ChessMove)) allValidMoves.add(ChessMove);
+            if (wouldNotBeInCheck(ChessMove)) allValidMoves.add(ChessMove);
         }
+
+        // en passant
+        System.out.println(board);
+        var piece = board.getPiece(startPosition);
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            var direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+            // check left to en passant front left
+            var left = new ChessPosition(startPosition.getRow(), startPosition.getColumn() - direction);
+            var frontLeft = new ChessPosition(startPosition.getRow() + direction, startPosition.getColumn() - direction);
+            if (left.isInbounds() && !board.squareIsEmpty(left) &&
+                    board.getPiece(left).getTeamColor() != piece.getTeamColor() && canBeEnPassant(left)) {
+                allValidMoves.add(new ChessMove(startPosition, frontLeft, null));
+            }
+
+            // check right to en passant front right
+            var right = new ChessPosition(startPosition.getRow(), startPosition.getColumn() + direction);
+            var frontRight = new ChessPosition(startPosition.getRow() + direction, startPosition.getColumn() + direction);
+            if (right.isInbounds() && !board.squareIsEmpty(right) &&
+                    board.getPiece(right).getTeamColor() != piece.getTeamColor() && canBeEnPassant(right)) {
+                allValidMoves.add(new ChessMove(startPosition, frontRight, null));
+            }
+        }
+
+        // castle if both king and rook are unmoved and path is clear between them
+        if (piece.getPieceType() == ChessPiece.PieceType.KING && !piece.hasMoved()) {
+            // kingside castle (h rook)
+            var rookPosition = new ChessPosition(startPosition.getRow(), 8);
+            if (!board.squareIsEmpty(rookPosition) && !board.getPiece(rookPosition).hasMoved()
+                    && isPathClearToCastle(startPosition, rookPosition)) {
+                allValidMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 7), null));
+            }
+
+            // queenside castle (a rook)
+            rookPosition = new ChessPosition(startPosition.getRow(), 1);
+            if (!board.squareIsEmpty(rookPosition) && !board.getPiece(rookPosition).hasMoved()
+                    && isPathClearToCastle(startPosition, rookPosition)) {
+                allValidMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 3), null));
+            }
+        }
+
+        System.out.printf("valid moves: %s%n", allValidMoves);
         return allValidMoves;
     }
 
@@ -73,29 +115,43 @@ public class ChessGame {
         }
 
         // verify that move is valid
-        System.out.println(board);
-        System.out.printf("Piece at %s%n", move.getStartPosition());
-        System.out.printf("suggested move: %s%n", move);
-        System.out.printf("open moves: %s%n", ChessPiece.pieceMoves(board, move.getStartPosition()));
-        System.out.printf("valid moves: %s%n", validMoves(move.getStartPosition()));
-
         if (!validMoves(move.getStartPosition()).contains(move)) {
-            System.out.println("Error: invalid move provided");
             throw new InvalidMoveException("Invalid move");
         }
 
-        System.out.println("move valid. executing...");
-
-        // remove piece from previous position
         var piece = board.getPiece(move.getStartPosition());
-        board.removePiece(move.getStartPosition());
 
-        // add piece to new position
-        if (move.getPromotionPiece() == null) {  // no promotion
-            board.addPiece(move.getEndPosition(), piece);
-        } else {  // promote upon making move
-            board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        // if en passant, remove other pawn
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getStartPosition().getColumn() != move.getEndPosition().getColumn()
+                && board.squareIsEmpty(move.getEndPosition())) { // move diagonal but no pawn diagonal, must be en passant
+            var direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+            board.removePiece(new ChessPosition(move.getEndPosition().getRow() - direction, move.getEndPosition().getColumn()));
         }
+
+        // if castling, move rook
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            var difference = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
+            // kingside castle (king goes right)
+            if (difference == 2) {
+                var rookStartPosition = new ChessPosition(move.getStartPosition().getRow(), 8);
+                var rookEndPosition = new ChessPosition(move.getStartPosition().getRow(), 6);
+                executeMove(new ChessMove(rookStartPosition, rookEndPosition, null));
+            } // queenside castle (king goes left)
+            else if (difference == -2) {
+                var rookStartPosition = new ChessPosition(move.getStartPosition().getRow(), 1);
+                var rookEndPosition = new ChessPosition(move.getStartPosition().getRow(), 4);
+                executeMove(new ChessMove(rookStartPosition, rookEndPosition, null));
+            }
+        }
+
+        // make the actual move
+        executeMove(move);
+
+        // update that piece has moved
+        piece.setHasMoved(true);
+
+        // save previous move
+        lastMove = move;
 
         // switch turns
         setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
@@ -146,7 +202,7 @@ public class ChessGame {
                 var currPosition = new ChessPosition(row, col);
                 if (board.getPiece(currPosition) != null && board.getPiece(currPosition).getTeamColor() == teamColor) {  // check moves for all pieces of same color
                     for (ChessMove validMove : validMoves(currPosition)) {
-                        if (canEscapeFromCheck(validMove)) return false;  // check if still in check
+                        if (wouldNotBeInCheck(validMove)) return false;  // check if still in check
                     }
                 }
             }
@@ -209,23 +265,61 @@ public class ChessGame {
         return kingPosition;
     }
 
-    private boolean canEscapeFromCheck(ChessMove move) {
+    private boolean wouldNotBeInCheck(ChessMove move) {
         var teamColor = board.getPiece(move.getStartPosition()).getTeamColor();
         var testGame = new ChessGame(new ChessBoard(board));
 
         // simulate move then check if in check
-        // remove piece from previous position
-        var piece = testGame.getBoard().getPiece(move.getStartPosition());
-        testGame.getBoard().removePiece(move.getStartPosition());
-
-        // add piece to new position
-        if (move.getPromotionPiece() == null) {  // no promotion
-            testGame.getBoard().addPiece(move.getEndPosition(), piece);
-        } else {  // promote upon making move
-            testGame.getBoard().addPiece(move.getEndPosition(), new ChessPiece(teamColor, move.getPromotionPiece()));
-        }
+        testGame.executeMove(move);
 
         return !testGame.isInCheck(teamColor);
+    }
+
+    private boolean canBeEnPassant(ChessPosition position) {
+        var piece = board.getPiece(position);
+        // must be a pawn
+        if (piece.getPieceType() != ChessPiece.PieceType.PAWN) return false;
+        // must have been last move
+        if (lastMove == null || !position.equals(lastMove.getEndPosition())) return false;
+        // must have been a double move
+        var diff = Math.abs(lastMove.getEndPosition().getRow() - lastMove.getStartPosition().getRow());
+        return (diff == 2);
+    }
+
+    /**
+     * Function to determine if the path is clear for the king to castle
+     * meaning there are no pieces between king and rook and the king would not undergo check
+     *
+     * @param kingPosition position of king
+     * @param rookPosition position of selected rook
+     * @return true if there are no pieces between the king and rook
+     */
+    private boolean isPathClearToCastle(ChessPosition kingPosition, ChessPosition rookPosition) {
+        var leftCol = Math.min(kingPosition.getColumn(), rookPosition.getColumn());
+        int rightCol = Math.max(kingPosition.getColumn(), rookPosition.getColumn());
+
+        // check each square between the king and the rook
+        for (int col = leftCol + 1; col < rightCol; col++) {
+            var currPosition = new ChessPosition(kingPosition.getRow(), col);
+            if (!board.squareIsEmpty(currPosition) || !wouldNotBeInCheck(new ChessMove(kingPosition, currPosition, null))) {
+                return false; // found a piece in the way or was checked
+            }
+        }
+        return true;
+    }
+
+    private void executeMove(ChessMove move) {
+        // remove piece from previous position
+        var piece = this.getBoard().getPiece(move.getStartPosition());
+        board.removePiece(move.getStartPosition());
+
+        // check for promotion
+        if (move.getPromotionPiece() != null) {
+            piece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+        }
+
+        // add piece to new position
+        board.addPiece(move.getEndPosition(), piece);
     }
 
 
