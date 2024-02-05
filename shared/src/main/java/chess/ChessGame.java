@@ -12,6 +12,7 @@ import java.util.Collection;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor teamColor;
+    private ChessMove lastMove;
 
     public ChessGame() {
     }
@@ -56,6 +57,30 @@ public class ChessGame {
         for (var ChessMove : ChessPiece.pieceMoves(board, startPosition)) {
             if (canEscapeFromCheck(ChessMove)) allValidMoves.add(ChessMove);
         }
+
+        // en passant
+        System.out.println(board);
+        var piece = board.getPiece(startPosition);
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            var direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+            // check left to en passant front left
+            var left = new ChessPosition(startPosition.getRow(), startPosition.getColumn() - direction);
+            var frontLeft = new ChessPosition(startPosition.getRow() + direction, startPosition.getColumn() - direction);
+            if (left.isInbounds() && !board.squareIsEmpty(left) &&
+                    board.getPiece(left).getTeamColor() != piece.getTeamColor() && canBeEnPassant(left)) {
+                allValidMoves.add(new ChessMove(startPosition, frontLeft, null));
+            }
+
+            // check right to en passant front right
+            var right = new ChessPosition(startPosition.getRow(), startPosition.getColumn() + direction);
+            var frontRight = new ChessPosition(startPosition.getRow() + direction, startPosition.getColumn() + direction);
+            if (right.isInbounds() && !board.squareIsEmpty(right) &&
+                    board.getPiece(right).getTeamColor() != piece.getTeamColor() && canBeEnPassant(right)) {
+                allValidMoves.add(new ChessMove(startPosition, frontRight, null));
+            }
+        }
+
+        System.out.println(String.format("valid moves: %s", allValidMoves));
         return allValidMoves;
     }
 
@@ -73,29 +98,35 @@ public class ChessGame {
         }
 
         // verify that move is valid
-        System.out.println(board);
-        System.out.printf("Piece at %s%n", move.getStartPosition());
-        System.out.printf("suggested move: %s%n", move);
-        System.out.printf("open moves: %s%n", ChessPiece.pieceMoves(board, move.getStartPosition()));
-        System.out.printf("valid moves: %s%n", validMoves(move.getStartPosition()));
-
         if (!validMoves(move.getStartPosition()).contains(move)) {
-            System.out.println("Error: invalid move provided");
             throw new InvalidMoveException("Invalid move");
         }
 
-        System.out.println("move valid. executing...");
+        var piece = board.getPiece(move.getStartPosition());
+
+        // if en passant, remove other pawn
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getStartPosition().getColumn() != move.getEndPosition().getColumn()
+                && board.squareIsEmpty(move.getEndPosition())) { // move diagonal but no pawn diagonal, must be en passant
+            var direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+            board.removePiece(new ChessPosition(move.getEndPosition().getRow() - direction, move.getEndPosition().getColumn()));
+        }
 
         // remove piece from previous position
-        var piece = board.getPiece(move.getStartPosition());
         board.removePiece(move.getStartPosition());
 
-        // add piece to new position
-        if (move.getPromotionPiece() == null) {  // no promotion
-            board.addPiece(move.getEndPosition(), piece);
-        } else {  // promote upon making move
-            board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        // check for promotion
+        if (move.getPromotionPiece() != null) {
+            piece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
         }
+
+        // add piece to new position
+        board.addPiece(move.getEndPosition(), piece);
+
+        // update that piece has moved
+        piece.setHasMoved(true);
+
+        // save previous move
+        lastMove = move;
 
         // switch turns
         setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
@@ -228,5 +259,15 @@ public class ChessGame {
         return !testGame.isInCheck(teamColor);
     }
 
+    private boolean canBeEnPassant(ChessPosition position) {
+        var piece = board.getPiece(position);
+        // must be a pawn
+        if (piece.getPieceType() != ChessPiece.PieceType.PAWN) return false;
+        // must have been last move
+        if (lastMove == null || !position.equals(lastMove.getEndPosition())) return false;
+        // must have been a double move
+        var diff = Math.abs(lastMove.getEndPosition().getRow() - lastMove.getStartPosition().getRow());
+        return (diff == 2);
+    }
 
 }
