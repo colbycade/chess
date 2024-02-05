@@ -14,6 +14,16 @@ public class ChessBoard {
     public ChessBoard() {
     }
 
+    // Copy constructor
+    public ChessBoard(ChessBoard otherBoard) {
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                var currPosition = new ChessPosition(row, col);
+                this.addPiece(currPosition, otherBoard.getPiece(currPosition));
+            }
+        }
+    }
+
     /**
      * @return Unicode String representation of ChessBoard object
      */
@@ -51,6 +61,10 @@ public class ChessBoard {
         board[8 - position.getRow()][position.getColumn() - 1] = piece;
     }
 
+    public void removePiece(ChessPosition position) {
+        board[8 - position.getRow()][position.getColumn() - 1] = null;
+    }
+
     /**
      * Gets a chess piece on the chessboard
      *
@@ -72,9 +86,9 @@ public class ChessBoard {
      */
     public void resetBoard() {
         // Clear the board
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                board[row][col] = null;
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                removePiece(new ChessPosition(row, col));
             }
         }
         // Set up white pieces
