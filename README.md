@@ -38,100 +38,110 @@ java -jar client/target/client-jar-with-dependencies.jar
 
 ♕ 240 Chess Client: chess.ChessPiece@7852e922
 ```
-```
+
 # Sequence Diagram
+```
 actor Client
 participant Server
-participant RegistrationService
+participant Services
 participant DataAccess
 database db
 
 group #navy Registration #white
 Client -> Server: [POST] /user\n{username, password, email}
-Server -> RegistrationService: register(username, password, email)
-RegistrationService -> DataAccess: getUser(username)
+Server -> Services: register(username, password, email)
+Services -> DataAccess: getUser(username)
 DataAccess -> db: SELECT username from user
-DataAccess --> RegistrationService: null
-RegistrationService -> DataAccess: createUser(username, password)
+DataAccess --> Services: null
+Services -> DataAccess: createUser(username, password)
 DataAccess -> db: INSERT username, password, email INTO user
-RegistrationService -> DataAccess: createAuth(username)
+Services -> DataAccess: createAuth(username)
 DataAccess -> db: INSERT username, authToken INTO auth
-DataAccess --> RegistrationService: authToken
-RegistrationService --> Server: authToken
+DataAccess --> Services: authData
+Services --> Server: authToken
 Server --> Client: 200\n{authToken}
 end
 
 group #orange Login #white
 Client -> Server: [POST] /session\n{username, password}
-Server -> RegistrationService: login(username, password)
-RegistrationService -> DataAccess: getUser(username)
+Server -> Services: login(username, password)
+Services -> DataAccess: getUser(username)
 DataAccess -> db:SELECT password from user
-DataAccess --> RegistrationService: password
-RegistrationService -> DataAccess: createAuth(username)
+DataAccess --> Services: UserData
+Services -> DataAccess: createAuth(username)
 DataAccess -> db:INSERT username, authToken INTO auth
-DataAccess --> RegistrationService: authToken
-RegistrationService --> Server: authToken
+DataAccess --> Services: AuthData
+Services --> Server: authToken
 Server --> Client: 200\n{username, authToken}
 end
 
-
 group #green Logout #white
 Client -> Server: [DELETE] /session\nauthToken
-Server -> RegistrationService: logout(authToken)
-RegistrationService -> DataAccess: deleteAuth(authToken)
+Server -> Services: logout(authToken)
+Services -> DataAccess: deleteAuth(authToken)
 DataAccess -> db: DELETE username, authToken FROM auth
-DataAccess --> RegistrationService: success
-RegistrationService --> Server: success
+DataAccess --> Services:success
+Services --> Server:success
 Server --> Client: 200
 end
 
 
 group #red List Games #white
 Client -> Server: [GET] /game\nauthToken
-Server -> RegistrationService: verifyToken(authToken)
-RegistrationService -> DataAccess:getAuth(authToken)
+Server -> Services: listGames(authToken)
+Services -> DataAccess:getAuth(authToken)
 DataAccess -> db: SELECT username, authToken FROM auth
-DataAccess --> RegistrationService: username, authToken
-RegistrationService --> Server: AuthData
-Server -> DataAccess:listGames()
+DataAccess --> Services: AuthData
+Services -> DataAccess:listGames()
 DataAccess -> db: SELECT * FROM game
 DataAccess -> SELECT games FROM games
-DataAccess --> Server: gamesList
+DataAccess --> Services: gameData[]
+Services --> Server: [gameID, whiteUsername, blackUsername, gameName][]
 Server --> Client: 200\n{games}
 end
 
-
 group #purple Create Game #white
 Client -> Server: [POST] /game\nauthToken\n{gameName}
-Server -> RegistrationService: verifyToken(authToken)
-RegistrationService -> DataAccess:getAuth(authToken)
-DataAccess -> db: SELECT username, authToken FROM auth
-DataAccess --> RegistrationService: username, authToken
-RegistrationService --> Server: AuthData
-Server -> DataAccess:createGame(gameName)
+Server -> Services: createGame(gameName, authToken)
+Services -> DataAccess:getAuth(authToken)
+DataAccess -> db: SELECT AuthData FROM auth
+DataAccess --> Services: AuthData
+Services -> DataAccess:createGame(gameName)
 DataAccess -> db:INSERT gameName INTO game
-DataAccess --> Server: gameID
+DataAccess --> Services: GameData
+Services --> Server: gameID
 Server --> Client:200\n{gameID}
 end
 
 group #yellow Join Game #black
 Client -> Server: [PUT] /game\nauthToken\n{ClientColor, gameID}
-Server -> RegistrationService: verifyToken(authToken)
-RegistrationService -> DataAccess:getAuth(authToken)
-DataAccess -> db: SELECT username, authToken FROM auth
-DataAccess --> RegistrationService: username, authToken
-RegistrationService --> Server: AuthData
-Server -> DataAccess:updateGame(gameID, username)
-DataAccess -> db:UPDATE game
+Server -> Services: joinGame(ClientColor, gameID, authToken)
+Services -> DataAccess:getAuth(authToken)
+DataAccess -> db: SELECT AuthData FROM auth
+DataAccess --> Services:  AuthData
+Services -> DataAccess:getGame(gameID)
+DataAccess -> db:SELECT GameData FROM game 
+DataAccess --> Services: GameData
+Services -> DataAccess:updateGame(GameData)
+DataAccess -> db:UPDATE gameData IN game
+DataAccess --> Services:success
+Services --> Server:success
 Server --> Client:200
 end
 
 group #gray Clear application #white
 Client -> Server: [DELETE] /db
-Server -> DataAccess:clearApp()
-DataAccess -> db:DELETE * FROM user
+Server -> Services:clearApp()
+Services -> DataAccess:deleteAllAuths()
 DataAccess -> db:DELETE * FROM auth
+Services -> DataAccess:deleteAllGames()
 DataAccess -> db:DELETE * FROM game
+Services -> DataAccess:deleteAllUsers()
+DataAccess -> db:DELETE * FROM user
+DataAccess --> Services:success
+Services --> Server:success
 Server --> Client:200
 end
 ```
+
+
