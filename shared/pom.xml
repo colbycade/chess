@@ -30,7 +30,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        Main
+                                        server.Main
                                     </mainClass>
                                 </manifest>
                             </archive>
