@@ -1,10 +1,10 @@
 package handler;
 
 import dataAccess.AuthDAO;
-import dataAccess.MemoryAuthDAO;
-import dataAccess.MemoryUserDAO;
+import dataAccess.InMemoryDatabase.MemoryAuthDAO;
+import dataAccess.InMemoryDatabase.MemoryUserDAO;
 import dataAccess.UserDAO;
-import model.*;
+import dataAccess.exception.*;
 import service.UserService;
 import service.request.RegisterRequest;
 import service.response.RegisterResponse;
@@ -13,11 +13,14 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import java.util.Map;
+
 public class RegisterHandler implements Route {
-    private final UserDAO userDAO = new MemoryUserDAO();
-    private final AuthDAO authDAO = new MemoryAuthDAO();
+    private final UserDAO userDAO = MemoryUserDAO.getInstance();
+    private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
     private final UserService userService = new UserService(userDAO, authDAO);
     private final Gson gson = new Gson();
+
     private static RegisterHandler instance = null;
 
     // Private constructor to prevent direct instantiation
@@ -37,12 +40,21 @@ public class RegisterHandler implements Route {
         try {
             RegisterRequest registerRequest = gson.fromJson(req.body(), RegisterRequest.class);
             RegisterResponse registerResponse = userService.register(registerRequest);
-            res.status(200); // HTTP 200 OK
+            res.status(200); // HTTP 200 Success
             res.type("application/json");
             return gson.toJson(new RegisterResponse(registerResponse.authToken()));
-        } catch (Exception e) {
-            res.status(500); // HTTP 500 Internal Server Error
-            return e;
+        } catch (BadRequestException e) {
+            res.status(400);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (AlreadyTakenException e) {
+            res.status(403);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (DataAccessException e) {
+            res.status(500);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (Exception e) { // Catch-all for any other exceptions
+            res.status(500); // Internal Server Error
+            return gson.toJson(Map.of("message", "An unexpected error occurred."));
         }
     }
 

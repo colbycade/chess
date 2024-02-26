@@ -1,6 +1,7 @@
 package service;
 
 import dataAccess.*;
+import dataAccess.exception.*;
 import model.UserData;
 import model.AuthData;
 import service.request.LoginRequest;
@@ -19,24 +20,37 @@ public class UserService {
     }
 
     public RegisterResponse register(RegisterRequest request) throws DataAccessException {
+        if (request.username() == null || request.password() == null || request.email() == null) {
+            throw new BadRequestException("Missing required fields.");
+        }
+
         // Check if user already exists
         if (userDAO.getUser(request.username()) != null) {
-            throw new DataAccessException("User already exists.");
+            throw new AlreadyTakenException("User already exists.");
         }
 
         // Create user and auth token
-        UserData userData = new UserData(request.username(), request.password(), request.email());
-        userDAO.insertUser(userData);
-        AuthData authData = authDAO.createAuth(userData.username());
+        userDAO.insertUser(new UserData(request.username(), request.password(), request.email()));
+        AuthData authData = authDAO.createAuth(request.username());
 
         return new RegisterResponse(authData.authToken());
     }
 
-    public LoginResponse login(LoginRequest req) {
-        return null;
+    public LoginResponse login(LoginRequest request) throws DataAccessException {
+        // Check that user exists
+        UserData user = userDAO.getUser(request.username());
+        if (user == null) {
+            throw new DataAccessException("User does not exist.");
+        }
+
+        // Create auth token
+        AuthData authData = authDAO.createAuth(request.username());
+
+        return new LoginResponse(authData.authToken(), user.username());
     }
 
-    public void logout(LogoutRequest req) {
+    public void logout(LogoutRequest req) throws DataAccessException {
+        authDAO.deleteAuth(req.authToken());
     }
 
 }
