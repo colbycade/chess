@@ -1,4 +1,4 @@
-package dataAccess.exception;
+package exception;
 
 
 /**

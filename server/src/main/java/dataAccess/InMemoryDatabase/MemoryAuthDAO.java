@@ -1,7 +1,7 @@
 package dataAccess.InMemoryDatabase;
 
 import dataAccess.AuthDAO;
-import dataAccess.exception.DataAccessException;
+import exception.DataAccessException;
 import model.AuthData;
 
 import java.util.HashMap;

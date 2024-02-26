@@ -1,6 +1,6 @@
 package dataAccess.InMemoryDatabase;
 
-import dataAccess.exception.DataAccessException;
+import exception.DataAccessException;
 import dataAccess.UserDAO;
 import model.UserData;
 

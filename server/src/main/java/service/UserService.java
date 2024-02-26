@@ -1,7 +1,7 @@
 package service;
 
 import dataAccess.*;
-import dataAccess.exception.*;
+import exception.*;
 import model.UserData;
 import model.AuthData;
 import service.request.LoginRequest;

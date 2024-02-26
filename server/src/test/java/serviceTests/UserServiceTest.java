@@ -1,7 +1,7 @@
 package serviceTests;
 
 import model.*;
-import dataAccess.exception.*;
+import exception.*;
 import dataAccess.InMemoryDatabase.MemoryAuthDAO;
 import dataAccess.InMemoryDatabase.MemoryUserDAO;
 import service.UserService;

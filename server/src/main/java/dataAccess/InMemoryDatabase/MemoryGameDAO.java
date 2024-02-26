@@ -1,7 +1,7 @@
 package dataAccess.InMemoryDatabase;
 
 import chess.ChessGame;
-import dataAccess.exception.DataAccessException;
+import exception.DataAccessException;
 import dataAccess.GameDAO;
 import model.GameData;
 
