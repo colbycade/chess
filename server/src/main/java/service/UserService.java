@@ -21,19 +21,19 @@ public class UserService {
 
     public RegisterResponse register(RegisterRequest request) throws DataAccessException {
         if (request.username() == null || request.password() == null || request.email() == null) {
-            throw new BadRequestException("Missing required fields.");
+            throw new BadRequestException("bad request");
         }
 
         // Check if user already exists
         if (userDAO.getUser(request.username()) != null) {
-            throw new AlreadyTakenException("User already exists.");
+            throw new AlreadyTakenException("already taken");
         }
 
         // Create user and auth token
         userDAO.insertUser(new UserData(request.username(), request.password(), request.email()));
         AuthData authData = authDAO.createAuth(request.username());
 
-        return new RegisterResponse(authData.authToken());
+        return new RegisterResponse(request.username(), authData.authToken());
     }
 
     public LoginResponse login(LoginRequest request) throws DataAccessException {

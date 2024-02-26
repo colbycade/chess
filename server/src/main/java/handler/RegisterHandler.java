@@ -40,21 +40,17 @@ public class RegisterHandler implements Route {
         try {
             RegisterRequest registerRequest = gson.fromJson(req.body(), RegisterRequest.class);
             RegisterResponse registerResponse = userService.register(registerRequest);
-            res.status(200); // HTTP 200 Success
-            res.type("application/json");
-            return gson.toJson(new RegisterResponse(registerResponse.authToken()));
+            res.status(200); // Success
+            return gson.toJson(new RegisterResponse(registerResponse.username(), registerResponse.authToken()));
         } catch (BadRequestException e) {
             res.status(400);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (AlreadyTakenException e) {
             res.status(403);
-            return gson.toJson(Map.of("message", e.getMessage()));
-        } catch (DataAccessException e) {
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
+        } catch (Exception e) {
             res.status(500);
-            return gson.toJson(Map.of("message", e.getMessage()));
-        } catch (Exception e) { // Catch-all for any other exceptions
-            res.status(500); // Internal Server Error
-            return gson.toJson(Map.of("message", "An unexpected error occurred."));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
