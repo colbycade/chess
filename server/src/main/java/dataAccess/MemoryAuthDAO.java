@@ -2,31 +2,34 @@ package dataAccess;
 
 import model.AuthData;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class MemoryAuthDAO implements AuthDAO {
-    private ArrayList<AuthData> Authorization;
+    private HashMap<String, AuthData> authorization;
 
     public MemoryAuthDAO() {
-        Authorization = new ArrayList<>();
+        authorization = new HashMap<>();
     }
 
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();
         AuthData auth = new AuthData(authToken, username);
-        Authorization.add(auth);
+        if (authorization.containsKey(authToken)) {
+            throw new DataAccessException("AuthToken already exists.");
+        }
+        authorization.put(authToken, auth);
         return auth;
     }
 
     @Override
-    public AuthData getAuth(AuthData auth) throws DataAccessException {
-        return null;
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        return authorization.get(authToken);
     }
 
     @Override
-    public void deleteAuth(AuthData auth) throws DataAccessException {
+    public void deleteAuth(String authToken) throws DataAccessException {
 
     }
 }

@@ -2,27 +2,25 @@ package dataAccess;
 
 import model.UserData;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
-    private ArrayList<UserData> Users;
+    private HashMap<String, UserData> users;
 
     public MemoryUserDAO() {
-        Users = new ArrayList<>();
+        users = new HashMap<>();
     }
 
     @Override
     public void insertUser(UserData user) throws DataAccessException {
-        Users.add(user);
+        if (users.containsKey(user.username())) {
+            throw new DataAccessException("User already exists.");
+        }
+        users.put(user.username(), user);
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        for (UserData u : Users) {
-            if (u.username().equals(username)) {
-                return u;
-            }
-        }
-        return null;
+        return users.get(username);
     }
 }

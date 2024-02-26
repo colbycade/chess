@@ -3,19 +3,22 @@ package dataAccess;
 import model.GameData;
 import model.UserData;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MemoryGameDAO implements GameDAO {
-    private ArrayList<GameData> Games;
+    private HashMap<Integer, GameData> games;
 
     public MemoryGameDAO() {
-        Games = new ArrayList<>();
+        games = new HashMap<>();
     }
 
     @Override
     public void createGame(GameData game) throws DataAccessException {
-
+        if (games.containsKey(game.gameID())) {
+            throw new DataAccessException("Game already exists.");
+        }
+        games.put(game.gameID(), game);
     }
 
     @Override
