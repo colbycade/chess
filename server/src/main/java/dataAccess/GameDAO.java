@@ -2,12 +2,12 @@ package dataAccess;
 
 import model.GameData;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface GameDAO {
 
-    // Method to create a new game in the database
-    void createGame(GameData game) throws DataAccessException;
+    // Method to create a new game in the database given a game name. Returns the game's ID.
+    int createGame(String gameName) throws DataAccessException;
 
     // Method to fetch a game by its ID
     GameData getGame(int gameID) throws DataAccessException;
@@ -16,6 +16,6 @@ public interface GameDAO {
     void updateGame(GameData game) throws DataAccessException;
 
     // Method to list all games
-    List<GameData> listGames() throws DataAccessException;
-    
+    Collection<GameData> listGames() throws DataAccessException;
+
 }
