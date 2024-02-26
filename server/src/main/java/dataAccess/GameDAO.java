@@ -1,5 +1,6 @@
 package dataAccess;
 
+import dataAccess.exception.DataAccessException;
 import model.GameData;
 
 import java.util.Collection;
@@ -18,4 +19,6 @@ public interface GameDAO {
     // Method to list all games
     Collection<GameData> listGames() throws DataAccessException;
 
+    // Method to clear database
+    void clear() throws DataAccessException;
 }

@@ -1,5 +1,7 @@
-package dataAccess;
+package dataAccess.InMemoryDatabase;
 
+import dataAccess.exception.DataAccessException;
+import dataAccess.UserDAO;
 import model.UserData;
 
 import java.util.HashMap;
@@ -32,5 +34,10 @@ public class MemoryUserDAO implements UserDAO {
     @Override
     public UserData getUser(String username) throws DataAccessException {
         return users.get(username);
+    }
+
+    @Override
+    public void clear() throws DataAccessException {
+        users.clear();
     }
 }

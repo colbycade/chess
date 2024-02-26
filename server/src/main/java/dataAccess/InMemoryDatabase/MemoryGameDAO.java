@@ -1,6 +1,8 @@
-package dataAccess;
+package dataAccess.InMemoryDatabase;
 
 import chess.ChessGame;
+import dataAccess.exception.DataAccessException;
+import dataAccess.GameDAO;
 import model.GameData;
 
 import java.util.Collection;
@@ -50,5 +52,10 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
         return games.values();
+    }
+
+    @Override
+    public void clear() throws DataAccessException {
+        games.clear();
     }
 }

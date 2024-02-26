@@ -1,5 +1,6 @@
 package dataAccess;
 
+import dataAccess.exception.DataAccessException;
 import model.AuthData;
 
 public interface AuthDAO {
@@ -11,4 +12,7 @@ public interface AuthDAO {
 
     // Method to delete an auth token
     void deleteAuth(String authToken) throws DataAccessException;
+
+    // Method to clear database
+    void clear() throws DataAccessException;
 }

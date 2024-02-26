@@ -1,5 +1,6 @@
 package dataAccess;
 
+import dataAccess.exception.DataAccessException;
 import model.*;
 
 public interface UserDAO {
@@ -8,4 +9,7 @@ public interface UserDAO {
 
     // Method to retrieve a user by username
     UserData getUser(String username) throws DataAccessException;
+
+    // Method to clear database
+    void clear() throws DataAccessException;
 }

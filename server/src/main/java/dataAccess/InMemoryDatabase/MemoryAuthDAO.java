@@ -1,6 +1,7 @@
-package dataAccess;
+package dataAccess.InMemoryDatabase;
 
-import handler.RegisterHandler;
+import dataAccess.AuthDAO;
+import dataAccess.exception.DataAccessException;
 import model.AuthData;
 
 import java.util.HashMap;
@@ -42,5 +43,10 @@ public class MemoryAuthDAO implements AuthDAO {
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         authorization.remove(authToken);
+    }
+
+    @Override
+    public void clear() throws DataAccessException {
+        authorization.clear();
     }
 }
