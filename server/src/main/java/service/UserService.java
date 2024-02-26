@@ -50,6 +50,12 @@ public class UserService {
     }
 
     public void logout(LogoutRequest req) throws DataAccessException {
+        // Verify that the auth token exists
+        if (req.authToken() == null || authDAO.getAuth(req.authToken()) == null) {
+            throw new UnauthorizedException("unauthorized");
+        }
+
+        // Delete the auth token
         authDAO.deleteAuth(req.authToken());
     }
 
