@@ -7,18 +7,26 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO {
-    private HashMap<Integer, GameData> games;
+    private HashMap<Integer, GameData> games = new HashMap<>();
     private int gameIDCounter = 0; // Counter for auto-incrementing game IDs
 
-    public MemoryGameDAO() {
-        games = new HashMap<>();
+    private static MemoryGameDAO instance = null;
+
+    // Private constructor to prevent direct instantiation
+    private MemoryGameDAO() {
+    }
+
+    // Public method to get the singleton instance
+    public static MemoryGameDAO getInstance() {
+        if (instance == null) {
+            instance = new MemoryGameDAO();
+        }
+        return instance;
     }
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
         int newGameID = ++gameIDCounter;
-        // Assuming GameData has a constructor or method to set gameID.
-        // If GameData's gameID is final, you might need to create a new instance of GameData with the newGameID here.
         ChessGame newGame = new ChessGame();
         GameData newGameData = new GameData(newGameID, "", "", gameName, newGame);
         games.put(newGameID, newGameData);

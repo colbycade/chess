@@ -1,15 +1,26 @@
 package dataAccess;
 
+import handler.RegisterHandler;
 import model.AuthData;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class MemoryAuthDAO implements AuthDAO {
-    private HashMap<String, AuthData> authorization;
+    private HashMap<String, AuthData> authorization = new HashMap<>();
 
-    public MemoryAuthDAO() {
-        authorization = new HashMap<>();
+    private static MemoryAuthDAO instance = null;
+
+    // Private constructor to prevent direct instantiation
+    private MemoryAuthDAO() {
+    }
+
+    // Public method to get the singleton instance
+    public static MemoryAuthDAO getInstance() {
+        if (instance == null) {
+            instance = new MemoryAuthDAO();
+        }
+        return instance;
     }
 
     @Override
