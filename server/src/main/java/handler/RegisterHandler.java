@@ -40,7 +40,8 @@ public class RegisterHandler implements Route {
         try {
             RegisterRequest registerRequest = gson.fromJson(req.body(), RegisterRequest.class);
             RegisterResponse registerResponse = userService.register(registerRequest);
-            res.status(200); // Success
+            res.status(200);
+            res.type("application/json");
             return gson.toJson(new RegisterResponse(registerResponse.username(), registerResponse.authToken()));
         } catch (BadRequestException e) {
             res.status(400);
