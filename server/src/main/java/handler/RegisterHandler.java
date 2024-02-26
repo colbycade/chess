@@ -43,7 +43,7 @@ public class RegisterHandler implements Route {
         RegisterResponse registerResponse = userService.register(registerRequest);
         res.status(200);
         res.type("application/json");
-        return gson.toJson(new RegisterResponse(registerResponse.username(), registerResponse.authToken()));
+        return gson.toJson(registerResponse);
     }
 
 }

@@ -30,7 +30,7 @@ public class UserService {
         }
 
         // Create user and auth token
-        userDAO.insertUser(new UserData(request.username(), request.password(), request.email()));
+        userDAO.createUser(new UserData(request.username(), request.password(), request.email()));
         AuthData authData = authDAO.createAuth(request.username());
 
         return new RegisterResponse(request.username(), authData.authToken());
@@ -49,14 +49,14 @@ public class UserService {
         return new LoginResponse(authData.authToken(), user.username());
     }
 
-    public void logout(LogoutRequest req) throws DataAccessException {
+    public void logout(LogoutRequest request) throws DataAccessException {
         // Verify that the auth token exists
-        if (req.authToken() == null || authDAO.getAuth(req.authToken()) == null) {
+        if (request.authToken() == null || authDAO.getAuth(request.authToken()) == null) {
             throw new UnauthorizedException("unauthorized");
         }
 
         // Delete the auth token
-        authDAO.deleteAuth(req.authToken());
+        authDAO.deleteAuth(request.authToken());
     }
 
 }

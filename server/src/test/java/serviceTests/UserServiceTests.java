@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Nested;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserServiceTest {
+class UserServiceTests {
     private UserService userService;
 
     @BeforeEach
@@ -60,7 +60,7 @@ class UserServiceTest {
             username = "username";
             password = "password";
             email = "email";
-            MemoryUserDAO.getInstance().insertUser(new UserData(username, password, email));
+            MemoryUserDAO.getInstance().createUser(new UserData(username, password, email));
         }
 
         @Test
@@ -103,7 +103,7 @@ class UserServiceTest {
             username = "username";
             password = "password";
             email = "email";
-            MemoryUserDAO.getInstance().insertUser(new UserData(username, password, email));
+            MemoryUserDAO.getInstance().createUser(new UserData(username, password, email));
 
             // Add an auth token for the user
             authToken = MemoryAuthDAO.getInstance().createAuth(username).authToken();
