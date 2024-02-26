@@ -4,12 +4,12 @@ import model.*;
 import dataAccess.exception.*;
 import dataAccess.InMemoryDatabase.MemoryAuthDAO;
 import dataAccess.InMemoryDatabase.MemoryUserDAO;
-import org.junit.jupiter.api.BeforeAll;
 import service.UserService;
 import service.request.LoginRequest;
 import service.request.RegisterRequest;
 import service.response.LoginResponse;
 import service.response.RegisterResponse;
+import service.request.LogoutRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -76,7 +76,7 @@ class UserServiceTest {
         }
 
         @Test
-        public void testLoginFailure() throws DataAccessException {
+        public void testLoginFailure() {
             String nonExistentUsername = "nonExistentUser";
             String incorrectPassword = "incorrectPassword";
 
@@ -87,6 +87,45 @@ class UserServiceTest {
             // Attempt to log in with incorrect password
             LoginRequest loginRequestIncorrectPassword = new LoginRequest(username, incorrectPassword);
             assertThrows(UnauthorizedException.class, () -> userService.login(loginRequestIncorrectPassword));
+        }
+    }
+
+    @Nested
+    class LogoutTest {
+        String username;
+        String password;
+        String email;
+        String authToken;
+
+        @BeforeEach
+        public void setUp() throws DataAccessException {
+            // Insert a test user
+            username = "username";
+            password = "password";
+            email = "email";
+            MemoryUserDAO.getInstance().insertUser(new UserData(username, password, email));
+
+            // Add an auth token for the user
+            authToken = MemoryAuthDAO.getInstance().createAuth(username).authToken();
+        }
+
+        @Test
+        public void testLogoutSuccess() throws DataAccessException {
+            // Attempt to log out with the auth token
+            LogoutRequest request = new LogoutRequest(authToken);
+            userService.logout(request);
+
+            // Assert that the auth token is deleted
+            assertNull(MemoryAuthDAO.getInstance().getAuth(authToken));
+        }
+
+        @Test
+        public void testLogoutFailure() {
+            String invalidAuthToken = "invalidAuthToken";
+
+            // Attempt to log out with an invalid auth token
+            LogoutRequest request = new LogoutRequest(invalidAuthToken);
+            assertThrows(UnauthorizedException.class, () -> userService.logout(request));
         }
     }
 }
