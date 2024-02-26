@@ -4,7 +4,9 @@ import dataAccess.AuthDAO;
 import dataAccess.InMemoryDatabase.MemoryAuthDAO;
 import dataAccess.InMemoryDatabase.MemoryUserDAO;
 import dataAccess.UserDAO;
-import dataAccess.exception.*;
+import exception.AlreadyTakenException;
+import exception.BadRequestException;
+import exception.DataAccessException;
 import service.UserService;
 import service.request.RegisterRequest;
 import service.response.RegisterResponse;
@@ -36,23 +38,12 @@ public class RegisterHandler implements Route {
     }
 
     @Override
-    public Object handle(Request req, Response res) {
-        try {
-            RegisterRequest registerRequest = gson.fromJson(req.body(), RegisterRequest.class);
-            RegisterResponse registerResponse = userService.register(registerRequest);
-            res.status(200);
-            res.type("application/json");
-            return gson.toJson(new RegisterResponse(registerResponse.username(), registerResponse.authToken()));
-        } catch (BadRequestException e) {
-            res.status(400);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-        } catch (AlreadyTakenException e) {
-            res.status(403);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-        } catch (Exception e) {
-            res.status(500);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-        }
+    public Object handle(Request req, Response res) throws DataAccessException {
+        RegisterRequest registerRequest = gson.fromJson(req.body(), RegisterRequest.class);
+        RegisterResponse registerResponse = userService.register(registerRequest);
+        res.status(200);
+        res.type("application/json");
+        return gson.toJson(new RegisterResponse(registerResponse.username(), registerResponse.authToken()));
     }
 
 }

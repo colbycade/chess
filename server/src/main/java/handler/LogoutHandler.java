@@ -5,7 +5,7 @@ import dataAccess.AuthDAO;
 import dataAccess.InMemoryDatabase.MemoryAuthDAO;
 import dataAccess.InMemoryDatabase.MemoryUserDAO;
 import dataAccess.UserDAO;
-import dataAccess.exception.UnauthorizedException;
+import exception.UnauthorizedException;
 import service.UserService;
 import service.request.LogoutRequest;
 import spark.Request;
@@ -36,17 +36,9 @@ public class LogoutHandler implements Route {
 
     @Override
     public Object handle(Request req, Response res) throws Exception {
-        try {
-            LogoutRequest logoutRequest = new LogoutRequest(req.headers("authorization"));
-            userService.logout(logoutRequest);
-            res.status(200);
-            return ""; // No response body
-        } catch (UnauthorizedException e) {
-            res.status(401);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-        } catch (Exception e) {
-            res.status(500);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-        }
+        LogoutRequest logoutRequest = new LogoutRequest(req.headers("authorization"));
+        userService.logout(logoutRequest);
+        res.status(200);
+        return ""; // No response body
     }
 }

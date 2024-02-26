@@ -5,7 +5,8 @@ import dataAccess.InMemoryDatabase.MemoryAuthDAO;
 import dataAccess.InMemoryDatabase.MemoryUserDAO;
 import dataAccess.AuthDAO;
 import dataAccess.UserDAO;
-import dataAccess.exception.UnauthorizedException;
+import exception.DataAccessException;
+import exception.UnauthorizedException;
 import service.UserService;
 import service.request.LoginRequest;
 import service.response.LoginResponse;
@@ -36,20 +37,11 @@ public class LoginHandler implements Route {
     }
 
     @Override
-    public Object handle(Request req, Response res) {
-        try {
-            LoginRequest loginRequest = gson.fromJson(req.body(), LoginRequest.class);
-            LoginResponse loginResponse = userService.login(loginRequest);
-            res.status(200);
-            res.type("application/json");
-            return gson.toJson(loginResponse);
-        } catch (UnauthorizedException e) {
-            res.status(401);
-            return gson.toJson(Map.of("message", "Error: unauthorized"));
-        } catch (Exception e) {
-            // Handle any other exceptions
-            res.status(500);
-            return gson.toJson(Map.of("message", "Error: description"));
-        }
+    public Object handle(Request req, Response res) throws DataAccessException {
+        LoginRequest loginRequest = gson.fromJson(req.body(), LoginRequest.class);
+        LoginResponse loginResponse = userService.login(loginRequest);
+        res.status(200);
+        res.type("application/json");
+        return gson.toJson(loginResponse);
     }
 }
