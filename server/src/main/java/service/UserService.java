@@ -37,10 +37,10 @@ public class UserService {
     }
 
     public LoginResponse login(LoginRequest request) throws DataAccessException {
-        // Check that user exists
+        // Check that user exists and password is correct
         UserData user = userDAO.getUser(request.username());
-        if (user == null) {
-            throw new DataAccessException("User does not exist.");
+        if (user == null || !user.password().equals(request.password())) {
+            throw new UnauthorizedException("unauthorized");
         }
 
         // Create auth token
