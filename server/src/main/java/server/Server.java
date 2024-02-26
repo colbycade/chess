@@ -1,10 +1,10 @@
 package server;
 
+import dataAccess.*;
 import handler.*;
 import spark.*;
 
 public class Server {
-
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
@@ -26,5 +26,9 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    public int port() {
+        return Spark.port();
     }
 }
