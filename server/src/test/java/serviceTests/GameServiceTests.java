@@ -24,11 +24,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GameServiceTests {
     private GameService gameService;
+    // These are dependencies of the GameService used to set up tests
+    private MemoryAuthDAO authDAO;
+    private MemoryGameDAO gameDAO;
 
     @BeforeEach
     public void setUp() throws DataAccessException {
-        MemoryAuthDAO authDAO = MemoryAuthDAO.getInstance();
-        MemoryGameDAO gameDAO = MemoryGameDAO.getInstance();
+        authDAO = MemoryAuthDAO.getInstance();
+        gameDAO = MemoryGameDAO.getInstance();
         authDAO.clear();
         gameDAO.clear();
         gameService = new GameService(gameDAO, authDAO);
@@ -42,7 +45,7 @@ public class GameServiceTests {
         @BeforeEach
         public void setUp() throws DataAccessException {
             // Insert a test auth
-            authToken = MemoryAuthDAO.getInstance().createAuth("username").authToken();
+            authToken = authDAO.createAuth("username").authToken();
         }
 
         @Test
@@ -70,7 +73,7 @@ public class GameServiceTests {
         @BeforeEach
         public void setUp() throws DataAccessException {
             // Insert a test auth
-            authToken = MemoryAuthDAO.getInstance().createAuth("username").authToken();
+            authToken = authDAO.createAuth("username").authToken();
         }
 
         @Test
@@ -105,9 +108,9 @@ public class GameServiceTests {
         @BeforeEach
         public void setUp() throws DataAccessException {
             // Insert a test auth
-            authToken = MemoryAuthDAO.getInstance().createAuth(username).authToken();
+            authToken = authDAO.createAuth(username).authToken();
             // Create a test game
-            gameID = MemoryGameDAO.getInstance().createGame(gameName);
+            gameID = gameDAO.createGame(gameName);
         }
 
         @Test
@@ -116,14 +119,14 @@ public class GameServiceTests {
             JoinGameRequest successfulRequest = new JoinGameRequest(authToken, ChessGame.TeamColor.WHITE, gameID);
             assertDoesNotThrow(() -> gameService.joinGame(successfulRequest));
 
-            GameData updatedGame = MemoryGameDAO.getInstance().getGame(gameID);
+            GameData updatedGame = gameDAO.getGame(gameID);
             assertEquals(username, updatedGame.whiteUsername());
             assertNull(updatedGame.blackUsername());
 
             // Joining as observer doesn't affect the game data
             JoinGameRequest observerRequest = new JoinGameRequest(authToken, null, gameID);
             assertDoesNotThrow(() -> gameService.joinGame(observerRequest));
-            assertEquals(updatedGame, MemoryGameDAO.getInstance().getGame(gameID));
+            assertEquals(updatedGame, gameDAO.getGame(gameID));
         }
 
         @Test
@@ -135,9 +138,9 @@ public class GameServiceTests {
 
             // Color already taken
             // add a game with a white player
-            MemoryGameDAO.getInstance().updateGame(new GameData(gameID, username, null, gameName, new ChessGame()));
+            gameDAO.updateGame(new GameData(gameID, username, null, gameName, new ChessGame()));
             // insert a second auth
-            String secondAuthToken = MemoryAuthDAO.getInstance().createAuth("secondUsername").authToken();
+            String secondAuthToken = authDAO.createAuth("secondUsername").authToken();
             // attempt to join the game with white
             JoinGameRequest colorTakenRequest = new JoinGameRequest(secondAuthToken, ChessGame.TeamColor.WHITE, gameID);
             assertThrows(AlreadyTakenException.class, () -> gameService.joinGame(colorTakenRequest));
@@ -149,4 +152,24 @@ public class GameServiceTests {
         }
     }
 
+    @Nested
+    class clearServiceTest {
+        int gameID;
+
+        @BeforeEach
+        public void setUp() throws DataAccessException {
+            // Pre-insert data
+            gameID = gameDAO.createGame("testGame");
+            if (gameDAO.getGame(gameID) == null) {
+                throw new DataAccessException("Failed to insert test data");
+            }
+        }
+
+        @Test
+        public void testClearServiceSuccess() {
+            assertDoesNotThrow(() -> gameService.clearService());
+            // Assert data has been cleared
+            assertNull(gameDAO.getGame(gameID));
+        }
+    }
 }

@@ -18,11 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTests {
     private UserService userService;
+    // These are dependencies of the UserService used to set up tests
+    private MemoryAuthDAO authDAO;
+    private MemoryUserDAO userDAO;
 
     @BeforeEach
     public void setUp() throws DataAccessException {
-        MemoryAuthDAO authDAO = MemoryAuthDAO.getInstance();
-        MemoryUserDAO userDAO = MemoryUserDAO.getInstance();
+        authDAO = MemoryAuthDAO.getInstance();
+        userDAO = MemoryUserDAO.getInstance();
         authDAO.clear();
         userDAO.clear();
         userService = new UserService(userDAO, authDAO);
@@ -60,7 +63,7 @@ class UserServiceTests {
             username = "username";
             password = "password";
             email = "email";
-            MemoryUserDAO.getInstance().createUser(new UserData(username, password, email));
+            userDAO.insertUser(new UserData(username, password, email));
         }
 
         @Test
@@ -103,10 +106,10 @@ class UserServiceTests {
             username = "username";
             password = "password";
             email = "email";
-            MemoryUserDAO.getInstance().createUser(new UserData(username, password, email));
+            userDAO.insertUser(new UserData(username, password, email));
 
             // Add an auth token for the user
-            authToken = MemoryAuthDAO.getInstance().createAuth(username).authToken();
+            authToken = authDAO.createAuth(username).authToken();
         }
 
         @Test
@@ -116,7 +119,7 @@ class UserServiceTests {
             userService.logout(request);
 
             // Assert that the auth token is deleted
-            assertNull(MemoryAuthDAO.getInstance().getAuth(authToken));
+            assertNull(authDAO.getAuth(authToken));
         }
 
         @Test
@@ -126,6 +129,30 @@ class UserServiceTests {
             // Attempt to log out with an invalid auth token
             LogoutRequest request = new LogoutRequest(invalidAuthToken);
             assertThrows(UnauthorizedException.class, () -> userService.logout(request));
+        }
+    }
+
+    @Nested
+    class clearServiceTest {
+        String authToken;
+        String username = "testUsername";
+
+        @BeforeEach
+        public void setUp() throws DataAccessException {
+            // Pre-insert data
+            userDAO.insertUser(new UserData(username, "testPassword", "testEmail"));
+            authToken = authDAO.createAuth(username).authToken();
+            if (userDAO.getUser(username) == null || authDAO.getAuth(authToken) == null) {
+                throw new DataAccessException("Failed to insert test data");
+            }
+        }
+
+        @Test
+        public void testClearServiceSuccess() throws DataAccessException {
+            assertDoesNotThrow(() -> userService.clearService());
+            // Assert data has been cleared
+            assertNull(userDAO.getUser(username));
+            assertNull(authDAO.getAuth(authToken));
         }
     }
 }
