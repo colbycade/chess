@@ -20,7 +20,7 @@ public class JoinGameHandler implements Route {
     private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
     private final GameService gameService = new GameService(gameDAO, authDAO);
     private final Gson gson = new Gson();
-    
+
     private static JoinGameHandler instance = null;
     // Private constructor to prevent direct instantiation
 
@@ -44,6 +44,7 @@ public class JoinGameHandler implements Route {
         JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, clientColor, gameID);
         gameService.joinGame(joinGameRequest);
         res.status(200);
-        return ""; // No response body
+        res.type("application/json");
+        return "{}"; // No response body
     }
 }

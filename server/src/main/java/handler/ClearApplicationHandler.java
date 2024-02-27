@@ -40,7 +40,7 @@ public class ClearApplicationHandler implements Route {
     public Object handle(Request req, Response res) throws DataAccessException {
         userService.clearService();
         gameService.clearService();
-        res.status(200);
-        return ""; // No response body
+        res.type("application/json");
+        return "{}"; // No response body
     }
 }

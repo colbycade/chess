@@ -48,7 +48,7 @@ public class UserService {
         // Create auth token
         AuthData authData = authDAO.createAuth(request.username());
 
-        return new LoginResponse(authData.authToken(), user.username());
+        return new LoginResponse(user.username(), authData.authToken());
     }
 
     public void logout(LogoutRequest request) throws DataAccessException {

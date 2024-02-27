@@ -7,11 +7,15 @@ import dataAccess.InMemoryDatabase.MemoryAuthDAO;
 import dataAccess.InMemoryDatabase.MemoryGameDAO;
 import exception.DataAccessException;
 import service.GameService;
+import service.request.CreateGameRequest;
 import service.request.ListGamesRequest;
+import service.response.CreateGameResponse;
 import service.response.ListGamesResponse;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+
+import java.util.Map;
 
 public class ListGamesHandler implements Route {
     private final GameDAO gameDAO = MemoryGameDAO.getInstance();
@@ -35,10 +39,11 @@ public class ListGamesHandler implements Route {
 
     @Override
     public Object handle(Request req, Response res) throws DataAccessException {
-        ListGamesRequest listGamesRequest = gson.fromJson(req.body(), ListGamesRequest.class);
+        String authToken = req.headers("authorization");
+        ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
         ListGamesResponse listGamesResponse = gameService.listGames(listGamesRequest);
         res.status(200);
         res.type("application/json");
-        return gson.toJson(listGamesResponse.games());
+        return gson.toJson(listGamesResponse);
     }
 }
