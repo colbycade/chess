@@ -58,6 +58,12 @@ public class GameService {
             throw new BadRequestException("bad request");
         }
 
+        // Update game data according to client's request
+        GameData updatedGame = getGameData(request, game, username);
+        gameDAO.updateGame(updatedGame);
+    }
+
+    private static GameData getGameData(JoinGameRequest request, GameData game, String username) throws AlreadyTakenException {
         // If client supplies a color, check if available and update
         if ((request.clientColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null) ||
                 (request.clientColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
@@ -67,12 +73,11 @@ public class GameService {
         String newBlackUsername = request.clientColor() == ChessGame.TeamColor.BLACK ? username : game.blackUsername();
 
         // TODO: Else, client will join as an observer
+        if (request.clientColor() == null) {
+        }
 
-        // Prepare updated game data
-        GameData updatedGame = new GameData(request.gameID(), newWhiteUsername, newBlackUsername, game.gameName(), game.game());
-
-        // Update game data
-        gameDAO.updateGame(updatedGame);
+        // Return updated game data
+        return new GameData(request.gameID(), newWhiteUsername, newBlackUsername, game.gameName(), game.game());
     }
 
     public void clearService() throws DataAccessException {
