@@ -44,8 +44,8 @@ public class ChessMovesStrategies {
             endingRow = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
 
             // Move one forward
-            var one_forward = new ChessPosition(myRow + direction, myCol);
-            addMoveIfValid(position, one_forward, true);
+            var oneForward = new ChessPosition(myRow + direction, myCol);
+            addMoveIfValid(position, oneForward, true);
 
             // Capture moves: left and right
             int[] captureDirections = {-1, 1};

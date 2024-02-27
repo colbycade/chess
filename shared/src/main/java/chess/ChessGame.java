@@ -54,8 +54,8 @@ public class ChessGame {
         var piece = board.getPiece(startPosition);
 
         // add standard moves
-        for (var ChessMove : ChessPiece.pieceMoves(board, startPosition)) {
-            if (wouldNotBeInCheck(ChessMove)) allValidMoves.add(ChessMove);
+        for (var chessMove : ChessPiece.pieceMoves(board, startPosition)) {
+            if (wouldNotBeInCheck(chessMove)) allValidMoves.add(chessMove);
         }
 
         // add en passant moves for pawns
