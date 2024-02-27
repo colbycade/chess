@@ -15,12 +15,24 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
-    private boolean hasMoved;
+    private boolean hasNotMoved;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
-        this.hasMoved = false;
+        this.hasNotMoved = true;
+    }
+
+    /**
+     * The various different chess piece options
+     */
+    public enum PieceType {
+        KING,
+        QUEEN,
+        BISHOP,
+        KNIGHT,
+        ROOK,
+        PAWN
     }
 
     /**
@@ -37,13 +49,12 @@ public class ChessPiece {
         return type;
     }
 
-    public boolean hasMoved() {
-        return hasMoved;
+    public boolean hasNotMoved() {
+        return hasNotMoved;
     }
 
-
-    public void setHasMoved(boolean hasMoved) {
-        this.hasMoved = hasMoved;
+    public void setHasNotMoved(boolean hasNotMoved) {
+        this.hasNotMoved = hasNotMoved;
     }
 
     /**
@@ -57,19 +68,32 @@ public class ChessPiece {
     }
 
     private final static Map<PieceType, String> whitePieceToChar = Map.of(
-            PieceType.PAWN, "♙",    // White Pawn
-            PieceType.KNIGHT, "♘",  // White Knight
-            PieceType.ROOK, "♖",    // White Rook
-            PieceType.QUEEN, "♕",   // White Queen
-            PieceType.KING, "♔",    // White King
-            PieceType.BISHOP, "♗"); // White Bishop
+            PieceType.PAWN, "♙",        // White Pawn
+            PieceType.KNIGHT, "♘",      // White Knight
+            PieceType.ROOK, "♖",        // White Rook
+            PieceType.QUEEN, "♕",       // White Queen
+            PieceType.KING, "♔",        // White King
+            PieceType.BISHOP, "♗");     // White Bishop
     private final static Map<PieceType, String> blackPieceToChar = Map.of(
-            PieceType.PAWN, "♟",    // Black Pawn
-            PieceType.KNIGHT, "♞",  // Black Knight
-            PieceType.ROOK, "♜",    // Black Rook
-            PieceType.QUEEN, "♛",   // Black Queen
-            PieceType.KING, "♚",    // Black King
-            PieceType.BISHOP, "♝"); // Black Bishop
+            PieceType.PAWN, "♟",        // Black Pawn
+            PieceType.KNIGHT, "♞",      // Black Knight
+            PieceType.ROOK, "♜",        // Black Rook
+            PieceType.QUEEN, "♛",       // Black Queen
+            PieceType.KING, "♚",        // Black King
+            PieceType.BISHOP, "♝");     // Black Bishop
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
+    }
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -282,28 +306,132 @@ public class ChessPiece {
         return moves;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChessPiece that = (ChessPiece) o;
-        return pieceColor == that.pieceColor && type == that.type;
+    public class MovementStrategyFactory {
+        public PieceMovesStrategy getStrategy(PieceType type) {
+            return switch (type) {
+                case PAWN -> new PawnMovesStrategy();
+                case KNIGHT -> new KnightMovesStrategy();
+                case BISHOP -> new BishopMovesStrategy();
+                case ROOK -> new RookMovesStrategy();
+                case QUEEN -> new QueenMovesStrategy();
+                case KING -> new KingMovesStrategy();
+            };
+        }
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(pieceColor, type);
+    public interface PieceMovesStrategy {
+        Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition position);
     }
 
-    /**
-     * The various different chess piece options
-     */
-    public enum PieceType {
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
+    public class PawnMovesStrategy implements PieceMovesStrategy {
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            var moves = new ArrayList<ChessMove>();
+            var myPiece = board.getPiece(myPosition);
+            var myRow = myPosition.getRow();
+            var myCol = myPosition.getColumn();
+
+            var direction = myPiece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+            var startingRow = myPiece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
+            var endingRow = myPiece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
+            // pawns promote to Rook, Knight, Bishop, or Queen (cannot stay a Pawn)
+            var promotionTypes = new PieceType[]{PieceType.KNIGHT, PieceType.BISHOP, PieceType.ROOK, PieceType.QUEEN};
+
+            // move one forward
+            var one_forward = new ChessPosition(myRow + direction, myCol);
+            if (board.squareIsEmpty(one_forward)) {
+                if (one_forward.getRow() == endingRow) {
+                    // promote
+                    for (PieceType type : promotionTypes) {
+                        moves.add(new ChessMove(myPosition, one_forward, type));
+                    }
+                } else {
+                    // no promotion
+                    moves.add(new ChessMove(myPosition, one_forward, null));
+                }
+
+                // first move can go two forward (but one forward must also be empty)
+                if (myRow == startingRow) {
+                    var two_forward = new ChessPosition(myRow + 2 * direction, myCol);
+                    if (board.squareIsEmpty(two_forward)) {
+                        moves.add(new ChessMove(myPosition, two_forward, null));
+                    }
+                }
+            }
+
+            // capture left
+            var frontLeft = new ChessPosition(myRow + direction, myCol - direction);
+            if (frontLeft.isInbounds() && !board.squareIsEmpty(frontLeft) &&
+                    board.getPiece(frontLeft).getTeamColor() != myPiece.getTeamColor()) {
+                if (frontLeft.getRow() == endingRow) {
+                    // promote
+                    for (PieceType type : promotionTypes) {
+                        moves.add(new ChessMove(myPosition, frontLeft, type));
+                    }
+                } else {
+                    // no promotion
+                    moves.add(new ChessMove(myPosition, frontLeft, null));
+                }
+            }
+
+            // capture right
+            var frontRight = new ChessPosition(myRow + direction, myCol + direction);
+            if (frontRight.isInbounds() && !board.squareIsEmpty(frontRight) &&
+                    board.getPiece(frontRight).getTeamColor() != myPiece.getTeamColor()) {
+                if (frontRight.getRow() == endingRow) {
+                    // promote
+                    for (PieceType type : promotionTypes) {
+                        moves.add(new ChessMove(myPosition, frontRight, type));
+                    }
+                } else {
+                    // no promotion
+                    moves.add(new ChessMove(myPosition, frontRight, null));
+                }
+            }
+
+            return moves;
+        }
+    }
+
+    public class KnightMovesStrategy implements PieceMovesStrategy {
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            return null;
+        }
+    }
+
+    public class BishopMovesStrategy implements PieceMovesStrategy {
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            return null;
+        }
+
+    }
+
+    public class RookMovesStrategy implements PieceMovesStrategy {
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            return null;
+        }
+    }
+
+    public class QueenMovesStrategy implements PieceMovesStrategy {
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            return null;
+        }
+    }
+
+    public class KingMovesStrategy implements PieceMovesStrategy {
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            return null;
+        }
     }
 }

@@ -20,7 +20,6 @@ public class ClearApplicationHandler implements Route {
     private final UserDAO userDAO = MemoryUserDAO.getInstance();
     private final GameService gameService = new GameService(gameDAO, authDAO);
     private final UserService userService = new UserService(userDAO, authDAO);
-    private final Gson gson = new Gson();
 
     private static ClearApplicationHandler instance = null;
 

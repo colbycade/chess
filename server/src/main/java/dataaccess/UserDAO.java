@@ -8,8 +8,8 @@ public interface UserDAO {
     void insertUser(UserData user) throws DataAccessException;
 
     // Method to retrieve a user by username
-    UserData getUser(String username) throws DataAccessException;
+    UserData getUser(String username);
 
     // Method to clear database
-    void clear() throws DataAccessException;
+    void clear();
 }
