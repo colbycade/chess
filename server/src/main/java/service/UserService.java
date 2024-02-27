@@ -58,7 +58,7 @@ public class UserService {
         authDAO.deleteAuth(request.authToken());
     }
 
-    public void clearService() throws DataAccessException {
+    public void clearService() {
         userDAO.clear();
         authDAO.clear();
     }

@@ -29,7 +29,7 @@ public class GameServiceTests {
     private MemoryGameDAO gameDAO;
 
     @BeforeEach
-    public void setUp() throws DataAccessException {
+    public void setUp() {
         authDAO = MemoryAuthDAO.getInstance();
         gameDAO = MemoryGameDAO.getInstance();
         authDAO.clear();
@@ -40,7 +40,7 @@ public class GameServiceTests {
     @Nested
     class CreateGameTest {
         String authToken;
-        String gameName = "my_game";
+        final String gameName = "my_game";
 
         @BeforeEach
         public void setUp() throws DataAccessException {
@@ -101,8 +101,8 @@ public class GameServiceTests {
     class JoinGameTest {
         String authToken;
         int gameID;
-        String username = "username";
-        String gameName = "my_game";
+        final String username = "username";
+        final String gameName = "my_game";
 
 
         @BeforeEach

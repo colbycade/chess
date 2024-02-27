@@ -1,6 +1,5 @@
 package handler;
 
-import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.inmemorydatabase.MemoryAuthDAO;
 import dataaccess.inmemorydatabase.MemoryUserDAO;

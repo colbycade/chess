@@ -23,7 +23,7 @@ class UserServiceTests {
     private MemoryUserDAO userDAO;
 
     @BeforeEach
-    public void setUp() throws DataAccessException {
+    public void setUp() {
         authDAO = MemoryAuthDAO.getInstance();
         userDAO = MemoryUserDAO.getInstance();
         authDAO.clear();
@@ -135,7 +135,7 @@ class UserServiceTests {
     @Nested
     class clearServiceTest {
         String authToken;
-        String username = "testUsername";
+        final String username = "testUsername";
 
         @BeforeEach
         public void setUp() throws DataAccessException {
@@ -148,7 +148,7 @@ class UserServiceTests {
         }
 
         @Test
-        public void testClearServiceSuccess() throws DataAccessException {
+        public void testClearServiceSuccess() {
             assertDoesNotThrow(() -> userService.clearService());
             // Assert data has been cleared
             assertNull(userDAO.getUser(username));
