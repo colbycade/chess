@@ -52,7 +52,7 @@ public class GameServiceTests {
         public void testCreateGameSuccess() throws DataAccessException {
             CreateGameResponse response = gameService.createGame(new CreateGameRequest(authToken, gameName));
             assertNotNull(response);
-            assertNotNull(response.gameId());
+            assertNotNull(response.gameID());
         }
 
         @Test
