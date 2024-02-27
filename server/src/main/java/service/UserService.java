@@ -10,6 +10,8 @@ import service.request.RegisterRequest;
 import service.response.RegisterResponse;
 import service.request.LogoutRequest;
 
+import static service.AuthUtil.verifyAuthToken;
+
 public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
@@ -50,13 +52,12 @@ public class UserService {
     }
 
     public void logout(LogoutRequest request) throws DataAccessException {
-        // Verify that the auth token exists
-        if (request.authToken() == null || authDAO.getAuth(request.authToken()) == null) {
-            throw new UnauthorizedException("unauthorized");
-        }
+        verifyAuthToken(authDAO, request.authToken());
 
         // Delete the auth token
         authDAO.deleteAuth(request.authToken());
     }
 
 }
+
+

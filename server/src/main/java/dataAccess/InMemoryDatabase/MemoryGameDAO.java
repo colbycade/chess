@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO {
-    private HashMap<Integer, GameData> games = new HashMap<>();
+    private final HashMap<Integer, GameData> games = new HashMap<>();
     private int gameIDCounter = 0; // Counter for auto-incrementing game IDs
 
     private static MemoryGameDAO instance = null;
@@ -27,7 +27,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public int createGame(String gameName) throws DataAccessException {
+    public int createGame(String gameName) {
         int newGameID = ++gameIDCounter;
         ChessGame newGame = new ChessGame();
         GameData newGameData = new GameData(newGameID, "", "", gameName, newGame);
@@ -36,21 +36,21 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(int gameID) {
         return games.get(gameID);
     }
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
         if (games.containsKey(game.gameID())) {
-            games.put(game.gameID(), game);
+            games.put(game.gameID(), game); // overwrite the old game data with the new game
         } else {
             throw new DataAccessException("Game with ID " + game.gameID() + " does not exist.");
         }
     }
 
     @Override
-    public Collection<GameData> listGames() throws DataAccessException {
+    public Collection<GameData> listGames() {
         return games.values();
     }
 

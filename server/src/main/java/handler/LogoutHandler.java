@@ -18,7 +18,6 @@ public class LogoutHandler implements Route {
     private final UserDAO userDAO = MemoryUserDAO.getInstance();
     private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
     private final UserService userService = new UserService(userDAO, authDAO);
-    private final Gson gson = new Gson();
 
     private static LogoutHandler instance = null;
 
