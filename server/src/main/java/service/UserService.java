@@ -32,7 +32,7 @@ public class UserService {
         }
 
         // Create user and auth token
-        userDAO.createUser(new UserData(request.username(), request.password(), request.email()));
+        userDAO.insertUser(new UserData(request.username(), request.password(), request.email()));
         AuthData authData = authDAO.createAuth(request.username());
 
         return new RegisterResponse(request.username(), authData.authToken());
@@ -58,6 +58,10 @@ public class UserService {
         authDAO.deleteAuth(request.authToken());
     }
 
+    public void clearService() throws DataAccessException {
+        userDAO.clear();
+        authDAO.clear();
+    }
 }
 
 
