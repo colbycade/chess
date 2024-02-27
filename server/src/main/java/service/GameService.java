@@ -73,8 +73,8 @@ public class GameService {
         String newBlackUsername = request.clientColor() == ChessGame.TeamColor.BLACK ? username : game.blackUsername();
 
         // TODO: Else, client will join as an observer
-        if (request.clientColor() == null) {
-        }
+//        if (request.clientColor() == null) {
+//        }
 
         // Return updated game data
         return new GameData(request.gameID(), newWhiteUsername, newBlackUsername, game.gameName(), game.game());
