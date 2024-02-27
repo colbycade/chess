@@ -4,80 +4,174 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class ChessMovesStrategies {
-    public class MovesStrategyFactory {
-        public static PieceMovesStrategy getStrategy(ChessPiece.PieceType type) {
-            return switch (type) {
-                case PAWN -> new PawnMovesStrategy();
-                case KNIGHT -> new KnightMovesStrategy();
-                case BISHOP -> new BishopMovesStrategy();
-                case ROOK -> new RookMovesStrategy();
-                case QUEEN -> new QueenMovesStrategy();
-                case KING -> new KingMovesStrategy();
-            };
-        }
+
+    public static PieceMovesStrategy getPieceStrategy(ChessPiece.PieceType type) {
+        return switch (type) {
+            case PAWN -> new PawnMovesStrategy();
+            case KNIGHT -> new KnightMovesStrategy();
+            case BISHOP -> new BishopMovesStrategy();
+            case ROOK -> new RookMovesStrategy();
+            case QUEEN -> new QueenMovesStrategy();
+            case KING -> new KingMovesStrategy();
+        };
     }
 
     public interface PieceMovesStrategy {
         Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition position);
     }
 
+    private static class PawnMovesStrategy implements PieceMovesStrategy {
+
+        // Pawns promote to Rook, Knight, Bishop, or Queen (cannot stay a Pawn)
+        private static final ChessPiece.PieceType[] PROMOTION_TYPES = {
+                ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.ROOK, ChessPiece.PieceType.QUEEN
+        };
+        private final ArrayList<ChessMove> moves = new ArrayList<>();
+        private ChessBoard board;
+        private int startingRow;
+        private int endingRow;
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition position) {
+            this.board = board;
+            ChessPiece piece = board.getPiece(position);
+            int myRow = position.getRow();
+            int myCol = position.getColumn();
+
+            int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+            startingRow = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
+            endingRow = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
+
+            // Move one forward
+            var one_forward = new ChessPosition(myRow + direction, myCol);
+            addMoveIfValid(position, one_forward, true);
+
+            // Capture moves: left and right
+            int[] captureDirections = {-1, 1};
+            for (int captureDirection : captureDirections) {
+                ChessPosition capturePosition = new ChessPosition(myRow + direction, myCol + captureDirection);
+                if (capturePosition.isInbounds() && !board.squareIsEmpty(capturePosition) &&
+                        board.getPiece(capturePosition).getTeamColor() != piece.getTeamColor()) {
+                    addMoveIfValid(position, capturePosition, false);
+                }
+            }
+
+            return moves;
+        }
+
+        private void addMoveIfValid(ChessPosition from, ChessPosition to, boolean checkTwoForward) {
+            if (to.isInbounds() && (board.squareIsEmpty(to) || !checkTwoForward)) {
+                if (to.getRow() == endingRow) {
+                    // Promotion
+                    for (ChessPiece.PieceType type : PROMOTION_TYPES) {
+                        moves.add(new ChessMove(from, to, type));
+                    }
+                } else {
+                    // Regular move
+                    moves.add(new ChessMove(from, to, null));
+                    if (checkTwoForward && from.getRow() == startingRow) {
+                        // Check for two squares forward on first move
+                        ChessPosition twoForward = new ChessPosition(from.getRow() + 2 * (endingRow == 8 ? 1 : -1), from.getColumn());
+                        if (board.squareIsEmpty(twoForward)) {
+                            moves.add(new ChessMove(from, twoForward, null));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     private static class BishopMovesStrategy implements PieceMovesStrategy {
+        private static final int[][] DIRECTIONS = {
+                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals only
+        };
 
         @Override
         public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
-            int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}}; // diagonals only
-
-            return calculateDirectionalMoves(board, myPosition, directions);
+            return calculateDirectionalMoves(board, myPosition, DIRECTIONS);
         }
     }
 
     private static class RookMovesStrategy implements PieceMovesStrategy {
+        private static final int[][] DIRECTIONS = {
+                {0, 1}, {0, -1}, {-1, 0}, {1, 0}    // up down left right
+        };
 
         @Override
         public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
-            int[][] directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}}; // up down left right
-
-            return calculateDirectionalMoves(board, myPosition, directions);
+            return calculateDirectionalMoves(board, myPosition, DIRECTIONS);
         }
     }
+
 
     private static class QueenMovesStrategy implements PieceMovesStrategy {
+        private static final int[][] DIRECTIONS = {
+                {0, 1}, {0, -1}, {-1, 0}, {1, 0},   // up down left right
+                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
+        };
 
         @Override
         public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
-            int[][] directions = {
-                    {0, 1}, {0, -1}, {-1, 0}, {1, 0},   // up down left right
-                    {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
-            };
-
-            return calculateDirectionalMoves(board, myPosition, directions);
+            return calculateDirectionalMoves(board, myPosition, DIRECTIONS);
         }
     }
 
 
-    private static Collection<ChessMove> calculateDirectionalMoves(ChessBoard board, ChessPosition myPosition, int[][] directions) {
+    private static class KingMovesStrategy implements PieceMovesStrategy {
+        private static final int[][] POSSIBLE_STEPS = {
+                {0, 1}, {0, -1}, {-1, 0}, {1, 0},   // up down left right
+                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
+        };
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            return calculateStepMoves(board, myPosition, POSSIBLE_STEPS);
+        }
+    }
+
+
+    private static class KnightMovesStrategy implements PieceMovesStrategy {
+        private static final int[][] POSSIBLE_STEPS = {   // all L-shapes
+                {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+        };
+
+        @Override
+        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
+            return calculateStepMoves(board, myPosition, POSSIBLE_STEPS);
+        }
+    }
+
+
+    private static Collection<ChessMove> calculateDirectionalMoves(ChessBoard board, ChessPosition position, int[][] directions) {
         var moves = new ArrayList<ChessMove>();
-        var myPiece = board.getPiece(myPosition);
-        var myRow = myPosition.getRow();
-        var myCol = myPosition.getColumn();
+        var piece = board.getPiece(position);
+        var row = position.getRow();
+        var col = position.getColumn();
 
         for (int[] direction : directions) {
             int rowDirection = direction[0];
             int colDirection = direction[1];
             int stepSize = 1;
-            ChessPosition newPosition = new ChessPosition(myRow + rowDirection * stepSize, myCol + colDirection * stepSize);
+            ChessPosition newPosition = new ChessPosition(row + rowDirection * stepSize, col + colDirection * stepSize);
 
             while (newPosition.isInbounds()) {
                 ChessPiece pieceAtPosition = board.getPiece(newPosition);
-                if (pieceAtPosition == null) {  // position is unoccupied
-                    moves.add(new ChessMove(myPosition, newPosition, null));
+                // If the position is occupied, add to moves and continue searching in this direction
+                if (pieceAtPosition == null) {
+                    moves.add(new ChessMove(position, newPosition, null));
                     stepSize++;
-                    newPosition = new ChessPosition(myRow + rowDirection * stepSize, myCol + colDirection * stepSize);
-                } else {    // position is occupied; capture if possible
-                    if (pieceAtPosition.getTeamColor() != myPiece.getTeamColor()) { // capture if enemy
-                        moves.add(new ChessMove(myPosition, newPosition, null));
+                    newPosition = new ChessPosition(row + rowDirection * stepSize, col + colDirection * stepSize);
+                }
+                // If the position is occupied by an enemy piece check for enemy and stop searching in this direction
+                else {
+                    // Add to moves if a capture is possible
+                    if (pieceAtPosition.getTeamColor() != piece.getTeamColor()) {
+                        moves.add(new ChessMove(position, newPosition, null));
                     }
-                    break;  // stop searching this direction
+                    break;
                 }
             }
         }
@@ -85,137 +179,22 @@ public class ChessMovesStrategies {
         return moves;
     }
 
-    private static class KingMovesStrategy implements PieceMovesStrategy {
+    public static Collection<ChessMove> calculateStepMoves(ChessBoard board, ChessPosition position, int[][] possibleSteps) {
+        var moves = new ArrayList<ChessMove>();
+        var piece = board.getPiece(position);
 
-        @Override
-        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
-            var moves = new ArrayList<ChessMove>();
-            var myPiece = board.getPiece(myPosition);
-
-            int[][] possibleSteps = {
-                    {0, 1}, {0, -1}, {-1, 0}, {1, 0},   // up down left right
-                    {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
-            };
-
-            for (int[] stepPair : possibleSteps) {
-                var rowStep = stepPair[0];
-                var colStep = stepPair[1];
-                var newPosition = new ChessPosition(myPosition.getRow() + rowStep, myPosition.getColumn() + colStep);
-                if (newPosition.isInbounds()) {
-                    ChessPiece pieceAtPosition = board.getPiece(newPosition);
-                    // position is unoccupied; add to moves
-                    if (pieceAtPosition == null) {
-                        moves.add(new ChessMove(myPosition, newPosition, null));
-                    }
-                    // position is occupied; capture if possible
-                    else if (pieceAtPosition.getTeamColor() != myPiece.getTeamColor()) {
-                        moves.add(new ChessMove(myPosition, newPosition, null));
-                    }
+        for (int[] step : possibleSteps) {
+            int newRow = position.getRow() + step[0];
+            int newColumn = position.getColumn() + step[1];
+            ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+            if (newPosition.isInbounds()) {
+                ChessPiece pieceAtPosition = board.getPiece(newPosition);
+                // If the position is unoccupied or occupied by an opponent's piece, add to moves
+                if (pieceAtPosition == null || pieceAtPosition.getTeamColor() != piece.getTeamColor()) {
+                    moves.add(new ChessMove(position, newPosition, null));
                 }
             }
-
-            return moves;
         }
-    }
-
-    private static class KnightMovesStrategy implements PieceMovesStrategy {
-
-        @Override
-        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
-            var moves = new ArrayList<ChessMove>();
-            var myPiece = board.getPiece(myPosition);
-
-            // all L-shapes
-            int[][] possibleSteps = {
-                    {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
-                    {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
-            };
-
-            for (int[] stepPair : possibleSteps) {
-                var rowStep = stepPair[0];
-                var colStep = stepPair[1];
-                var newPosition = new ChessPosition(myPosition.getRow() + rowStep, myPosition.getColumn() + colStep);
-                if (newPosition.isInbounds()) {
-                    ChessPiece pieceAtPosition = board.getPiece(newPosition);
-                    // position is empty or capture is possible
-                    if (pieceAtPosition == null || pieceAtPosition.getTeamColor() != myPiece.getTeamColor()) {
-                        moves.add(new ChessMove(myPosition, newPosition, null));
-                    }
-                }
-            }
-
-            return moves;
-        }
-    }
-
-    private static class PawnMovesStrategy implements PieceMovesStrategy {
-
-        @Override
-        public Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition myPosition) {
-            var moves = new ArrayList<ChessMove>();
-            var myPiece = board.getPiece(myPosition);
-            var myRow = myPosition.getRow();
-            var myCol = myPosition.getColumn();
-
-            var direction = myPiece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
-            var startingRow = myPiece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
-            var endingRow = myPiece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
-            // pawns promote to Rook, Knight, Bishop, or Queen (cannot stay a Pawn)
-            var promotionTypes = new ChessPiece.PieceType[]{ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.QUEEN};
-
-            // move one forward
-            var one_forward = new ChessPosition(myRow + direction, myCol);
-            if (board.squareIsEmpty(one_forward)) {
-                if (one_forward.getRow() == endingRow) {
-                    // promote
-                    for (ChessPiece.PieceType type : promotionTypes) {
-                        moves.add(new ChessMove(myPosition, one_forward, type));
-                    }
-                } else {
-                    // no promotion
-                    moves.add(new ChessMove(myPosition, one_forward, null));
-                }
-
-                // first move can go two forward (but one forward must also be empty)
-                if (myRow == startingRow) {
-                    var two_forward = new ChessPosition(myRow + 2 * direction, myCol);
-                    if (board.squareIsEmpty(two_forward)) {
-                        moves.add(new ChessMove(myPosition, two_forward, null));
-                    }
-                }
-            }
-
-            // capture left
-            var frontLeft = new ChessPosition(myRow + direction, myCol - direction);
-            if (frontLeft.isInbounds() && !board.squareIsEmpty(frontLeft) &&
-                    board.getPiece(frontLeft).getTeamColor() != myPiece.getTeamColor()) {
-                if (frontLeft.getRow() == endingRow) {
-                    // promote
-                    for (ChessPiece.PieceType type : promotionTypes) {
-                        moves.add(new ChessMove(myPosition, frontLeft, type));
-                    }
-                } else {
-                    // no promotion
-                    moves.add(new ChessMove(myPosition, frontLeft, null));
-                }
-            }
-
-            // capture right
-            var frontRight = new ChessPosition(myRow + direction, myCol + direction);
-            if (frontRight.isInbounds() && !board.squareIsEmpty(frontRight) &&
-                    board.getPiece(frontRight).getTeamColor() != myPiece.getTeamColor()) {
-                if (frontRight.getRow() == endingRow) {
-                    // promote
-                    for (ChessPiece.PieceType type : promotionTypes) {
-                        moves.add(new ChessMove(myPosition, frontRight, type));
-                    }
-                } else {
-                    // no promotion
-                    moves.add(new ChessMove(myPosition, frontRight, null));
-                }
-            }
-
-            return moves;
-        }
+        return moves;
     }
 }

@@ -103,10 +103,11 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        var myPiece = board.getPiece(myPosition);
-        PieceMovesStrategy strategy = MovesStrategyFactory.getStrategy(myPiece.getPieceType());
-        return strategy.calculateValidMoves(board, myPosition);
+    public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+        var piece = board.getPiece(position);
+        var pieceType = piece.getPieceType();
+        PieceMovesStrategy strategy = ChessMovesStrategies.getPieceStrategy(pieceType);
+        return strategy.calculateValidMoves(board, position);
     }
 
 }
