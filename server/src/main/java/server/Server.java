@@ -26,22 +26,34 @@ public class Server {
         // Setup global exception handlers
         Spark.exception(BadRequestException.class, (e, req, res) -> {
             res.status(400);
+            res.type("application/json");
             res.body(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
         });
 
         Spark.exception(UnauthorizedException.class, (e, req, res) -> {
             res.status(401);
+            res.type("application/json");
             res.body(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
         });
 
         Spark.exception(AlreadyTakenException.class, (e, req, res) -> {
             res.status(403);
+            res.type("application/json");
             res.body(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
         });
 
         Spark.exception(Exception.class, (e, req, res) -> {
             res.status(500);
+            res.type("application/json");
             res.body(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+        });
+
+        Spark.notFound((req, res) -> {
+            var msg = String.format("[%s] %s not found", req.requestMethod(), req.pathInfo());
+            res.status(500);
+            res.type("application/json");
+            res.body(gson.toJson(Map.of("message", "Error: " + msg)));
+            return res.body();
         });
 
 
