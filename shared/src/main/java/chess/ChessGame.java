@@ -81,17 +81,17 @@ public class ChessGame {
         }
 
         // castle if both king and rook are unmoved and path is clear between them
-        if (piece.getPieceType() == ChessPiece.PieceType.KING && !piece.hasMoved()) {
+        if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.hasNotMoved()) {
             // kingside castle (h rook)
             var rookPosition = new ChessPosition(startPosition.getRow(), 8);
-            if (!board.squareIsEmpty(rookPosition) && !board.getPiece(rookPosition).hasMoved()
+            if (!board.squareIsEmpty(rookPosition) && board.getPiece(rookPosition).hasNotMoved()
                     && isPathClearToCastle(startPosition, rookPosition)) {
                 allValidMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 7), null));
             }
 
             // queenside castle (a rook)
             rookPosition = new ChessPosition(startPosition.getRow(), 1);
-            if (!board.squareIsEmpty(rookPosition) && !board.getPiece(rookPosition).hasMoved()
+            if (!board.squareIsEmpty(rookPosition) && board.getPiece(rookPosition).hasNotMoved()
                     && isPathClearToCastle(startPosition, rookPosition)) {
                 allValidMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 3), null));
             }
@@ -148,7 +148,7 @@ public class ChessGame {
         executeMove(move);
 
         // update that piece has moved
-        piece.setHasMoved(true);
+        piece.setHasNotMoved(false);
 
         // save previous move
         lastMove = move;

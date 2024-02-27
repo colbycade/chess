@@ -341,8 +341,8 @@ public class EnPassantTests {
 
         //make sure pawn cannot do En Passant move
         Assertions.assertFalse(game.validMoves(position).contains(
-                TestFactory.getNewMove(TestFactory.getNewPosition(5, 2),
-                        TestFactory.getNewPosition(6, 3), null)),
+                        TestFactory.getNewMove(TestFactory.getNewPosition(5, 2),
+                                TestFactory.getNewPosition(6, 3), null)),
                 "ChessGame validMoves contained a En Passant move after the move became invalid");
     }
 
