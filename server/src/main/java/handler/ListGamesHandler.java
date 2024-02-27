@@ -1,21 +1,17 @@
 package handler;
 
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
-import dataAccess.InMemoryDatabase.MemoryAuthDAO;
-import dataAccess.InMemoryDatabase.MemoryGameDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryGameDAO;
 import exception.DataAccessException;
 import service.GameService;
-import service.request.CreateGameRequest;
 import service.request.ListGamesRequest;
-import service.response.CreateGameResponse;
 import service.response.ListGamesResponse;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-
-import java.util.Map;
 
 public class ListGamesHandler implements Route {
     private final GameDAO gameDAO = MemoryGameDAO.getInstance();

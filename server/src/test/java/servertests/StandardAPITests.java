@@ -1,4 +1,4 @@
-package serverTests;
+package servertests;
 
 import chess.ChessGame;
 import org.junit.jupiter.api.*;

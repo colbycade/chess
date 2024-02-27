@@ -63,7 +63,7 @@ public class TestFactory {
         var board = loadBoard(boardText);
         var testPiece = board.getPiece(startPosition);
         var validMoves = loadMoves(startPosition, endPositions);
-        var pieceMoves = new HashSet<>(testPiece.pieceMoves(board, startPosition));
+        var pieceMoves = new HashSet<>(ChessPiece.pieceMoves(board, startPosition));
 
         Assertions.assertEquals(validMoves, pieceMoves, "Wrong moves");
     }

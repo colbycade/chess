@@ -1,10 +1,10 @@
 package handler;
 
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
-import dataAccess.InMemoryDatabase.MemoryAuthDAO;
-import dataAccess.InMemoryDatabase.MemoryGameDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryGameDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.request.JoinGameRequest;

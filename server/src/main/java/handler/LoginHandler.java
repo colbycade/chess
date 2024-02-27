@@ -1,20 +1,17 @@
 package handler;
 
 import com.google.gson.Gson;
-import dataAccess.InMemoryDatabase.MemoryAuthDAO;
-import dataAccess.InMemoryDatabase.MemoryUserDAO;
-import dataAccess.AuthDAO;
-import dataAccess.UserDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryUserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.UserDAO;
 import exception.DataAccessException;
-import exception.UnauthorizedException;
 import service.UserService;
 import service.request.LoginRequest;
 import service.response.LoginResponse;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-
-import java.util.Map;
 
 public class LoginHandler implements Route {
     private final UserDAO userDAO = MemoryUserDAO.getInstance();

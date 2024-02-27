@@ -1,13 +1,13 @@
-package dataAccess.InMemoryDatabase;
+package dataaccess.inmemorydatabase;
 
 import exception.DataAccessException;
-import dataAccess.UserDAO;
+import dataaccess.UserDAO;
 import model.UserData;
 
 import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
-    private HashMap<String, UserData> users = new HashMap<>();
+    private final HashMap<String, UserData> users = new HashMap<>();
 
     private static MemoryUserDAO instance = null;
 

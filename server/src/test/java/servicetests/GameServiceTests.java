@@ -1,8 +1,8 @@
-package serviceTests;
+package servicetests;
 
 import chess.ChessGame;
-import dataAccess.InMemoryDatabase.MemoryAuthDAO;
-import dataAccess.InMemoryDatabase.MemoryGameDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryGameDAO;
 import exception.BadRequestException;
 import exception.DataAccessException;
 import exception.UnauthorizedException;

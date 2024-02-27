@@ -1,11 +1,11 @@
 package handler;
 
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
-import dataAccess.InMemoryDatabase.MemoryAuthDAO;
-import dataAccess.InMemoryDatabase.MemoryGameDAO;
-import dataAccess.InMemoryDatabase.MemoryUserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.UserDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryGameDAO;
+import dataaccess.inmemorydatabase.MemoryUserDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.UserService;

@@ -252,7 +252,7 @@ public class PawnMoveTests {
             validMoves.add(TestFactory.getNewMove(start, end, ChessPiece.PieceType.KNIGHT));
         }
 
-        var pieceMoves = new HashSet<>(testPiece.pieceMoves(board, start));
+        var pieceMoves = new HashSet<>(ChessPiece.pieceMoves(board, start));
         Assertions.assertEquals(validMoves, pieceMoves, "Wrong moves");
     }
 

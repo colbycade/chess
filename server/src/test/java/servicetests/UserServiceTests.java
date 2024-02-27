@@ -1,9 +1,9 @@
-package serviceTests;
+package servicetests;
 
 import model.*;
 import exception.*;
-import dataAccess.InMemoryDatabase.MemoryAuthDAO;
-import dataAccess.InMemoryDatabase.MemoryUserDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryUserDAO;
 import service.UserService;
 import service.request.LoginRequest;
 import service.request.RegisterRequest;

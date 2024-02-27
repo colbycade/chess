@@ -1,11 +1,9 @@
 package handler;
 
-import dataAccess.AuthDAO;
-import dataAccess.InMemoryDatabase.MemoryAuthDAO;
-import dataAccess.InMemoryDatabase.MemoryUserDAO;
-import dataAccess.UserDAO;
-import exception.AlreadyTakenException;
-import exception.BadRequestException;
+import dataaccess.AuthDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryUserDAO;
+import dataaccess.UserDAO;
 import exception.DataAccessException;
 import service.UserService;
 import service.request.RegisterRequest;
@@ -14,8 +12,6 @@ import com.google.gson.Gson;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-
-import java.util.Map;
 
 public class RegisterHandler implements Route {
     private final UserDAO userDAO = MemoryUserDAO.getInstance();
