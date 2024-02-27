@@ -20,8 +20,8 @@ public class Server {
         Spark.delete("/session", LogoutHandler.getInstance());
         Spark.post("/game", CreateGameHandler.getInstance());
         Spark.get("/game", ListGamesHandler.getInstance());
-        Spark.put("/game/join", JoinGameHandler.getInstance());
-        Spark.delete("/game/clear", ClearApplicationHandler.getInstance());
+        Spark.put("/game", JoinGameHandler.getInstance());
+        Spark.delete("/db", ClearApplicationHandler.getInstance());
 
         // Setup global exception handlers
         Spark.exception(BadRequestException.class, (e, req, res) -> {
