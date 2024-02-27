@@ -58,28 +58,15 @@ public class ChessGame {
             if (wouldNotBeInCheck(ChessMove)) allValidMoves.add(ChessMove);
         }
 
-        // add en passant moves
+        // add en passant moves for pawns
         if (piece != null && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
             allValidMoves.addAll(getEnPassantMoves(startPosition, direction));
         }
 
-        // add castling moves
-        // castle if both king and rook are unmoved and path is clear between them
-        if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.hasNotMoved()) {
-            // kingside castle (h rook)
-            var rookPosition = new ChessPosition(startPosition.getRow(), 8);
-            if (!board.squareIsEmpty(rookPosition) && board.getPiece(rookPosition).hasNotMoved()
-                    && isPathClearToCastle(startPosition, rookPosition)) {
-                allValidMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 7), null));
-            }
-
-            // queenside castle (a rook)
-            rookPosition = new ChessPosition(startPosition.getRow(), 1);
-            if (!board.squareIsEmpty(rookPosition) && board.getPiece(rookPosition).hasNotMoved()
-                    && isPathClearToCastle(startPosition, rookPosition)) {
-                allValidMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(), 3), null));
-            }
+        // add castling moves for king if it has not moved
+        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.hasNotMoved()) {
+            allValidMoves.addAll(getCastlingMoves(startPosition));
         }
 
         return allValidMoves;
@@ -114,14 +101,28 @@ public class ChessGame {
         return (diff == 2);
     }
 
-    /**
-     * Function to determine if the path is clear for the king to castle,
-     * meaning there are no pieces between king and rook and the king would not undergo check
-     *
-     * @param kingPosition position of king
-     * @param rookPosition position of selected rook
-     * @return true if there are no pieces between the king and rook
-     */
+    // Get castling moves for the king
+    private Collection<ChessMove> getCastlingMoves(ChessPosition kingStartPosition) {
+        var moves = new ArrayList<ChessMove>();
+        int[][] castlingPositions = {
+                {7, 8}, // Kingside (h rook)
+                {3, 1}  // Queenside (a rook)
+        };
+
+        for (int[] rookAndKingColumns : castlingPositions) {
+            var kingEndPosition = new ChessPosition(kingStartPosition.getRow(), rookAndKingColumns[0]);
+            var rookPosition = new ChessPosition(kingStartPosition.getRow(), rookAndKingColumns[1]);
+
+            // Check if rook has not moved and path is clear to king
+            if (!board.squareIsEmpty(rookPosition) && board.getPiece(rookPosition).hasNotMoved()
+                    && isPathClearToCastle(kingStartPosition, rookPosition)) {
+                moves.add(new ChessMove(kingStartPosition, kingEndPosition, null));
+            }
+        }
+        return moves;
+    }
+
+    // Check if path is clear between king and rook
     private boolean isPathClearToCastle(ChessPosition kingPosition, ChessPosition rookPosition) {
         var leftCol = Math.min(kingPosition.getColumn(), rookPosition.getColumn());
         int rightCol = Math.max(kingPosition.getColumn(), rookPosition.getColumn());
@@ -179,17 +180,10 @@ public class ChessGame {
             }
         }
 
-        // make the actual move
         executeMove(move);
-
-        // update that piece has moved
-        piece.setHasNotMoved(false);
-
-        // save previous move
-        lastMove = move;
-
-        // switch turns
-        setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+        piece.setHasNotMoved(false);    // update that piece has moved
+        lastMove = move;    // save previous move
+        setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);  // switch turns
     }
 
     /**
