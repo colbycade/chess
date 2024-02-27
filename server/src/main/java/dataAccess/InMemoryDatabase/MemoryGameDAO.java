@@ -30,7 +30,7 @@ public class MemoryGameDAO implements GameDAO {
     public int createGame(String gameName) {
         int newGameID = ++gameIDCounter;
         ChessGame newGame = new ChessGame();
-        GameData newGameData = new GameData(newGameID, "", "", gameName, newGame);
+        GameData newGameData = new GameData(newGameID, null, null, gameName, newGame);
         games.put(newGameID, newGameData);
         return newGameID;
     }

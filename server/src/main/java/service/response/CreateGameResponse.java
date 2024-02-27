@@ -1,4 +1,4 @@
 package service.response;
 
-public record CreateGameResponse(int gameId) {
+public record CreateGameResponse(Integer gameId) {
 }
