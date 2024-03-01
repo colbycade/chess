@@ -41,6 +41,7 @@ public class MemoryUserDAO implements UserDAO {
         users.clear();
     }
 
+    @Override
     public String hashPassword(String password) {
         return password; // no hashing for in-memory database
     }

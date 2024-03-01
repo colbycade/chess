@@ -40,17 +40,24 @@ public class UserService {
 
     public LoginResponse login(LoginRequest request) throws DataAccessException {
         // Check that user exists and password is correct when hashed
-        UserData user = userDAO.getUser(request.username());
-        String storedHashedPassword = user.password();
-        String hashedPassword = userDAO.hashPassword(request.password());
-        if (user == null || !hashedPassword.equals(storedHashedPassword)) {
+        try {
+            UserData user = userDAO.getUser(request.username());
+            if (user == null) {
+                throw new UnauthorizedException("unauthorized");
+            }
+            String storedHashedPassword = user.password();
+            String hashedPassword = userDAO.hashPassword(request.password());
+            if (!hashedPassword.equals(storedHashedPassword)) {
+                throw new UnauthorizedException("unauthorized");
+            }
+
+            // Create auth token
+            AuthData authData = authDAO.createAuth(request.username());
+            return new LoginResponse(user.username(), authData.authToken());
+
+        } catch (DataAccessException e) {
             throw new UnauthorizedException("unauthorized");
         }
-
-        // Create auth token
-        AuthData authData = authDAO.createAuth(request.username());
-
-        return new LoginResponse(user.username(), authData.authToken());
     }
 
     public void logout(LogoutRequest request) throws DataAccessException {

@@ -60,7 +60,7 @@ public class MySQLUserDAO implements UserDAO {
                             resultSet.getString("email")
                     );
                 } else {
-                    throw new DataAccessException("User not found");
+                    throw new DataAccessException("User does not exist");
                 }
             }
         } catch (SQLException e) {

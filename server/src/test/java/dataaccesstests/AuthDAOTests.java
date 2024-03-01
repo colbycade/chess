@@ -21,7 +21,10 @@ public class AuthDAOTests {
         String daoType = System.getProperty("userDaoType", "memory");
         switch (daoType) {
             case "mysql" -> authDAO = new MySQLAuthDAO();
-            case "memory" -> authDAO = MemoryAuthDAO.getInstance();
+            case "memory" -> {
+                authDAO = MemoryAuthDAO.getInstance();
+                authDAO.clear(); // prevent data from persisting between tests because MemoryAuthDAO is a singleton
+            }
         }
     }
 

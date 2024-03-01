@@ -1,6 +1,7 @@
 package dataaccesstests;
 
 import dataaccess.UserDAO;
+import dataaccess.inmemorydatabase.MemoryGameDAO;
 import dataaccess.inmemorydatabase.MemoryUserDAO;
 import dataaccess.sqldatabase.MySQLUserDAO;
 import exception.DataAccessException;
@@ -21,9 +22,11 @@ public class UserDAOTests {
         String daoType = System.getProperty("userDaoType", "memory");
         switch (daoType) {
             case "mysql" -> userDAO = new MySQLUserDAO();
-            case "memory" -> userDAO = MemoryUserDAO.getInstance();
+            case "memory" -> {
+                userDAO = MemoryUserDAO.getInstance();
+                userDAO.clear(); // prevent data from persisting between tests because MemoryUserDAO is a singleton
+            }
         }
-        userDAO.clear(); // Especially important for singleton InMemoryUserDAO
     }
 
     @Test
