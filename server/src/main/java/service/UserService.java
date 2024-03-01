@@ -39,9 +39,11 @@ public class UserService {
     }
 
     public LoginResponse login(LoginRequest request) throws DataAccessException {
-        // Check that user exists and password is correct
+        // Check that user exists and password is correct when hashed
         UserData user = userDAO.getUser(request.username());
-        if (user == null || !user.password().equals(request.password())) {
+        String storedHashedPassword = user.password();
+        String hashedPassword = userDAO.hashPassword(request.password());
+        if (user == null || !hashedPassword.equals(storedHashedPassword)) {
             throw new UnauthorizedException("unauthorized");
         }
 

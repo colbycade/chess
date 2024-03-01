@@ -3,7 +3,7 @@ Database: ChessDB
 Table: User
     Columns:
         - VARCHAR(64) username PRIMARY KEY
-        - VARCHAR(64) password
+        - VARCHAR(72) password_hash
         - VARCHAR(330) email
 
 Table: Authentication

@@ -4,6 +4,7 @@ import dataaccess.DatabaseManager;
 import dataaccess.UserDAO;
 import exception.DataAccessException;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.sql.*;
 
@@ -17,7 +18,7 @@ public class MySQLUserDAO implements UserDAO {
             var statement = """
                     CREATE TABLE IF NOT EXISTS User (
                         username VARCHAR(64) PRIMARY KEY,
-                        password VARCHAR(64) NOT NULL,
+                        password_hash VARCHAR(72) NOT NULL,
                         email VARCHAR(330) NOT NULL
                     )""";
             try (var preparedStatement = conn.prepareStatement(statement)) {
@@ -28,13 +29,15 @@ public class MySQLUserDAO implements UserDAO {
         }
     }
 
+
     @Override
     public void insertUser(UserData user) throws DataAccessException {
+        String hashedPassword = hashPassword(user.password());
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO User (username, password, email) VALUES (?, ?, ?)";
+            var statement = "INSERT INTO User (username, password_hash, email) VALUES (?, ?, ?)";
             try (var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, user.username());
-                preparedStatement.setString(2, user.password());
+                preparedStatement.setString(2, hashedPassword);
                 preparedStatement.setString(3, user.email());
                 preparedStatement.executeUpdate();
             }
@@ -53,7 +56,7 @@ public class MySQLUserDAO implements UserDAO {
                 if (resultSet.next()) {
                     return new UserData(
                             resultSet.getString("username"),
-                            resultSet.getString("password"),
+                            resultSet.getString("password_hash"),
                             resultSet.getString("email")
                     );
                 } else {
@@ -75,5 +78,11 @@ public class MySQLUserDAO implements UserDAO {
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
+    }
+
+    public String hashPassword(String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(password);
+        return hashedPassword;
     }
 }

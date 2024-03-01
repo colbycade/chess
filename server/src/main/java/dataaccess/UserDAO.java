@@ -12,4 +12,7 @@ public interface UserDAO {
 
     // Method to clear database
     void clear() throws DataAccessException;
+
+    // Method to hash a password
+    String hashPassword(String password);
 }

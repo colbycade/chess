@@ -40,4 +40,8 @@ public class MemoryUserDAO implements UserDAO {
     public void clear() {
         users.clear();
     }
+
+    public String hashPassword(String password) {
+        return password; // no hashing for in-memory database
+    }
 }
