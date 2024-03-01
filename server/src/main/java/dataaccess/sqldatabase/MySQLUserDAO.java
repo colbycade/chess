@@ -80,6 +80,7 @@ public class MySQLUserDAO implements UserDAO {
         }
     }
 
+    @Override
     public String hashPassword(String password) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashedPassword = encoder.encode(password);
