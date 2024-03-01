@@ -35,7 +35,7 @@ public class ClearApplicationHandler implements Route {
     }
 
     @Override
-    public Object handle(Request req, Response res) {
+    public Object handle(Request req, Response res) throws DataAccessException {
         userService.clearService();
         gameService.clearService();
         res.type("application/json");

@@ -80,7 +80,7 @@ public class GameService {
         return new GameData(request.gameID(), newWhiteUsername, newBlackUsername, game.gameName(), game.game());
     }
 
-    public void clearService() {
+    public void clearService() throws DataAccessException {
         gameDAO.clear();
     }
 }
