@@ -27,19 +27,19 @@ public class Server {
         Spark.exception(BadRequestException.class, (e, req, res) -> {
             res.status(400);
             res.type("application/json");
-            res.body(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+            res.body(gson.toJson(Map.of("message", "Error: bad request")));
         });
 
         Spark.exception(UnauthorizedException.class, (e, req, res) -> {
             res.status(401);
             res.type("application/json");
-            res.body(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+            res.body(gson.toJson(Map.of("message", "Error: unauthorized")));
         });
 
         Spark.exception(AlreadyTakenException.class, (e, req, res) -> {
             res.status(403);
             res.type("application/json");
-            res.body(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+            res.body(gson.toJson(Map.of("message", "Error: already taken")));
         });
 
         Spark.exception(Exception.class, (e, req, res) -> {

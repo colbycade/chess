@@ -23,12 +23,12 @@ public class UserService {
 
     public RegisterResponse register(RegisterRequest request) throws DataAccessException {
         if (request.username() == null || request.password() == null || request.email() == null) {
-            throw new BadRequestException("bad request");
+            throw new BadRequestException("missing required fields");
         }
 
         // Check if user already exists
         if (userDAO.getUser(request.username()) != null) {
-            throw new AlreadyTakenException("already taken");
+            throw new AlreadyTakenException("user already exists");
         }
 
         // Create user and auth token
@@ -43,12 +43,12 @@ public class UserService {
         try {
             UserData user = userDAO.getUser(request.username());
             if (user == null) {
-                throw new UnauthorizedException("unauthorized");
+                throw new UnauthorizedException("user does not exist");
             }
             String storedHashedPassword = user.password();
             String hashedPassword = userDAO.hashPassword(request.password());
             if (!hashedPassword.equals(storedHashedPassword)) {
-                throw new UnauthorizedException("unauthorized");
+                throw new UnauthorizedException("incorrect password");
             }
 
             // Create auth token
@@ -56,7 +56,7 @@ public class UserService {
             return new LoginResponse(user.username(), authData.authToken());
 
         } catch (DataAccessException e) {
-            throw new UnauthorizedException("unauthorized");
+            throw new UnauthorizedException(e.getMessage());
         }
     }
 

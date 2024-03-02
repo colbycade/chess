@@ -30,7 +30,7 @@ public class GameService {
 
         // Verify that the game name is not null
         if (request.gameName() == null) {
-            throw new BadRequestException("bad request");
+            throw new BadRequestException("game name cannot be null");
         }
 
         // Create game
@@ -55,7 +55,7 @@ public class GameService {
         // Verify that the game exists
         GameData game = gameDAO.getGame(request.gameID());
         if (game == null) {
-            throw new BadRequestException("bad request");
+            throw new BadRequestException("game does not exist");
         }
 
         // Update game data according to client's request
@@ -67,7 +67,7 @@ public class GameService {
         // If client supplies a color, check if available and update
         if ((request.clientColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null) ||
                 (request.clientColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
-            throw new AlreadyTakenException("already taken");
+            throw new AlreadyTakenException("color already taken");
         }
         String newWhiteUsername = request.clientColor() == ChessGame.TeamColor.WHITE ? username : game.whiteUsername();
         String newBlackUsername = request.clientColor() == ChessGame.TeamColor.BLACK ? username : game.blackUsername();
