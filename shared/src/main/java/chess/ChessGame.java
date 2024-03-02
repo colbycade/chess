@@ -15,6 +15,8 @@ public class ChessGame {
     private ChessMove lastMove;
 
     public ChessGame() {
+        board = new ChessBoard();
+        teamColor = TeamColor.WHITE;
     }
 
     public ChessGame(ChessBoard startingBoard) {
