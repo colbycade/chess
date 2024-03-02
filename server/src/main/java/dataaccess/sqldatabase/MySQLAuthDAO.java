@@ -10,6 +10,22 @@ import java.util.UUID;
 
 public class MySQLAuthDAO implements AuthDAO {
 
+    public MySQLAuthDAO() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = """
+                    CREATE TABLE IF NOT EXISTS Auth (
+                        authToken VARCHAR(36) PRIMARY KEY,
+                        username VARCHAR(64) NOT NULL
+                    )""";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();
