@@ -8,8 +8,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.sql.*;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-
 public class MySQLUserDAO implements UserDAO {
 
     public MySQLUserDAO() throws DataAccessException {
@@ -35,7 +33,7 @@ public class MySQLUserDAO implements UserDAO {
         String hashedPassword = hashPassword(user.password());
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO User (username, password_hash, email) VALUES (?, ?, ?)";
-            try (var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, user.username());
                 preparedStatement.setString(2, hashedPassword);
                 preparedStatement.setString(3, user.email());
