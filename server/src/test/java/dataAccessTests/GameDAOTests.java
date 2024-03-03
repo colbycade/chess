@@ -1,4 +1,4 @@
-package dataaccesstests;
+package dataAccessTests;
 
 import chess.*;
 import dataaccess.GameDAO;

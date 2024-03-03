@@ -1,4 +1,4 @@
-package servicetests;
+package serviceTests;
 
 import chess.ChessGame;
 import dataaccess.inmemorydatabase.MemoryAuthDAO;
@@ -29,7 +29,7 @@ public class GameServiceTests {
     private MemoryGameDAO gameDAO;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws DataAccessException {
         authDAO = MemoryAuthDAO.getInstance();
         gameDAO = MemoryGameDAO.getInstance();
         authDAO.clear();

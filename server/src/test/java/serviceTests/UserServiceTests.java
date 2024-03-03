@@ -1,4 +1,4 @@
-package servicetests;
+package serviceTests;
 
 import model.*;
 import exception.*;

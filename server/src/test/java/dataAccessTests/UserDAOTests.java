@@ -1,4 +1,4 @@
-package dataaccesstests;
+package dataAccessTests;
 
 import dataaccess.UserDAO;
 import dataaccess.inmemorydatabase.MemoryUserDAO;

@@ -1,4 +1,4 @@
-package dataaccesstests;
+package dataAccessTests;
 
 import dataaccess.AuthDAO;
 import dataaccess.inmemorydatabase.MemoryAuthDAO;
