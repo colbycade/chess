@@ -3,6 +3,8 @@ package service;
 import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryGameDAO;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.DataAccessException;
@@ -20,9 +22,9 @@ public class GameService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
 
-    public GameService(GameDAO gameDAO, AuthDAO authDAO) {
-        this.gameDAO = gameDAO;
-        this.authDAO = authDAO;
+    public GameService() {
+        this.gameDAO = MemoryGameDAO.getInstance();
+        this.authDAO = MemoryAuthDAO.getInstance();
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) throws DataAccessException {

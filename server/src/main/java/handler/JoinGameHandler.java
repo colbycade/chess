@@ -1,10 +1,6 @@
 package handler;
 
 import com.google.gson.Gson;
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.inmemorydatabase.MemoryAuthDAO;
-import dataaccess.inmemorydatabase.MemoryGameDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.request.JoinGameRequest;
@@ -16,9 +12,7 @@ import chess.ChessGame.TeamColor;
 import java.util.Map;
 
 public class JoinGameHandler implements Route {
-    private final GameDAO gameDAO = MemoryGameDAO.getInstance();
-    private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
-    private final GameService gameService = new GameService(gameDAO, authDAO);
+    private final GameService gameService = new GameService();
     private final Gson gson = new Gson();
 
     private static JoinGameHandler instance = null;

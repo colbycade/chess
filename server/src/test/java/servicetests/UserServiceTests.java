@@ -28,7 +28,7 @@ class UserServiceTests {
         userDAO = MemoryUserDAO.getInstance();
         authDAO.clear();
         userDAO.clear();
-        userService = new UserService(userDAO, authDAO);
+        userService = new UserService();
     }
 
     @Nested

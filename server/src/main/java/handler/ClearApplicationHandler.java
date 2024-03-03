@@ -1,11 +1,5 @@
 package handler;
 
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
-import dataaccess.inmemorydatabase.MemoryAuthDAO;
-import dataaccess.inmemorydatabase.MemoryGameDAO;
-import dataaccess.inmemorydatabase.MemoryUserDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.UserService;
@@ -14,11 +8,8 @@ import spark.Response;
 import spark.Route;
 
 public class ClearApplicationHandler implements Route {
-    private final GameDAO gameDAO = MemoryGameDAO.getInstance();
-    private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
-    private final UserDAO userDAO = MemoryUserDAO.getInstance();
-    private final GameService gameService = new GameService(gameDAO, authDAO);
-    private final UserService userService = new UserService(userDAO, authDAO);
+    private final GameService gameService = new GameService();
+    private final UserService userService = new UserService();
 
     private static ClearApplicationHandler instance = null;
 

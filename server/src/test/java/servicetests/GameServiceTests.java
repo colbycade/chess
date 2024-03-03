@@ -34,7 +34,7 @@ public class GameServiceTests {
         gameDAO = MemoryGameDAO.getInstance();
         authDAO.clear();
         gameDAO.clear();
-        gameService = new GameService(gameDAO, authDAO);
+        gameService = new GameService();
     }
 
     @Nested

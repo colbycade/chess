@@ -1,6 +1,8 @@
 package service;
 
 import dataaccess.*;
+import dataaccess.inmemorydatabase.MemoryAuthDAO;
+import dataaccess.inmemorydatabase.MemoryUserDAO;
 import exception.*;
 import model.UserData;
 import model.AuthData;
@@ -16,9 +18,9 @@ public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
-    public UserService(UserDAO userDAO, AuthDAO authDAO) {
-        this.userDAO = userDAO;
-        this.authDAO = authDAO;
+    public UserService() {
+        this.userDAO = MemoryUserDAO.getInstance();
+        this.authDAO = MemoryAuthDAO.getInstance();
     }
 
     public RegisterResponse register(RegisterRequest request) throws DataAccessException {
