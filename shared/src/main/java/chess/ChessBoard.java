@@ -12,7 +12,6 @@ public class ChessBoard {
     private final ChessPiece[][] board = new ChessPiece[8][8];
 
     public ChessBoard() {
-        resetBoard(); // Set up the board with the default starting position
     }
 
     // Copy constructor

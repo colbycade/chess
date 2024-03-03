@@ -15,7 +15,9 @@ public class ChessGame {
     private ChessMove lastMove;
 
     public ChessGame() {
-        board = new ChessBoard();
+        ChessBoard startingBoard = new ChessBoard();
+        startingBoard.resetBoard(); // set to starting position
+        board = startingBoard;
         teamColor = TeamColor.WHITE;
     }
 
@@ -148,6 +150,10 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         // can't make move out of turn
+        if (board.getPiece(move.getStartPosition()) == null) {
+            throw new InvalidMoveException("Invalid move: No piece at start position");
+        }
+
         if (board.getPiece(move.getStartPosition()).getTeamColor() != getTeamTurn()) {
             throw new InvalidMoveException("Invalid move: Out of turn");
         }
