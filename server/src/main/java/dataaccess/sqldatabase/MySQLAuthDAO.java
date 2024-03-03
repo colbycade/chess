@@ -38,7 +38,7 @@ public class MySQLAuthDAO implements AuthDAO {
                 preparedStatement.setString(2, username);
                 preparedStatement.executeUpdate();
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
         return auth;

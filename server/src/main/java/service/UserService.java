@@ -48,8 +48,7 @@ public class UserService {
                 throw new UnauthorizedException("user does not exist");
             }
             String storedHashedPassword = user.password();
-            String hashedPassword = userDAO.hashPassword(request.password());
-            if (!hashedPassword.equals(storedHashedPassword)) {
+            if (!userDAO.isMatch(request.password(), storedHashedPassword)) {
                 throw new UnauthorizedException("incorrect password");
             }
 

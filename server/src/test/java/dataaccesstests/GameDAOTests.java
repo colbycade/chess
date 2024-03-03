@@ -1,9 +1,6 @@
 package dataaccesstests;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
-import chess.InvalidMoveException;
+import chess.*;
 import dataaccess.GameDAO;
 import dataaccess.inmemorydatabase.MemoryGameDAO;
 import dataaccess.sqldatabase.MySQLGameDAO;
@@ -34,7 +31,7 @@ public class GameDAOTests {
 
     @Test
     public void testCreateGame() throws DataAccessException {
-        int gameID = gameDAO.createGame("testGame");
+        Integer gameID = gameDAO.createGame("testGame");
         assertNotNull(gameID);
     }
 
@@ -48,15 +45,15 @@ public class GameDAOTests {
 
     @Test
     public void testUpdateGame() throws DataAccessException, InvalidMoveException {
-        int gameID = gameDAO.createGame("testGame");
+        int gameID = gameDAO.createGame("oldGame");
         GameData oldGame = gameDAO.getGame(gameID);
-        ChessGame testGame = oldGame.game();
+        ChessGame newGame = oldGame.game();
         ChessMove testMove = new ChessMove(new ChessPosition(2, 1), new ChessPosition(3, 1), null);
-        testGame.makeMove(testMove);
-        GameData updatedGame = new GameData(gameID, "newWhiteUser", "newBlackUser", "newName", testGame);
+        newGame.makeMove(testMove);
+        GameData updatedGame = new GameData(gameID, "newWhiteUser", "newBlackUser", "newGame", newGame);
         gameDAO.updateGame(updatedGame);
         GameData returnedGame = gameDAO.getGame(gameID);
-        assertEquals("newName", returnedGame.gameName());
+        assertEquals("newGame", returnedGame.gameName());
     }
 
     @Test

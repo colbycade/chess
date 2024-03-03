@@ -1,7 +1,6 @@
 package dataaccesstests;
 
 import dataaccess.UserDAO;
-import dataaccess.inmemorydatabase.MemoryGameDAO;
 import dataaccess.inmemorydatabase.MemoryUserDAO;
 import dataaccess.sqldatabase.MySQLUserDAO;
 import exception.DataAccessException;
@@ -22,19 +21,33 @@ public class UserDAOTests {
         String daoType = System.getProperty("userDaoType", "memory");
         switch (daoType) {
             case "mysql" -> userDAO = new MySQLUserDAO();
-            case "memory" -> {
-                userDAO = MemoryUserDAO.getInstance();
-                userDAO.clear(); // prevent data from persisting between tests because MemoryUserDAO is a singleton
-            }
+            case "memory" -> userDAO = MemoryUserDAO.getInstance();
         }
+        userDAO.clear();
     }
 
     @Test
-    public void testUserDAO() throws DataAccessException {
-        UserData userInserted = new UserData("username", "password", "email");
-        assertDoesNotThrow(() -> userDAO.insertUser(userInserted));
-        UserData userReturned = userDAO.getUser("username");
-        assertEquals(userReturned.username(), userInserted.username());
-        assertEquals(userReturned.password(), userDAO.hashPassword(userInserted.password()));
+    public void testInsertUser() {
+        UserData user = new UserData("username", "password", "email");
+        assertDoesNotThrow(() -> userDAO.insertUser(user));
     }
+
+    @Test
+    public void testGetUser() throws DataAccessException {
+        UserData user = new UserData("username", "password", "email");
+        userDAO.insertUser(user);
+        UserData userReturned = userDAO.getUser("username");
+        assertEquals(userReturned.username(), user.username());
+        String encodedPasswordFromStorage = userReturned.password();
+        assertTrue(userDAO.isMatch(user.password(), encodedPasswordFromStorage));
+    }
+
+    @Test
+    public void testClear() throws DataAccessException {
+        UserData user = new UserData("username", "password", "email");
+        userDAO.insertUser(user);
+        userDAO.clear();
+        assertNull(userDAO.getUser("username"));
+    }
+
 }

@@ -38,7 +38,7 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     @Override
-    public int createGame(String gameName) throws DataAccessException {
+    public Integer createGame(String gameName) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO Game (game_name, game_data) VALUES (?, ?)";
             try (var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
@@ -85,7 +85,7 @@ public class MySQLGameDAO implements GameDAO {
     public void updateGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = """
-                    UPDATE Game SET 
+                    UPDATE Game SET
                         white_username = ?,
                         black_username = ?,
                         game_name = ?,

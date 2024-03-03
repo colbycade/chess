@@ -42,7 +42,7 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public String hashPassword(String password) {
-        return password; // no hashing for in-memory database
+    public boolean isMatch(String password, String storedPassword) {
+        return (password.equals(storedPassword)); // no hashing for in-memory database
     }
 }

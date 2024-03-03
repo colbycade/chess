@@ -57,9 +57,8 @@ public class MySQLUserDAO implements UserDAO {
                             resultSet.getString("password_hash"),
                             resultSet.getString("email")
                     );
-                } else {
-                    throw new DataAccessException("User does not exist");
                 }
+                return null;
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
@@ -79,9 +78,13 @@ public class MySQLUserDAO implements UserDAO {
     }
 
     @Override
-    public String hashPassword(String password) {
+    public boolean isMatch(String rawPassword, String encodedPasswordFromStorage) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode(password);
-        return hashedPassword;
+        return encoder.matches(rawPassword, encodedPasswordFromStorage);
+    }
+
+    private String hashPassword(String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.encode(password);
     }
 }

@@ -15,17 +15,15 @@ public class AuthDAOTests {
     private AuthDAO authDAO;
 
     @BeforeEach
-    public void AuthDAOTests() throws DataAccessException {
+    public void setUp() throws DataAccessException {
         // Default to MemoryUserDAO if the property is not set
         // (edit run config or use -DuserDaoType=mysql in VM options)
         String daoType = System.getProperty("userDaoType", "memory");
         switch (daoType) {
             case "mysql" -> authDAO = new MySQLAuthDAO();
-            case "memory" -> {
-                authDAO = MemoryAuthDAO.getInstance();
-                authDAO.clear(); // prevent data from persisting between tests because MemoryAuthDAO is a singleton
-            }
+            case "memory" -> authDAO = MemoryAuthDAO.getInstance();
         }
+        authDAO.clear();
     }
 
     @Test

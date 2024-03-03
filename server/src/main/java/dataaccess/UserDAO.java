@@ -4,15 +4,15 @@ import exception.DataAccessException;
 import model.*;
 
 public interface UserDAO {
-    // Method to insert a new user into the database
+    // Insert a new user into the database
     void insertUser(UserData user) throws DataAccessException;
 
-    // Method to retrieve a user by username
+    // Retrieve a user by username, returns null if user not found
     UserData getUser(String username) throws DataAccessException;
 
-    // Method to clear database
+    // Clear database
     void clear() throws DataAccessException;
 
-    // Method to hash a password
-    String hashPassword(String password);
+    // Verify the encoded password obtained from storage matches the submitted raw password after it too is encoded
+    boolean isMatch(String rawPassword, String encodedPasswordFromStorage);
 }
