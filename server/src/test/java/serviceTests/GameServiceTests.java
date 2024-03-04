@@ -3,10 +3,10 @@ package serviceTests;
 import chess.ChessGame;
 import dataAccess.inMemoryDatabase.MemoryAuthDAO;
 import dataAccess.inMemoryDatabase.MemoryGameDAO;
+import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.DataAccessException;
 import exception.UnauthorizedException;
-import exception.AlreadyTakenException;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -115,7 +115,7 @@ public class GameServiceTests {
         }
 
         @Test
-        public void testJoinGameSuccess() {
+        public void testJoinGameSuccess() throws DataAccessException {
             // Successful join with white
             JoinGameRequest successfulRequest = new JoinGameRequest(authToken, ChessGame.TeamColor.WHITE, gameID);
             assertDoesNotThrow(() -> gameService.joinGame(successfulRequest));
@@ -167,7 +167,7 @@ public class GameServiceTests {
         }
 
         @Test
-        public void testClearServiceSuccess() {
+        public void testClearServiceSuccess() throws DataAccessException {
             assertDoesNotThrow(() -> gameService.clearService());
             assertNull(gameDAO.getGame(gameID));
         }

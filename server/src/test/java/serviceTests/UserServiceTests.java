@@ -1,18 +1,21 @@
 package serviceTests;
 
-import model.*;
-import exception.*;
 import dataAccess.inMemoryDatabase.MemoryAuthDAO;
 import dataAccess.inMemoryDatabase.MemoryUserDAO;
+import exception.AlreadyTakenException;
+import exception.BadRequestException;
+import exception.DataAccessException;
+import exception.UnauthorizedException;
+import model.UserData;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import service.UserService;
 import service.request.LoginRequest;
+import service.request.LogoutRequest;
 import service.request.RegisterRequest;
 import service.response.LoginResponse;
 import service.response.RegisterResponse;
-import service.request.LogoutRequest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -148,7 +151,7 @@ class UserServiceTests {
         }
 
         @Test
-        public void testClearServiceSuccess() {
+        public void testClearServiceSuccess() throws DataAccessException {
             assertDoesNotThrow(() -> userService.clearService());
             // Assert data has been cleared
             assertNull(userDAO.getUser(username));

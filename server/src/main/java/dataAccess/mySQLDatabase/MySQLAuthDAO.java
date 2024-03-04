@@ -2,6 +2,7 @@ package dataAccess.mySQLDatabase;
 
 import dataAccess.AuthDAO;
 import dataAccess.DatabaseManager;
+import exception.BadRequestException;
 import exception.DataAccessException;
 import model.AuthData;
 
@@ -30,6 +31,9 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
+        if (username == null) {
+            throw new BadRequestException("username cannot be null.");
+        }
         String authToken = UUID.randomUUID().toString();
         AuthData auth = new AuthData(authToken, username);
 
@@ -47,7 +51,10 @@ public class MySQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws BadRequestException {
+        if (authToken == null) {
+            throw new BadRequestException("authToken cannot be null.");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM Auth WHERE authToken = ?";
             try (var preparedStatement = conn.prepareStatement(statement)) {
@@ -68,6 +75,9 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
+        if (authToken == null) {
+            throw new BadRequestException("authToken cannot be null.");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "DELETE FROM Auth WHERE authToken = ?";
             try (var preparedStatement = conn.prepareStatement(statement)) {

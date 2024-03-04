@@ -10,8 +10,8 @@ public interface GameDAO {
     // Create a new game in the database given a game name. Returns the game's ID.
     Integer createGame(String gameName) throws DataAccessException;
 
-    // Get a game by its ID and return null if it doesn't exist
-    GameData getGame(int gameID) throws DataAccessException;
+    // Get a game by its ID
+    GameData getGame(Integer gameID) throws DataAccessException;
 
     // Method to update an existing game's data
     void updateGame(GameData game) throws DataAccessException;

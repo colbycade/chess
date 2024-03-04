@@ -2,6 +2,7 @@ package dataAccess.mySQLDatabase;
 
 import dataAccess.DatabaseManager;
 import dataAccess.UserDAO;
+import exception.BadRequestException;
 import exception.DataAccessException;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,9 +33,22 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void insertUser(UserData user) throws DataAccessException {
+        if (user == null) {
+            throw new BadRequestException("User data cannot be null.");
+        }
         String hashedPassword = hashPassword(user.password());
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO User (username, password_hash, email) VALUES (?, ?, ?)";
+            // Check if user already exists
+            var statement = "SELECT * FROM User WHERE username = ?";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, user.username());
+                var resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    throw new BadRequestException("User already exists.");
+                }
+            }
+            // Add new user
+            statement = "INSERT INTO User (username, password_hash, email) VALUES (?, ?, ?)";
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, user.username());
                 preparedStatement.setString(2, hashedPassword);
@@ -48,6 +62,9 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
+        if (username == null) {
+            throw new BadRequestException("username cannot be null.");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM User WHERE username = ?";
             try (var preparedStatement = conn.prepareStatement(statement)) {
@@ -81,6 +98,9 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public boolean isMatch(String rawPassword, String encodedPasswordFromStorage) {
+        if (rawPassword == null || encodedPasswordFromStorage == null) {
+            throw new IllegalArgumentException("passwords cannot be null.");
+        }
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.matches(rawPassword, encodedPasswordFromStorage);
     }

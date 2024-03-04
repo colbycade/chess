@@ -4,9 +4,11 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.DatabaseManager;
 import dataAccess.GameDAO;
+import exception.BadRequestException;
 import exception.DataAccessException;
 import model.GameData;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +43,9 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public Integer createGame(String gameName) throws DataAccessException {
+        if (gameName == null) {
+            throw new BadRequestException("game name cannot be null.");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO Game (game_name, game_data) VALUES (?, ?)";
             try (var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
@@ -60,7 +65,10 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(Integer gameID) throws DataAccessException {
+        if (gameID == null) {
+            throw new BadRequestException("gameID cannot be null.");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM Game WHERE game_id = ?";
             try (var preparedStatement = conn.prepareStatement(statement)) {
@@ -84,8 +92,23 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
+        if (game == null) {
+            throw new BadRequestException("game cannot be null.");
+        }
+
+
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = """
+            // Check if game exists
+            var statement = "SELECT COUNT(*) FROM Game WHERE game_id = ?";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setInt(1, game.gameID());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next() && resultSet.getInt(1) == 0) { // If game does not exist
+                    throw new BadRequestException("Game with ID " + game.gameID() + " does not exist.");
+                }
+            }
+            // Update game
+            statement = """
                     UPDATE Game SET
                         white_username = ?,
                         black_username = ?,

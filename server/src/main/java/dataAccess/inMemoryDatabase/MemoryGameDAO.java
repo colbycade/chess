@@ -1,8 +1,9 @@
 package dataAccess.inMemoryDatabase;
 
 import chess.ChessGame;
-import exception.DataAccessException;
 import dataAccess.GameDAO;
+import exception.BadRequestException;
+import exception.DataAccessException;
 import model.GameData;
 
 import java.util.Collection;
@@ -27,7 +28,10 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public Integer createGame(String gameName) {
+    public Integer createGame(String gameName) throws BadRequestException {
+        if (gameName == null) {
+            throw new BadRequestException("game name cannot be null.");
+        }
         int newGameID = ++gameIDCounter;
         ChessGame newGame = new ChessGame();
         GameData newGameData = new GameData(newGameID, null, null, gameName, newGame);
@@ -36,16 +40,22 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(Integer gameID) throws BadRequestException {
+        if (gameID == null) {
+            throw new BadRequestException("gameID cannot be null.");
+        }
         return games.get(gameID);
     }
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
+        if (game == null) {
+            throw new BadRequestException("game data cannot be null.");
+        }
         if (games.containsKey(game.gameID())) {
             games.put(game.gameID(), game); // overwrite the old game data with the new game
         } else {
-            throw new DataAccessException("Game with ID " + game.gameID() + " does not exist.");
+            throw new BadRequestException("Game with ID " + game.gameID() + " does not exist.");
         }
     }
 

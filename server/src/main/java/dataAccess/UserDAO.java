@@ -7,7 +7,7 @@ public interface UserDAO {
     // Insert a new user into the database
     void insertUser(UserData user) throws DataAccessException;
 
-    // Retrieve a user by username, returns null if user not found
+    // Retrieve a user by username
     UserData getUser(String username) throws DataAccessException;
 
     // Clear database data related to users
