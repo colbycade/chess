@@ -11,22 +11,7 @@ import java.sql.*;
 public class MySQLUserDAO implements UserDAO {
 
     public MySQLUserDAO() {
-        try {
-            DatabaseManager.createDatabase();
-            try (var conn = DatabaseManager.getConnection()) {
-                var statement = """
-                        CREATE TABLE IF NOT EXISTS User (
-                            username VARCHAR(64) PRIMARY KEY,
-                            password_hash VARCHAR(72) NOT NULL,
-                            email VARCHAR(330) NOT NULL
-                        )""";
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        MySQLUtil.initializeDatabase(); // Ensure User table has been created
     }
 
 
@@ -69,14 +54,7 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "TRUNCATE TABLE User";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
+        MySQLUtil.clearDatabase();
     }
 
     @Override

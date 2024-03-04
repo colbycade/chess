@@ -11,21 +11,7 @@ import java.util.UUID;
 public class MySQLAuthDAO implements AuthDAO {
 
     public MySQLAuthDAO() {
-        try {
-            DatabaseManager.createDatabase();
-            try (var conn = DatabaseManager.getConnection()) {
-                var statement = """
-                        CREATE TABLE IF NOT EXISTS Auth (
-                            authToken VARCHAR(36) PRIMARY KEY,
-                            username VARCHAR(64) NOT NULL
-                        )""";
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        MySQLUtil.initializeDatabase(); // Ensure Auth table has been created
     }
 
     @Override
@@ -81,13 +67,6 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "TRUNCATE TABLE Auth";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
+        MySQLUtil.clearDatabase();
     }
 }

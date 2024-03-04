@@ -9,12 +9,12 @@ Table: User
 Table: Authentication
     Columns:
         - CHAR(36) auth_token PRIMARY KEY
-        - VARCHAR(64) username
+        - VARCHAR(64) username FOREIGN KEY (User.username)
 
 Table: Game
     Columns:
         - INT game_id AUTO_INCREMENT PRIMARY KEY
-        - VARCHAR(64) white_username
-        - VARCHAR(64) black_username
+        - VARCHAR(64) white_username FOREIGN KEY (User.username)
+        - VARCHAR(64) black_username FOREIGN KEY (User.username)
         - VARCHAR(64) game_name
         - BLOB game_data

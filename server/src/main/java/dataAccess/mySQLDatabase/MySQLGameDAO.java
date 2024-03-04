@@ -19,24 +19,7 @@ public class MySQLGameDAO implements GameDAO {
 
     public MySQLGameDAO() {
         gson = new Gson();
-        try {
-            DatabaseManager.createDatabase();
-            try (var conn = DatabaseManager.getConnection()) {
-                var statement = """
-                        CREATE TABLE IF NOT EXISTS Game (
-                            game_id INT PRIMARY KEY AUTO_INCREMENT,
-                            white_username VARCHAR(64),
-                            black_username VARCHAR(64),
-                            game_name VARCHAR(64),
-                            game_data BLOB
-                        )""";
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        MySQLUtil.initializeDatabase(); // Ensure Game table has been created
     }
 
     @Override
@@ -131,14 +114,7 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "TRUNCATE TABLE Game";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
+        MySQLUtil.clearDatabase();
     }
 
 
