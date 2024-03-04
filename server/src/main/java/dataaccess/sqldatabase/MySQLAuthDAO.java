@@ -10,19 +10,21 @@ import java.util.UUID;
 
 public class MySQLAuthDAO implements AuthDAO {
 
-    public MySQLAuthDAO() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = """
-                    CREATE TABLE IF NOT EXISTS Auth (
-                        authToken VARCHAR(36) PRIMARY KEY,
-                        username VARCHAR(64) NOT NULL
-                    )""";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+    public MySQLAuthDAO() {
+        try {
+            DatabaseManager.createDatabase();
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = """
+                        CREATE TABLE IF NOT EXISTS Auth (
+                            authToken VARCHAR(36) PRIMARY KEY,
+                            username VARCHAR(64) NOT NULL
+                        )""";
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
             }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -45,7 +47,7 @@ public class MySQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public AuthData getAuth(String authToken) throws DataAccessException {
+    public AuthData getAuth(String authToken) {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM Auth WHERE authToken = ?";
             try (var preparedStatement = conn.prepareStatement(statement)) {
@@ -59,8 +61,9 @@ public class MySQLAuthDAO implements AuthDAO {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
+
     }
 
     @Override

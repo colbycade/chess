@@ -10,20 +10,22 @@ import java.sql.*;
 
 public class MySQLUserDAO implements UserDAO {
 
-    public MySQLUserDAO() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = """
-                    CREATE TABLE IF NOT EXISTS User (
-                        username VARCHAR(64) PRIMARY KEY,
-                        password_hash VARCHAR(72) NOT NULL,
-                        email VARCHAR(330) NOT NULL
-                    )""";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+    public MySQLUserDAO() {
+        try {
+            DatabaseManager.createDatabase();
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = """
+                        CREATE TABLE IF NOT EXISTS User (
+                            username VARCHAR(64) PRIMARY KEY,
+                            password_hash VARCHAR(72) NOT NULL,
+                            email VARCHAR(330) NOT NULL
+                        )""";
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
             }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 

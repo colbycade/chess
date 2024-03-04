@@ -5,6 +5,8 @@ import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
 import dataaccess.inmemorydatabase.MemoryAuthDAO;
 import dataaccess.inmemorydatabase.MemoryGameDAO;
+import dataaccess.sqldatabase.MySQLAuthDAO;
+import dataaccess.sqldatabase.MySQLGameDAO;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.DataAccessException;
@@ -23,8 +25,8 @@ public class GameService {
     private final AuthDAO authDAO;
 
     public GameService() {
-        this.gameDAO = MemoryGameDAO.getInstance();
-        this.authDAO = MemoryAuthDAO.getInstance();
+        this.gameDAO = new MySQLGameDAO();
+        this.authDAO = new MySQLAuthDAO();
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) throws DataAccessException {
@@ -36,8 +38,8 @@ public class GameService {
         }
 
         // Create game
-        int gameId = gameDAO.createGame(request.authToken());
-        return new CreateGameResponse(gameId);
+        int gameID = gameDAO.createGame(request.gameName());
+        return new CreateGameResponse(gameID);
     }
 
     public ListGamesResponse listGames(ListGamesRequest request) throws DataAccessException {

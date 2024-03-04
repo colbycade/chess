@@ -17,23 +17,25 @@ public class MySQLGameDAO implements GameDAO {
 
     private final Gson gson;
 
-    public MySQLGameDAO() throws DataAccessException {
+    public MySQLGameDAO() {
         gson = new Gson();
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = """
-                    CREATE TABLE IF NOT EXISTS Game (
-                        game_id INT PRIMARY KEY AUTO_INCREMENT,
-                        white_username VARCHAR(64),
-                        black_username VARCHAR(64),
-                        game_name VARCHAR(64),
-                        game_data BLOB
-                    )""";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+        try {
+            DatabaseManager.createDatabase();
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = """
+                        CREATE TABLE IF NOT EXISTS Game (
+                            game_id INT PRIMARY KEY AUTO_INCREMENT,
+                            white_username VARCHAR(64),
+                            black_username VARCHAR(64),
+                            game_name VARCHAR(64),
+                            game_data BLOB
+                        )""";
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
             }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
