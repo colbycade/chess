@@ -1,7 +1,7 @@
-package dataaccess.sqldatabase;
+package dataAccess.mySQLDatabase;
 
-import dataaccess.AuthDAO;
-import dataaccess.DatabaseManager;
+import dataAccess.AuthDAO;
+import dataAccess.DatabaseManager;
 import exception.DataAccessException;
 import model.AuthData;
 

@@ -1,6 +1,6 @@
 package service;
 
-import dataaccess.AuthDAO;
+import dataAccess.AuthDAO;
 import exception.DataAccessException;
 import exception.UnauthorizedException;
 

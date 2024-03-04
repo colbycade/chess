@@ -1,7 +1,7 @@
-package dataaccess.inmemorydatabase;
+package dataAccess.inMemoryDatabase;
 
 import exception.DataAccessException;
-import dataaccess.UserDAO;
+import dataAccess.UserDAO;
 import model.UserData;
 
 import java.util.HashMap;

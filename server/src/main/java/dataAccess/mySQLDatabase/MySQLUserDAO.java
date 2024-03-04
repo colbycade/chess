@@ -1,7 +1,7 @@
-package dataaccess.sqldatabase;
+package dataAccess.mySQLDatabase;
 
-import dataaccess.DatabaseManager;
-import dataaccess.UserDAO;
+import dataAccess.DatabaseManager;
+import dataAccess.UserDAO;
 import exception.DataAccessException;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

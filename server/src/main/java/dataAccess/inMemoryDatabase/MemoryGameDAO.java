@@ -1,8 +1,8 @@
-package dataaccess.inmemorydatabase;
+package dataAccess.inMemoryDatabase;
 
 import chess.ChessGame;
 import exception.DataAccessException;
-import dataaccess.GameDAO;
+import dataAccess.GameDAO;
 import model.GameData;
 
 import java.util.Collection;

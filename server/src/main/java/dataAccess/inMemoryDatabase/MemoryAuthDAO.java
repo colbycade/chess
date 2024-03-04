@@ -1,6 +1,6 @@
-package dataaccess.inmemorydatabase;
+package dataAccess.inMemoryDatabase;
 
-import dataaccess.AuthDAO;
+import dataAccess.AuthDAO;
 import exception.DataAccessException;
 import model.AuthData;
 

@@ -1,9 +1,9 @@
 package dataAccessTests;
 
 import chess.*;
-import dataaccess.GameDAO;
-import dataaccess.inmemorydatabase.MemoryGameDAO;
-import dataaccess.sqldatabase.MySQLGameDAO;
+import dataAccess.GameDAO;
+import dataAccess.inMemoryDatabase.MemoryGameDAO;
+import dataAccess.mySQLDatabase.MySQLGameDAO;
 import exception.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
