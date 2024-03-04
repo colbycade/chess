@@ -3,6 +3,7 @@ package dataAccessTests;
 import dataAccess.AuthDAO;
 import dataAccess.inMemoryDatabase.MemoryAuthDAO;
 import dataAccess.mySQLDatabase.MySQLAuthDAO;
+import exception.BadRequestException;
 import exception.DataAccessException;
 import model.AuthData;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +28,19 @@ public class AuthDAOTests {
     }
 
     @Test
-    public void testCreateAuth() throws DataAccessException {
+    public void testCreateAuthSuccess() throws DataAccessException {
         AuthData authCreate = authDAO.createAuth("username");
         assertNotNull(authCreate);
     }
 
     @Test
-    public void testGetAuth() throws DataAccessException {
+    public void testCreateAuthFail() throws DataAccessException {
+        AuthData authCreate = authDAO.createAuth("username");
+        assertNotNull(authCreate);
+    }
+
+    @Test
+    public void testGetAuthSuccess() throws DataAccessException {
         AuthData authCreate = authDAO.createAuth("username");
         String authToken = authCreate.authToken();
         AuthData authGet = authDAO.getAuth(authToken);
@@ -41,7 +48,15 @@ public class AuthDAOTests {
     }
 
     @Test
-    public void testDeleteAuth() throws DataAccessException {
+    public void testGetAuthFail() throws DataAccessException {
+        String badToken = "bad";
+        authDAO.createAuth("username");
+        AuthData authGet = authDAO.getAuth(badToken);
+        assertNull(authGet);
+    }
+
+    @Test
+    public void testDeleteAuthSuccess() throws DataAccessException {
         AuthData authCreate = authDAO.createAuth("username");
         String authToken = authCreate.authToken();
         authDAO.deleteAuth(authToken);
@@ -49,11 +64,16 @@ public class AuthDAOTests {
     }
 
     @Test
+    public void testDeleteAuthFail() throws DataAccessException {
+        authDAO.createAuth("username");
+        assertThrows(BadRequestException.class, () -> authDAO.deleteAuth(null));
+    }
+
+    @Test
     public void testClear() throws DataAccessException {
-        AuthData authCreate = authDAO.createAuth("username2");
+        AuthData authCreate = authDAO.createAuth("username");
         authDAO.clear();
         assertNull(authDAO.getAuth(authCreate.authToken()));
     }
-
 
 }

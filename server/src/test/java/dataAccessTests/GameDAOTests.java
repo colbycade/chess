@@ -1,9 +1,13 @@
 package dataAccessTests;
 
-import chess.*;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import dataAccess.GameDAO;
 import dataAccess.inMemoryDatabase.MemoryGameDAO;
 import dataAccess.mySQLDatabase.MySQLGameDAO;
+import exception.BadRequestException;
 import exception.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,20 +34,31 @@ public class GameDAOTests {
     }
 
     @Test
-    public void testCreateGame() throws DataAccessException {
+    public void testCreateGameSuccess() throws DataAccessException {
         Integer gameID = gameDAO.createGame("testGame");
         assertNotNull(gameID);
     }
 
     @Test
-    public void testGetGame() throws DataAccessException {
+    public void testCreateGameFail() {
+        assertThrows(BadRequestException.class, () -> gameDAO.createGame(null));
+    }
+
+    @Test
+    public void testGetGameSuccess() throws DataAccessException {
         int gameID = gameDAO.createGame("testGame");
         GameData game = gameDAO.getGame(gameID);
         assertNotNull(game);
     }
 
     @Test
-    public void testUpdateGame() throws DataAccessException, InvalidMoveException {
+    public void testGetGameFail() throws DataAccessException {
+        gameDAO.createGame("testGame");
+        assertNull(gameDAO.getGame(-1));
+    }
+
+    @Test
+    public void testUpdateGameSuccess() throws DataAccessException, InvalidMoveException {
         int gameID = gameDAO.createGame("oldGame");
         GameData oldGame = gameDAO.getGame(gameID);
         ChessGame newGame = oldGame.game();
@@ -53,6 +68,31 @@ public class GameDAOTests {
         gameDAO.updateGame(updatedGame);
         GameData returnedGame = gameDAO.getGame(gameID);
         assertEquals("newGame", returnedGame.gameName());
+    }
+
+    @Test
+    public void testUpdateGameFail() throws DataAccessException {
+        int gameID = gameDAO.createGame("game");
+        GameData game = gameDAO.getGame(gameID);
+        GameData updatedGame = new GameData(-1, "newWhiteUser", "newBlackUser", "newGame", game.game());
+        assertThrows(DataAccessException.class, () -> gameDAO.updateGame(updatedGame));
+    }
+
+    @Test
+    public void testListGamesSuccess() throws DataAccessException {
+        gameDAO.createGame("testGame1");
+        gameDAO.createGame("testGame2");
+        gameDAO.createGame("testGame3");
+        gameDAO.createGame("testGame4");
+        Collection<GameData> games = gameDAO.listGames();
+        assertNotNull(games);
+        assertEquals(4, games.size());
+    }
+
+    @Test
+    public void testListGamesFail() throws DataAccessException {
+        Collection<GameData> games = gameDAO.listGames();
+        assertTrue(games.isEmpty());
     }
 
     @Test
@@ -67,14 +107,4 @@ public class GameDAOTests {
         assertEquals(0, games.size());
     }
 
-    @Test
-    public void testListGames() throws DataAccessException {
-        gameDAO.createGame("testGame1");
-        gameDAO.createGame("testGame2");
-        gameDAO.createGame("testGame3");
-        gameDAO.createGame("testGame4");
-        Collection<GameData> games = gameDAO.listGames();
-        assertNotNull(games);
-        assertEquals(4, games.size());
-    }
 }
