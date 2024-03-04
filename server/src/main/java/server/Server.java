@@ -1,6 +1,12 @@
 package server;
 
 import com.google.gson.Gson;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
+import dataAccess.UserDAO;
+import dataAccess.mySQLDatabase.MySQLAuthDAO;
+import dataAccess.mySQLDatabase.MySQLGameDAO;
+import dataAccess.mySQLDatabase.MySQLUserDAO;
 import exception.*;
 import handler.*;
 import spark.*;
@@ -8,20 +14,36 @@ import spark.*;
 import java.util.Map;
 
 public class Server {
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
+    private final UserDAO userDAO;
+
+    public Server(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
+        this.userDAO = userDAO;
+    }
+
+    public Server() { // Default to mysql
+        this.authDAO = new MySQLAuthDAO();
+        this.gameDAO = new MySQLGameDAO();
+        this.userDAO = new MySQLUserDAO();
+    }
+
     public int run(int desiredPort) {
         Gson gson = new Gson();
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
 
-        // Register your endpoints and handle exceptions here.
-        Spark.post("/user", RegisterHandler.getInstance());
-        Spark.post("/session", LoginHandler.getInstance());
-        Spark.delete("/session", LogoutHandler.getInstance());
-        Spark.post("/game", CreateGameHandler.getInstance());
-        Spark.get("/game", ListGamesHandler.getInstance());
-        Spark.put("/game", JoinGameHandler.getInstance());
-        Spark.delete("/db", ClearApplicationHandler.getInstance());
+        // Register endpoints
+        Spark.post("/user", new RegisterHandler(authDAO, userDAO));
+        Spark.post("/session", new LoginHandler(authDAO, userDAO));
+        Spark.delete("/session", new LogoutHandler(authDAO, userDAO));
+        Spark.post("/game", new CreateGameHandler(authDAO, gameDAO));
+        Spark.get("/game", new ListGamesHandler(authDAO, gameDAO));
+        Spark.put("/game", new JoinGameHandler(authDAO, gameDAO));
+        Spark.delete("/db", new ClearApplicationHandler(gameDAO, authDAO, userDAO));
 
         // Setup global exception handlers
         Spark.exception(BadRequestException.class, (e, req, res) -> {

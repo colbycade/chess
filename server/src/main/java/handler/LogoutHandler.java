@@ -1,5 +1,7 @@
 package handler;
 
+import dataAccess.AuthDAO;
+import dataAccess.UserDAO;
 import service.UserService;
 import service.request.LogoutRequest;
 import spark.Request;
@@ -7,20 +9,10 @@ import spark.Response;
 import spark.Route;
 
 public class LogoutHandler implements Route {
-    private final UserService userService = new UserService();
+    private final UserService userService;
 
-    private static LogoutHandler instance = null;
-
-    // Private constructor to prevent direct instantiation
-    private LogoutHandler() {
-    }
-
-    // Public method to get the singleton instance
-    public static LogoutHandler getInstance() {
-        if (instance == null) {
-            instance = new LogoutHandler();
-        }
-        return instance;
+    public LogoutHandler(AuthDAO authDAO, UserDAO userDAO) {
+        this.userService = new UserService(authDAO, userDAO);
     }
 
     @Override

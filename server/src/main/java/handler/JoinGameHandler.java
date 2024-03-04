@@ -1,6 +1,8 @@
 package handler;
 
 import com.google.gson.Gson;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.request.JoinGameRequest;
@@ -12,21 +14,11 @@ import chess.ChessGame.TeamColor;
 import java.util.Map;
 
 public class JoinGameHandler implements Route {
-    private final GameService gameService = new GameService();
+    private final GameService gameService;
     private final Gson gson = new Gson();
 
-    private static JoinGameHandler instance = null;
-    // Private constructor to prevent direct instantiation
-
-    private JoinGameHandler() {
-    }
-
-    // Public method to get the singleton instance
-    public static JoinGameHandler getInstance() {
-        if (instance == null) {
-            instance = new JoinGameHandler();
-        }
-        return instance;
+    public JoinGameHandler(AuthDAO authDAO, GameDAO gameDAO) {
+        this.gameService = new GameService(authDAO, gameDAO);
     }
 
     @Override

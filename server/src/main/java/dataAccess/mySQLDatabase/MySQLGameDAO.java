@@ -1,9 +1,9 @@
-package dataaccess.sqldatabase;
+package dataAccess.mySQLDatabase;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import dataaccess.DatabaseManager;
-import dataaccess.GameDAO;
+import dataAccess.DatabaseManager;
+import dataAccess.GameDAO;
 import exception.DataAccessException;
 import model.GameData;
 
@@ -74,9 +74,8 @@ public class MySQLGameDAO implements GameDAO {
                             resultSet.getString("game_name"),
                             gson.fromJson(resultSet.getString("game_data"), ChessGame.class)
                     );
-                } else {
-                    throw new DataAccessException("Game does not exist");
                 }
+                return null;
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

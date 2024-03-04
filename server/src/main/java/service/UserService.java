@@ -1,10 +1,6 @@
 package service;
 
-import dataaccess.*;
-import dataaccess.inmemorydatabase.MemoryAuthDAO;
-import dataaccess.inmemorydatabase.MemoryUserDAO;
-import dataaccess.sqldatabase.MySQLAuthDAO;
-import dataaccess.sqldatabase.MySQLUserDAO;
+import dataAccess.*;
 import exception.*;
 import model.UserData;
 import model.AuthData;
@@ -17,12 +13,12 @@ import service.request.LogoutRequest;
 import static service.AuthUtil.verifyAuthToken;
 
 public class UserService {
-    private final UserDAO userDAO;
     private final AuthDAO authDAO;
+    private final UserDAO userDAO;
 
-    public UserService() {
-        this.userDAO = new MySQLUserDAO();
-        this.authDAO = new MySQLAuthDAO();
+    public UserService(AuthDAO authDAO, UserDAO userDAO) {
+        this.authDAO = authDAO;
+        this.userDAO = userDAO;
     }
 
     public RegisterResponse register(RegisterRequest request) throws DataAccessException {

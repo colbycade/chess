@@ -2,8 +2,8 @@ package serviceTests;
 
 import model.*;
 import exception.*;
-import dataaccess.inmemorydatabase.MemoryAuthDAO;
-import dataaccess.inmemorydatabase.MemoryUserDAO;
+import dataAccess.inMemoryDatabase.MemoryAuthDAO;
+import dataAccess.inMemoryDatabase.MemoryUserDAO;
 import service.UserService;
 import service.request.LoginRequest;
 import service.request.RegisterRequest;
@@ -28,7 +28,7 @@ class UserServiceTests {
         userDAO = MemoryUserDAO.getInstance();
         authDAO.clear();
         userDAO.clear();
-        userService = new UserService();
+        userService = new UserService(authDAO, userDAO);
     }
 
     @Nested

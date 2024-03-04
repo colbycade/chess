@@ -1,12 +1,8 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.inmemorydatabase.MemoryAuthDAO;
-import dataaccess.inmemorydatabase.MemoryGameDAO;
-import dataaccess.sqldatabase.MySQLAuthDAO;
-import dataaccess.sqldatabase.MySQLGameDAO;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.DataAccessException;
@@ -21,12 +17,12 @@ import service.response.ListGamesResponse;
 import static service.AuthUtil.verifyAuthToken;
 
 public class GameService {
-    private final GameDAO gameDAO;
     private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
 
-    public GameService() {
-        this.gameDAO = new MySQLGameDAO();
-        this.authDAO = new MySQLAuthDAO();
+    public GameService(AuthDAO authDAO, GameDAO gameDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) throws DataAccessException {

@@ -1,5 +1,7 @@
 package handler;
 
+import dataAccess.AuthDAO;
+import dataAccess.UserDAO;
 import exception.DataAccessException;
 import service.UserService;
 import service.request.RegisterRequest;
@@ -10,21 +12,11 @@ import spark.Response;
 import spark.Route;
 
 public class RegisterHandler implements Route {
-    private final UserService userService = new UserService();
+    private final UserService userService;
     private final Gson gson = new Gson();
 
-    private static RegisterHandler instance = null;
-
-    // Private constructor to prevent direct instantiation
-    private RegisterHandler() {
-    }
-
-    // Public method to get the singleton instance
-    public static RegisterHandler getInstance() {
-        if (instance == null) {
-            instance = new RegisterHandler();
-        }
-        return instance;
+    public RegisterHandler(AuthDAO authDAO, UserDAO userDAO) {
+        this.userService = new UserService(authDAO, userDAO);
     }
 
     @Override

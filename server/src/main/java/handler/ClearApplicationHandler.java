@@ -1,5 +1,8 @@
 package handler;
 
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
+import dataAccess.UserDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.UserService;
@@ -8,21 +11,12 @@ import spark.Response;
 import spark.Route;
 
 public class ClearApplicationHandler implements Route {
-    private final GameService gameService = new GameService();
-    private final UserService userService = new UserService();
+    private final GameService gameService;
+    private final UserService userService;
 
-    private static ClearApplicationHandler instance = null;
-
-    // Private constructor to prevent direct instantiation
-    private ClearApplicationHandler() {
-    }
-
-    // Public method to get the singleton instance
-    public static ClearApplicationHandler getInstance() {
-        if (instance == null) {
-            instance = new ClearApplicationHandler();
-        }
-        return instance;
+    public ClearApplicationHandler(GameDAO gameDAO, AuthDAO authDAO, UserDAO userDAO) {
+        this.gameService = new GameService(authDAO, gameDAO);
+        this.userService = new UserService(authDAO, userDAO);
     }
 
     @Override

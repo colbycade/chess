@@ -1,6 +1,8 @@
 package handler;
 
 import com.google.gson.Gson;
+import dataAccess.AuthDAO;
+import dataAccess.UserDAO;
 import exception.DataAccessException;
 import service.UserService;
 import service.request.LoginRequest;
@@ -10,21 +12,11 @@ import spark.Response;
 import spark.Route;
 
 public class LoginHandler implements Route {
-    private final UserService userService = new UserService();
+    private final UserService userService;
     private final Gson gson = new Gson();
 
-    private static LoginHandler instance = null;
-
-    // Private constructor to prevent direct instantiation
-    private LoginHandler() {
-    }
-
-    // Public method to get the singleton instance
-    public static LoginHandler getInstance() {
-        if (instance == null) {
-            instance = new LoginHandler();
-        }
-        return instance;
+    public LoginHandler(AuthDAO authDAO, UserDAO userDAO) {
+        this.userService = new UserService(authDAO, userDAO);
     }
 
     @Override

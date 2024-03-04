@@ -1,6 +1,8 @@
 package handler;
 
 import com.google.gson.Gson;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.request.ListGamesRequest;
@@ -10,21 +12,11 @@ import spark.Response;
 import spark.Route;
 
 public class ListGamesHandler implements Route {
-    private final GameService gameService = new GameService();
+    private final GameService gameService;
     private final Gson gson = new Gson();
 
-    private static ListGamesHandler instance = null;
-
-    // Private constructor to prevent direct instantiation
-    private ListGamesHandler() {
-    }
-
-    // Public method to get the singleton instance
-    public static ListGamesHandler getInstance() {
-        if (instance == null) {
-            instance = new ListGamesHandler();
-        }
-        return instance;
+    public ListGamesHandler(AuthDAO authDAO, GameDAO gameDAO) {
+        this.gameService = new GameService(authDAO, gameDAO);
     }
 
     @Override

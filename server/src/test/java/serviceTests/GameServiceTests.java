@@ -1,8 +1,8 @@
 package serviceTests;
 
 import chess.ChessGame;
-import dataaccess.inmemorydatabase.MemoryAuthDAO;
-import dataaccess.inmemorydatabase.MemoryGameDAO;
+import dataAccess.inMemoryDatabase.MemoryAuthDAO;
+import dataAccess.inMemoryDatabase.MemoryGameDAO;
 import exception.BadRequestException;
 import exception.DataAccessException;
 import exception.UnauthorizedException;
@@ -28,13 +28,14 @@ public class GameServiceTests {
     private MemoryAuthDAO authDAO;
     private MemoryGameDAO gameDAO;
 
+
     @BeforeEach
-    public void setUp() throws DataAccessException {
+    public void setUp() {
         authDAO = MemoryAuthDAO.getInstance();
         gameDAO = MemoryGameDAO.getInstance();
         authDAO.clear();
         gameDAO.clear();
-        gameService = new GameService();
+        gameService = new GameService(authDAO, gameDAO);
     }
 
     @Nested
@@ -168,7 +169,6 @@ public class GameServiceTests {
         @Test
         public void testClearServiceSuccess() {
             assertDoesNotThrow(() -> gameService.clearService());
-            // Assert data has been cleared
             assertNull(gameDAO.getGame(gameID));
         }
     }
