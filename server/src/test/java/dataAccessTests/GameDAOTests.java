@@ -40,7 +40,6 @@ public class GameDAOTests {
         int gameID = gameDAO.createGame("testGame");
         GameData game = gameDAO.getGame(gameID);
         assertNotNull(game);
-        System.out.println(game);
     }
 
     @Test
