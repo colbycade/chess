@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
+import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.RegisterRequest;
 import model.response.CreateGameResponse;
@@ -171,6 +172,31 @@ public class ServerFacade {
     }
 
     public void joinGame(String authToken, ChessGame.TeamColor clientColor, Integer gameID) throws ResponseException {
+        try {
+            URL url = new URL("http://localhost:" + port + "/game");
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("PUT");
+
+            // Specify that we are going to write out data
+            http.setDoOutput(true);
+
+            // Write out a header
+            http.setRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("Authorization", authToken);
+
+            // Write out the body
+            JoinGameRequest requestBody = new JoinGameRequest(authToken, clientColor, gameID);
+            String jsonRequestBody = new Gson().toJson(requestBody);
+            try (OutputStream outputStream = http.getOutputStream()) {
+                outputStream.write(jsonRequestBody.getBytes());
+            }
+
+            // Read the response (no response body)
+            http.getInputStream();
+
+        } catch (IOException e) {
+            throw new ResponseException("Failed to join game. Error: " + e.getMessage());
+        }
     }
 
     public void observeGame(String authToken, Integer gameID) throws ResponseException {

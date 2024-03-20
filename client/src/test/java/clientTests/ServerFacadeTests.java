@@ -1,5 +1,6 @@
 package clientTests;
 
+import chess.ChessGame;
 import dataAccess.inMemoryDatabase.MemoryAuthDAO;
 import dataAccess.inMemoryDatabase.MemoryGameDAO;
 import dataAccess.inMemoryDatabase.MemoryUserDAO;
@@ -122,5 +123,29 @@ public class ServerFacadeTests {
     void listGamesFail() {
         // List games without auth throws exception
         assertThrows(ResponseException.class, () -> facade.listGames(null));
+    }
+
+    @Test
+    void joinGameSuccess() throws Exception {
+        // Create game
+        Integer gameID = gameDAO.createGame("game1");
+
+        // Insert test auth into database
+        String testAuth = authDAO.createAuth("player1").authToken();
+
+        // Join game successful
+        assertDoesNotThrow(() -> facade.joinGame(testAuth, ChessGame.TeamColor.WHITE, gameID));
+    }
+
+    @Test
+    void joinGameFail() throws Exception {
+        // Join game without auth throws exception
+        assertThrows(ResponseException.class, () -> facade.joinGame(null, ChessGame.TeamColor.WHITE, 1));
+
+        // Insert test auth into database
+        String testAuth = authDAO.createAuth("player1").authToken();
+
+        // Join non-existent game throws exception
+        assertThrows(ResponseException.class, () -> facade.joinGame(testAuth, ChessGame.TeamColor.WHITE, -1));
     }
 }
