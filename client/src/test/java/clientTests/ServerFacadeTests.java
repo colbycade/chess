@@ -4,6 +4,7 @@ import dataAccess.inMemoryDatabase.MemoryAuthDAO;
 import dataAccess.inMemoryDatabase.MemoryGameDAO;
 import dataAccess.inMemoryDatabase.MemoryUserDAO;
 import model.UserData;
+import model.response.CreateGameResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,8 +71,36 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void loginFail() throws Exception {
+    void loginFail() {
         // Login unregistered user throws exception
         assertThrows(ResponseException.class, () -> facade.login("unknown_player", "wrong_password"));
+    }
+
+    @Test
+    void createGameSuccess() throws Exception {
+        // Insert test auth into database
+        authDAO.createAuth("player1");
+        String testAuth = authDAO.getAuth("player1").authToken();
+
+        // Create game successful
+        Integer gameID = assertDoesNotThrow(() -> {
+            CreateGameResponse response = facade.createGame(testAuth, "game1");
+            return response.gameID();
+        });
+        assertNotNull(gameID);
+    }
+
+    @Test
+    void createGameFail() throws Exception {
+        // Create game without auth throws exception
+        assertThrows(ResponseException.class, () -> facade.createGame(null, "game1"));
+
+        // Insert test auth into database
+        authDAO.createAuth("player1");
+        String testAuth = authDAO.getAuth("player1").authToken();
+
+        // Create game with duplicate name throws exception
+        gameDAO.createGame("game1");
+        assertThrows(ResponseException.class, () -> facade.createGame(testAuth, "game1"));
     }
 }
