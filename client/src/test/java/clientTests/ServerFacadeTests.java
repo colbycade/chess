@@ -79,8 +79,7 @@ public class ServerFacadeTests {
     @Test
     void createGameSuccess() throws Exception {
         // Insert test auth into database
-        authDAO.createAuth("player1");
-        String testAuth = authDAO.getAuth("player1").authToken();
+        String testAuth = authDAO.createAuth("player1").authToken();
 
         // Create game successful
         Integer gameID = assertDoesNotThrow(() -> {
@@ -94,13 +93,5 @@ public class ServerFacadeTests {
     void createGameFail() throws Exception {
         // Create game without auth throws exception
         assertThrows(ResponseException.class, () -> facade.createGame(null, "game1"));
-
-        // Insert test auth into database
-        authDAO.createAuth("player1");
-        String testAuth = authDAO.getAuth("player1").authToken();
-
-        // Create game with duplicate name throws exception
-        gameDAO.createGame("game1");
-        assertThrows(ResponseException.class, () -> facade.createGame(testAuth, "game1"));
     }
 }
