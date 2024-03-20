@@ -1,9 +1,18 @@
 package ui;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
+import model.request.RegisterRequest;
+import model.response.RegisterResponse;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collection;
 
 public class ServerFacade {
@@ -15,13 +24,18 @@ public class ServerFacade {
         this.port = port;
     }
 
-    public void displayHelp() {
-        if (authData == null) {
-            System.out.println(preLoginHelp);
-        } else {
-            System.out.println(postLoginHelp);
-        }
+    public String getAuthToken() {
+        return authData.authToken();
     }
+
+    public boolean isLoggedIn() {
+        return authData != null;
+    }
+
+    public void displayHelp() {
+        System.out.println(authData == null ? preLoginHelp : postLoginHelp);
+    }
+
 
     private final String preLoginHelp = """
                 register <USERNAME> <PASSWORD> <EMAIL> - to create an account
@@ -40,30 +54,56 @@ public class ServerFacade {
                 help - with possible commands
             """;
 
-    public AuthData register(String username, String password, String email) {
-        return null;
+    public void register(String username, String password, String email) throws ResponseException {
+        try {
+            URL url = new URL("http://localhost:" + port + "/user");
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("POST");
+
+            // Specify that we are going to write out data
+            http.setDoOutput(true);
+
+            // Write out a header
+            http.setRequestProperty("Content-Type", "application/json");
+
+            // Write out the body
+            RegisterRequest requestBody = new RegisterRequest(username, password, email);
+            String jsonRequestBody = new Gson().toJson(requestBody);
+            try (OutputStream outputStream = http.getOutputStream()) {
+                outputStream.write(jsonRequestBody.getBytes());
+            }
+
+            // Read the response
+            RegisterResponse responseBody;
+            try (InputStream respBodyBytes = http.getInputStream()) {
+                InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
+                responseBody = new Gson().fromJson(inputStreamReader, RegisterResponse.class);
+            }
+            this.authData = new AuthData(responseBody.authToken(), responseBody.username());
+        } catch (IOException e) {
+            throw new ResponseException("Registration failed. Error: " + e.getMessage());
+        }
     }
 
-    public AuthData login(String username, String password) {
-        return null;
+    public void login(String username, String password) throws ResponseException {
     }
 
     public void logout() {
         authData = null;
     }
 
-    public GameData createGame(String authToken, String gameName) {
+    public GameData createGame(String authToken, String gameName) throws ResponseException {
         return null;
     }
 
-    public Collection<GameData> listGames(String authToken) {
+    public Collection<GameData> listGames(String authToken) throws ResponseException {
         return null;
     }
 
-    public void joinGame(String authToken, ChessGame.TeamColor clientColor, Integer gameID) {
+    public void joinGame(String authToken, ChessGame.TeamColor clientColor, Integer gameID) throws ResponseException {
     }
 
-    public void observeGame(String authToken, Integer gameID) {
+    public void observeGame(String authToken, Integer gameID) throws ResponseException {
     }
 
 
