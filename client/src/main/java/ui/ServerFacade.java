@@ -6,6 +6,7 @@ import model.AuthData;
 import model.GameData;
 import model.request.LoginRequest;
 import model.request.RegisterRequest;
+import model.response.CreateGameResponse;
 import model.response.LoginResponse;
 import model.response.RegisterResponse;
 
@@ -16,6 +17,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Map;
 
 public class ServerFacade {
 
@@ -117,8 +119,33 @@ public class ServerFacade {
 
     // POST-LOGIN COMMANDS
 
-    public GameData createGame(String authToken, String gameName) throws ResponseException {
-        return null;
+    public CreateGameResponse createGame(String authToken, String gameName) throws ResponseException {
+        try {
+            URL url = new URL("http://localhost:" + port + "/game");
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("POST");
+
+            // Specify that we are going to write out data
+            http.setDoOutput(true);
+
+            // Write out a header
+            http.setRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("Authorization", authToken);
+
+            // Write out the bodys
+            String jsonRequestBody = new Gson().toJson(Map.of("gameName", gameName));
+            try (OutputStream outputStream = http.getOutputStream()) {
+                outputStream.write(jsonRequestBody.getBytes());
+            }
+
+            // Read the response
+            try (InputStream respBodyBytes = http.getInputStream()) {
+                InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
+                return new Gson().fromJson(inputStreamReader, CreateGameResponse.class);
+            }
+        } catch (IOException e) {
+            throw new ResponseException("Failed to create game. Error: " + e.getMessage());
+        }
     }
 
     public Collection<GameData> listGames(String authToken) throws ResponseException {

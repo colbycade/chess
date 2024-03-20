@@ -85,8 +85,8 @@ public class ClientUI {
                     if (parts.length == 2) {
                         try {
                             String gameName = parts[1];
-                            GameData gameData = serverFacade.createGame(serverFacade.getAuthToken(), gameName);
-                            System.out.println("Game created: " + gameData.toString());
+                            Integer gameID = serverFacade.createGame(serverFacade.getAuthToken(), gameName).gameID();
+                            System.out.println("Game created with ID: " + gameID.toString());
                         } catch (ResponseException e) {
                             System.out.println("Failed to create game.");
                         }
