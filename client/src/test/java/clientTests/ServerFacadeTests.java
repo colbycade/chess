@@ -172,4 +172,21 @@ public class ServerFacadeTests {
         // Observe non-existent game throws exception
         assertThrows(ResponseException.class, () -> facade.joinGame(testAuth, null, -1));
     }
+
+    @Test
+    void logoutSuccess() throws Exception {
+        // Insert test user into database and login
+        userDAO.insertUser(new UserData("player1", "password", "p1@email.com"));
+        facade.login("player1", "password");
+
+        // Logout successful
+        assertDoesNotThrow(() -> facade.logout());
+        assertNull(facade.getAuthToken());
+    }
+
+    @Test
+    void logoutFail() {
+        // Logout without being logged in throws exception
+        assertThrows(ResponseException.class, () -> facade.logout());
+    }
 }

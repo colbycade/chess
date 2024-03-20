@@ -60,11 +60,6 @@ public class ClientUI {
                     }
                     break;
 
-                case "logout":
-                    serverFacade.logout();
-                    System.out.println("Logged out.");
-                    break;
-
                 case "create":
                     if (parts.length == 2) {
                         try {
@@ -123,6 +118,20 @@ public class ClientUI {
                         System.out.println("Invalid command. Usage: observe <gameID>");
                     }
                     break;
+
+                case "logout":
+                    if (parts.length == 1) {
+                        try {
+                            serverFacade.logout();
+                            System.out.println("Logged out.");
+                        } catch (ResponseException e) {
+                            System.out.println("Failed to logout.");
+                        }
+                    } else {
+                        System.out.println("Invalid command. Usage: logout");
+                    }
+                    break;
+
                 case "quit":
                     quit = true;
                     System.out.println("Exiting the program.");

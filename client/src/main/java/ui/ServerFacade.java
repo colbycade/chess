@@ -11,11 +11,13 @@ import model.response.ListGamesResponse;
 import model.response.LoginResponse;
 import model.response.RegisterResponse;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 public class ServerFacade {
@@ -28,7 +30,7 @@ public class ServerFacade {
     }
 
     public String getAuthToken() {
-        return authData.authToken();
+        return authData != null ? authData.authToken() : null;
     }
 
     public boolean isLoggedIn() {
@@ -81,7 +83,7 @@ public class ServerFacade {
                 RegisterResponse responseBody = new Gson().fromJson(inputStreamReader, RegisterResponse.class);
                 this.authData = new AuthData(responseBody.authToken(), responseBody.username());
             }
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Registration failed. Error: " + e.getMessage());
         }
     }
@@ -111,7 +113,7 @@ public class ServerFacade {
                 LoginResponse responseBody = new Gson().fromJson(inputStreamReader, LoginResponse.class);
                 this.authData = new AuthData(responseBody.authToken(), responseBody.username());
             }
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Login failed. Error: " + e.getMessage());
         }
     }
@@ -142,7 +144,7 @@ public class ServerFacade {
                 InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
                 return new Gson().fromJson(inputStreamReader, CreateGameResponse.class);
             }
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to create game. Error: " + e.getMessage());
         }
     }
@@ -165,7 +167,7 @@ public class ServerFacade {
                 InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
                 return new Gson().fromJson(inputStreamReader, ListGamesResponse.class);
             }
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to list games. Error: " + e.getMessage());
         }
     }
@@ -193,7 +195,7 @@ public class ServerFacade {
             // Read the response (no response body)
             http.getInputStream();
 
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to join game. Error: " + e.getMessage());
         }
     }
@@ -221,13 +223,32 @@ public class ServerFacade {
             // Read the response (no response body)
             http.getInputStream();
 
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to join game. Error: " + e.getMessage());
         }
     }
 
-    public void logout() {
-        authData = null;
+    public void logout() throws ResponseException {
+        try {
+            URI uri = new URI("http://localhost:" + port + "/session");
+            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+            http.setRequestMethod("DELETE");
+
+            // Specify that we are going to write out data
+            http.setDoOutput(true);
+
+            // Write out a header
+            http.setRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("Authorization", getAuthToken());
+
+            // Read the response (no response body)
+            http.getInputStream();
+
+            // Clear client's auth data
+            authData = null;
+        } catch (IOException | URISyntaxException e) {
+            throw new ResponseException("Failed to logout. Error: " + e.getMessage());
+        }
     }
 
     // GAMEPLAY COMMANDS
