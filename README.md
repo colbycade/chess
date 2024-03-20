@@ -17,13 +17,13 @@ Open the project directory in IntelliJ in order to develop, run, and debug your 
 You can use the following commands to build, test, package, and run your code.
 
 | Command                    | Description                                     |
-| -------------------------- | ----------------------------------------------- |
+|----------------------------|-------------------------------------------------|
 | `mvn compile`              | Builds the code                                 |
 | `mvn package`              | Run the tests and build an Uber jar file        |
 | `mvn package -DskipTests`  | Build an Uber jar file                          |
 | `mvn install`              | Installs the packages into the local repository |
 | `mvn test`                 | Run all the tests                               |
-| `mvn -pl shared test`     | Run all the shared tests                        |
+| `mvn -pl shared test`      | Run all the shared tests                        |
 | `mvn -pl client exec:java` | Build and run the client `Main`                 |
 | `mvn -pl server exec:java` | Build and run the server `Main`                 |
 
@@ -41,13 +41,15 @@ java -jar client/target/client-jar-with-dependencies.jar
 
 
 # API
-Register - POST /user       Body: {username, password, email}  
-Login - POST /session       Body: {username, password}  
-Logout - DELETE /session    Header: authToken  
-List Games - GET /game      Header: authToken  
-Create Game - POST /game    Header: authToken Body: {gameName}  
-Join Game - PUT /game       Header: authToken Body: {ClientColor, gameID}  
-Clear Application - DELETE /db  
+| Endpoint                | HTTP Method | Path      | Header    | Body                        | Returns                                            |
+|-------------------------|-------------|-----------|-----------|-----------------------------|----------------------------------------------------|
+| Register                | POST        | /user     |           | {username, password, email} | authToken                                          |
+| Login                   | POST        | /session  |           | {username, password}        | authToken                                          |
+| Logout                  | DELETE      | /session  | authToken |                             | {}                                                 |
+| List Games              | GET         | /game     | authToken |                             | {gameID, whiteUsername, blackUsername, gameName}[] |
+| Create Game             | POST        | /game     | authToken | {gameName}                  | gameID                                             |
+| Join Game               | PUT         | /game     | authToken | {ClientColor, gameID}       | {}                                                 |
+| Clear Application       | DELETE      | /db       |           |                             | {}                                                 |
 
 ## Sequence Diagram
 ```
