@@ -12,11 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import service.GameService;
-import service.request.CreateGameRequest;
-import service.request.JoinGameRequest;
-import service.request.ListGamesRequest;
-import service.response.CreateGameResponse;
-import service.response.ListGamesResponse;
+import model.request.CreateGameRequest;
+import model.request.JoinGameRequest;
+import model.request.ListGamesRequest;
+import model.response.CreateGameResponse;
+import model.response.ListGamesResponse;
 
 import java.util.Collection;
 

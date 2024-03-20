@@ -8,11 +8,11 @@ import exception.BadRequestException;
 import exception.DataAccessException;
 import model.GameData;
 import model.AuthData;
-import service.request.CreateGameRequest;
-import service.request.JoinGameRequest;
-import service.request.ListGamesRequest;
-import service.response.CreateGameResponse;
-import service.response.ListGamesResponse;
+import model.request.CreateGameRequest;
+import model.request.JoinGameRequest;
+import model.request.ListGamesRequest;
+import model.response.CreateGameResponse;
+import model.response.ListGamesResponse;
 
 import static service.AuthUtil.verifyAuthToken;
 

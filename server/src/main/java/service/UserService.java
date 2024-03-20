@@ -4,11 +4,11 @@ import dataAccess.*;
 import exception.*;
 import model.UserData;
 import model.AuthData;
-import service.request.LoginRequest;
-import service.response.LoginResponse;
-import service.request.RegisterRequest;
-import service.response.RegisterResponse;
-import service.request.LogoutRequest;
+import model.request.LoginRequest;
+import model.response.LoginResponse;
+import model.request.RegisterRequest;
+import model.response.RegisterResponse;
+import model.request.LogoutRequest;
 
 import static service.AuthUtil.verifyAuthToken;
 

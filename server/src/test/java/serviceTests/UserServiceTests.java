@@ -11,11 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import service.UserService;
-import service.request.LoginRequest;
-import service.request.LogoutRequest;
-import service.request.RegisterRequest;
-import service.response.LoginResponse;
-import service.response.RegisterResponse;
+import model.request.LoginRequest;
+import model.request.LogoutRequest;
+import model.request.RegisterRequest;
+import model.response.LoginResponse;
+import model.response.RegisterResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
 

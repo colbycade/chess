@@ -3,7 +3,7 @@ package handler;
 import dataAccess.AuthDAO;
 import dataAccess.UserDAO;
 import service.UserService;
-import service.request.LogoutRequest;
+import model.request.LogoutRequest;
 import spark.Request;
 import spark.Response;
 import spark.Route;

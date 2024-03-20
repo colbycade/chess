@@ -5,7 +5,7 @@ import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
 import exception.DataAccessException;
 import service.GameService;
-import service.request.JoinGameRequest;
+import model.request.JoinGameRequest;
 import spark.Request;
 import spark.Response;
 import spark.Route;
