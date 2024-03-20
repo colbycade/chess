@@ -11,12 +11,11 @@ import model.response.ListGamesResponse;
 import model.response.LoginResponse;
 import model.response.RegisterResponse;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.Map;
 
 public class ServerFacade {
@@ -59,8 +58,8 @@ public class ServerFacade {
 
     public void register(String username, String password, String email) throws ResponseException {
         try {
-            URL url = new URL("http://localhost:" + port + "/user");
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            URI uri = new URI("http://localhost:" + port + "/user");
+            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
             http.setRequestMethod("POST");
 
             // Specify that we are going to write out data
@@ -82,15 +81,15 @@ public class ServerFacade {
                 RegisterResponse responseBody = new Gson().fromJson(inputStreamReader, RegisterResponse.class);
                 this.authData = new AuthData(responseBody.authToken(), responseBody.username());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseException("Registration failed. Error: " + e.getMessage());
         }
     }
 
     public void login(String username, String password) throws ResponseException {
         try {
-            URL url = new URL("http://localhost:" + port + "/session");
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            URI uri = new URI("http://localhost:" + port + "/session");
+            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
             http.setRequestMethod("POST");
 
             // Specify that we are going to write out data
@@ -112,7 +111,7 @@ public class ServerFacade {
                 LoginResponse responseBody = new Gson().fromJson(inputStreamReader, LoginResponse.class);
                 this.authData = new AuthData(responseBody.authToken(), responseBody.username());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseException("Login failed. Error: " + e.getMessage());
         }
     }
@@ -121,8 +120,8 @@ public class ServerFacade {
 
     public CreateGameResponse createGame(String authToken, String gameName) throws ResponseException {
         try {
-            URL url = new URL("http://localhost:" + port + "/game");
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            URI uri = new URI("http://localhost:" + port + "/game");
+            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
             http.setRequestMethod("POST");
 
             // Specify that we are going to write out data
@@ -143,15 +142,15 @@ public class ServerFacade {
                 InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
                 return new Gson().fromJson(inputStreamReader, CreateGameResponse.class);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseException("Failed to create game. Error: " + e.getMessage());
         }
     }
 
     public ListGamesResponse listGames(String authToken) throws ResponseException {
         try {
-            URL url = new URL("http://localhost:" + port + "/game");
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            URI uri = new URI("http://localhost:" + port + "/game");
+            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
             http.setRequestMethod("GET");
 
             // Specify that we are going to write out data
@@ -166,15 +165,15 @@ public class ServerFacade {
                 InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
                 return new Gson().fromJson(inputStreamReader, ListGamesResponse.class);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseException("Failed to list games. Error: " + e.getMessage());
         }
     }
 
     public void joinGame(String authToken, ChessGame.TeamColor clientColor, Integer gameID) throws ResponseException {
         try {
-            URL url = new URL("http://localhost:" + port + "/game");
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            URI uri = new URI("http://localhost:" + port + "/game");
+            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
             http.setRequestMethod("PUT");
 
             // Specify that we are going to write out data
@@ -194,7 +193,7 @@ public class ServerFacade {
             // Read the response (no response body)
             http.getInputStream();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseException("Failed to join game. Error: " + e.getMessage());
         }
     }
