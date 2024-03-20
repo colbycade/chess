@@ -3,10 +3,10 @@ package ui;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
-import model.GameData;
 import model.request.LoginRequest;
 import model.request.RegisterRequest;
 import model.response.CreateGameResponse;
+import model.response.ListGamesResponse;
 import model.response.LoginResponse;
 import model.response.RegisterResponse;
 
@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Map;
 
 public class ServerFacade {
@@ -148,8 +147,27 @@ public class ServerFacade {
         }
     }
 
-    public Collection<GameData> listGames(String authToken) throws ResponseException {
-        return null;
+    public ListGamesResponse listGames(String authToken) throws ResponseException {
+        try {
+            URL url = new URL("http://localhost:" + port + "/game");
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("GET");
+
+            // Specify that we are going to write out data
+            http.setDoOutput(true);
+
+            // Write out a header
+            http.setRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("Authorization", authToken);
+
+            // Read the response
+            try (InputStream respBodyBytes = http.getInputStream()) {
+                InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
+                return new Gson().fromJson(inputStreamReader, ListGamesResponse.class);
+            }
+        } catch (IOException e) {
+            throw new ResponseException("Failed to list games. Error: " + e.getMessage());
+        }
     }
 
     public void joinGame(String authToken, ChessGame.TeamColor clientColor, Integer gameID) throws ResponseException {

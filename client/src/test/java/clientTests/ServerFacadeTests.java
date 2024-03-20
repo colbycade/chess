@@ -3,6 +3,7 @@ package clientTests;
 import dataAccess.inMemoryDatabase.MemoryAuthDAO;
 import dataAccess.inMemoryDatabase.MemoryGameDAO;
 import dataAccess.inMemoryDatabase.MemoryUserDAO;
+import model.GameData;
 import model.UserData;
 import model.response.CreateGameResponse;
 import org.junit.jupiter.api.AfterAll;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import server.Server;
 import ui.ResponseException;
 import ui.ServerFacade;
+
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -90,8 +93,34 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void createGameFail() throws Exception {
+    void createGameFail() {
         // Create game without auth throws exception
         assertThrows(ResponseException.class, () -> facade.createGame(null, "game1"));
+    }
+
+    @Test
+    void listGamesSuccess() throws Exception {
+        // Insert test auth into database
+        String testAuth = authDAO.createAuth("player1").authToken();
+
+        // List games with no games successful
+        Collection<GameData> games = assertDoesNotThrow(() -> facade.listGames(testAuth).games());
+        assertTrue(games.isEmpty());
+
+        // List games with games successful
+        games = assertDoesNotThrow(() -> {
+            facade.createGame(testAuth, "game1");
+            facade.createGame(testAuth, "game2");
+            facade.createGame(testAuth, "game3");
+            return facade.listGames(testAuth).games();
+        });
+        assertNotNull(games);
+        assertEquals(3, games.size());
+    }
+
+    @Test
+    void listGamesFail() {
+        // List games without auth throws exception
+        assertThrows(ResponseException.class, () -> facade.listGames(null));
     }
 }

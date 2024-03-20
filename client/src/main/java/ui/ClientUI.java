@@ -65,22 +65,6 @@ public class ClientUI {
                     System.out.println("Logged out.");
                     break;
 
-                case "list":
-                    if (parts.length == 1) {
-                        try {
-                            Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken());
-                            System.out.println("Available games:");
-                            for (GameData game : games) {
-                                System.out.println(game.toString());
-                            }
-                        } catch (ResponseException e) {
-                            System.out.println("Failed to retrieve games.");
-                        }
-                    } else {
-                        System.out.println("Invalid command. Usage: list");
-                        break;
-                    }
-
                 case "create":
                     if (parts.length == 2) {
                         try {
@@ -94,6 +78,22 @@ public class ClientUI {
                         System.out.println("Invalid command. Usage: create <NAME>");
                     }
                     break;
+
+                case "list":
+                    if (parts.length == 1) {
+                        try {
+                            Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
+                            System.out.println("Available games:");
+                            for (GameData game : games) {
+                                System.out.println(game.toString());
+                            }
+                        } catch (ResponseException e) {
+                            System.out.println("Failed to retrieve games.");
+                        }
+                    } else {
+                        System.out.println("Invalid command. Usage: list");
+                        break;
+                    }
 
                 case "join":
                     if (parts.length == 3) {
