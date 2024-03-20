@@ -3,8 +3,8 @@ package ui;
 import java.util.Scanner;
 
 public class ClientUI {
-    private ServerFacade serverFacade;
-    private Scanner scanner;
+    private final ServerFacade serverFacade;
+    private final Scanner scanner;
 
     public ClientUI(Integer port) {
         serverFacade = new ServerFacade(port);
@@ -41,11 +41,19 @@ public class ClientUI {
                     }
                     break;
 
-                // ... other cases ...
-
-                case "quit":
-                    quit = true;
-                    System.out.println("Exiting the program.");
+                case "login":
+                    if (parts.length == 3) {
+                        String username = parts[1];
+                        String password = parts[2];
+                        try {
+                            serverFacade.login(username, password);
+                            System.out.println("Login successful!");
+                        } catch (ResponseException e) {
+                            System.out.println("Login failed. Please try again.");
+                        }
+                    } else {
+                        System.out.println("Invalid command. Usage: login <USERNAME> <PASSWORD>");
+                    }
                     break;
 
                 default:
