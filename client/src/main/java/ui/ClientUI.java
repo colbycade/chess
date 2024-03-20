@@ -1,5 +1,9 @@
 package ui;
 
+import chess.ChessGame;
+import model.GameData;
+
+import java.util.Collection;
 import java.util.Scanner;
 
 public class ClientUI {
@@ -54,6 +58,74 @@ public class ClientUI {
                     } else {
                         System.out.println("Invalid command. Usage: login <USERNAME> <PASSWORD>");
                     }
+                    break;
+
+                case "logout":
+                    serverFacade.logout();
+                    System.out.println("Logged out.");
+                    break;
+
+                case "list":
+                    if (parts.length == 1) {
+                        try {
+                            Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken());
+                            System.out.println("Available games:");
+                            for (GameData game : games) {
+                                System.out.println(game.toString());
+                            }
+                        } catch (ResponseException e) {
+                            System.out.println("Failed to retrieve games.");
+                        }
+                    } else {
+                        System.out.println("Invalid command. Usage: list");
+                        break;
+                    }
+
+                case "create":
+                    if (parts.length == 2) {
+                        try {
+                            String gameName = parts[1];
+                            GameData gameData = serverFacade.createGame(serverFacade.getAuthToken(), gameName);
+                            System.out.println("Game created: " + gameData.toString());
+                        } catch (ResponseException e) {
+                            System.out.println("Failed to create game.");
+                        }
+                    } else {
+                        System.out.println("Invalid command. Usage: create <NAME>");
+                    }
+                    break;
+
+                case "join":
+                    if (parts.length == 3) {
+                        try {
+                            Integer gameID = Integer.parseInt(parts[1]);
+                            ChessGame.TeamColor clientColor = ChessGame.TeamColor.valueOf(parts[2].toUpperCase());
+                            serverFacade.joinGame(serverFacade.getAuthToken(), clientColor, gameID);
+                            System.out.println("Joined game " + gameID + " as " + clientColor);
+                        } catch (ResponseException e) {
+                            System.out.println("Failed to join game.");
+                        }
+                    } else {
+                        System.out.println("Invalid command. Usage: join <gameID> [WHITE|BLACK]");
+                    }
+                    break;
+
+                case "observe":
+                    if (parts.length == 2) {
+                        try {
+                            Integer gameID = Integer.parseInt(parts[1]);
+                            serverFacade.observeGame(serverFacade.getAuthToken(), gameID);
+                            System.out.println("Observing game " + gameID);
+                        } catch (ResponseException e) {
+                            System.out.println("Failed to observe game.");
+                        }
+                    } else {
+                        System.out.println("Invalid command. Usage: observe <gameID>");
+                    }
+                    break;
+                case "quit":
+                    quit = true;
+                    System.out.println("Exiting the program.");
                     break;
 
                 default:
