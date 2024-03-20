@@ -199,6 +199,31 @@ public class ServerFacade {
     }
 
     public void observeGame(String authToken, Integer gameID) throws ResponseException {
+        try {
+            URI uri = new URI("http://localhost:" + port + "/game");
+            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+            http.setRequestMethod("PUT");
+
+            // Specify that we are going to write out data
+            http.setDoOutput(true);
+
+            // Write out a header
+            http.setRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("Authorization", authToken);
+
+            // Write out the body (with no TeamColor to join as an observer)
+            JoinGameRequest requestBody = new JoinGameRequest(authToken, null, gameID);
+            String jsonRequestBody = new Gson().toJson(requestBody);
+            try (OutputStream outputStream = http.getOutputStream()) {
+                outputStream.write(jsonRequestBody.getBytes());
+            }
+
+            // Read the response (no response body)
+            http.getInputStream();
+
+        } catch (Exception e) {
+            throw new ResponseException("Failed to join game. Error: " + e.getMessage());
+        }
     }
 
     public void logout() {

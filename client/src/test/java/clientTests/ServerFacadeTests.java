@@ -148,4 +148,28 @@ public class ServerFacadeTests {
         // Join non-existent game throws exception
         assertThrows(ResponseException.class, () -> facade.joinGame(testAuth, ChessGame.TeamColor.WHITE, -1));
     }
+
+    @Test
+    void observeGameSuccess() throws Exception {
+        // Create game
+        Integer gameID = gameDAO.createGame("game1");
+
+        // Insert test auth into database
+        String testAuth = authDAO.createAuth("player1").authToken();
+
+        // Observe game successful
+        assertDoesNotThrow(() -> facade.joinGame(testAuth, null, gameID));
+    }
+
+    @Test
+    void observeGameFail() throws Exception {
+        // Observe game without auth throws exception
+        assertThrows(ResponseException.class, () -> facade.joinGame(null, null, 1));
+
+        // Insert test auth into database
+        String testAuth = authDAO.createAuth("player1").authToken();
+
+        // Observe non-existent game throws exception
+        assertThrows(ResponseException.class, () -> facade.joinGame(testAuth, null, -1));
+    }
 }
