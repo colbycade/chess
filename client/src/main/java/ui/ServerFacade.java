@@ -54,6 +54,8 @@ public class ServerFacade {
                 help - with possible commands
             """;
 
+    // PRE-LOGIN COMMANDS
+
     public void register(String username, String password, String email) throws ResponseException {
         try {
             URL url = new URL("http://localhost:" + port + "/user");
@@ -74,12 +76,11 @@ public class ServerFacade {
             }
 
             // Read the response
-            RegisterResponse responseBody;
             try (InputStream respBodyBytes = http.getInputStream()) {
                 InputStreamReader inputStreamReader = new InputStreamReader(respBodyBytes);
-                responseBody = new Gson().fromJson(inputStreamReader, RegisterResponse.class);
+                RegisterResponse responseBody = new Gson().fromJson(inputStreamReader, RegisterResponse.class);
+                this.authData = new AuthData(responseBody.authToken(), responseBody.username());
             }
-            this.authData = new AuthData(responseBody.authToken(), responseBody.username());
         } catch (IOException e) {
             throw new ResponseException("Registration failed. Error: " + e.getMessage());
         }
@@ -88,9 +89,7 @@ public class ServerFacade {
     public void login(String username, String password) throws ResponseException {
     }
 
-    public void logout() {
-        authData = null;
-    }
+    // POST-LOGIN COMMANDS
 
     public GameData createGame(String authToken, String gameName) throws ResponseException {
         return null;
@@ -106,5 +105,10 @@ public class ServerFacade {
     public void observeGame(String authToken, Integer gameID) throws ResponseException {
     }
 
+    public void logout() {
+        authData = null;
+    }
+
+    // GAMEPLAY COMMANDS
 
 }
