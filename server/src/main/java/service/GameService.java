@@ -65,12 +65,12 @@ public class GameService {
 
     private static GameData getGameData(JoinGameRequest request, GameData game, String username) throws AlreadyTakenException {
         // If client supplies a color, check if available and update
-        if ((request.clientColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null) ||
-                (request.clientColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
+        if ((request.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null) ||
+                (request.playerColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
             throw new AlreadyTakenException("color already taken");
         }
-        String newWhiteUsername = request.clientColor() == ChessGame.TeamColor.WHITE ? username : game.whiteUsername();
-        String newBlackUsername = request.clientColor() == ChessGame.TeamColor.BLACK ? username : game.blackUsername();
+        String newWhiteUsername = request.playerColor() == ChessGame.TeamColor.WHITE ? username : game.whiteUsername();
+        String newBlackUsername = request.playerColor() == ChessGame.TeamColor.BLACK ? username : game.blackUsername();
 
         // TODO: Else, client will join as an observer
 //        if (request.clientColor() == null) {

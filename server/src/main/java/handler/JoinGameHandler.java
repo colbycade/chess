@@ -25,11 +25,11 @@ public class JoinGameHandler implements Route {
     public Object handle(Request req, Response res) throws DataAccessException {
         String authToken = req.headers("authorization");
         var body = gson.fromJson(req.body(), Map.class);
-        String clientColorString = (String) body.get("playerColor"); // account for null
-        TeamColor clientColor = clientColorString != null ? TeamColor.valueOf(clientColorString) : null;
+        String playerColorString = (String) body.get("playerColor"); // account for null
+        TeamColor playerColor = playerColorString != null ? TeamColor.valueOf(playerColorString) : null;
         Double gameIDDouble = (Double) body.get("gameID"); // gson converts numbers to Double by default
         int gameID = gameIDDouble.intValue();
-        JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, clientColor, gameID);
+        JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, playerColor, gameID);
         gameService.joinGame(joinGameRequest);
         res.status(200);
         res.type("application/json");
