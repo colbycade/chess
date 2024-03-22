@@ -141,7 +141,7 @@ public class ServerFacade {
             http.setRequestProperty("Content-Type", "application/json");
             http.setRequestProperty("Authorization", authToken);
 
-            // Write out the bodys
+            // Write out the body
             String jsonRequestBody = new Gson().toJson(Map.of("gameName", gameName));
             try (OutputStream outputStream = http.getOutputStream()) {
                 outputStream.write(jsonRequestBody.getBytes());
@@ -162,9 +162,6 @@ public class ServerFacade {
             URI uri = new URI("http://localhost:" + port + "/game");
             HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
             http.setRequestMethod("GET");
-
-            // Specify that we are going to write out data
-            http.setDoOutput(true);
 
             // Write out a header
             http.setRequestProperty("Content-Type", "application/json");
