@@ -109,8 +109,13 @@ public class ClientUI {
                             int count = 0;
                             for (GameData game : games) {
                                 count++;
+                                // Display game information
                                 System.out.println(SET_TEXT_COLOR_MAGENTA + "Game " + SET_TEXT_COLOR_YELLOW + count + SET_TEXT_COLOR_MAGENTA + ": " + RESET_ALL);
-                                displayGame(game);
+                                System.out.println(SET_TEXT_COLOR_BLACK + "  Game Name: " + SET_TEXT_COLOR_BLUE + game.gameName());
+                                System.out.println(SET_TEXT_COLOR_BLACK + "  White Player: " + SET_TEXT_COLOR_BLUE +
+                                        (game.whiteUsername() != null ? game.whiteUsername() : SET_TEXT_COLOR_LIGHT_GREY + "none"));
+                                System.out.println(SET_TEXT_COLOR_BLACK + "  Black Player: " + SET_TEXT_COLOR_BLUE +
+                                        (game.blackUsername() != null ? game.blackUsername() : SET_TEXT_COLOR_LIGHT_GREY + "none"));
                             }
                         }
                     } catch (ResponseException e) {
@@ -132,6 +137,15 @@ public class ClientUI {
                         ChessGame.TeamColor clientColor = ChessGame.TeamColor.valueOf(parts[2].toUpperCase());
                         serverFacade.joinGame(serverFacade.getAuthToken(), clientColor, gameID);
                         System.out.println(SET_TEXT_COLOR_GREEN + "Joined game " + SET_TEXT_COLOR_YELLOW + gameID + SET_TEXT_COLOR_GREEN + " as " + SET_TEXT_COLOR_YELLOW + clientColor);
+                        Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
+                        GameData game = games.stream()
+                                .filter(g -> g.gameID().equals(gameID))
+                                .findFirst()
+                                .orElse(null);
+                        if (game == null) {
+                            throw new ResponseException("Game not found.");
+                        }
+                        displayGame(game);
                     } catch (ResponseException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Failed to join game.");
                     }
@@ -150,6 +164,15 @@ public class ClientUI {
                         Integer gameID = Integer.parseInt(parts[1]);
                         serverFacade.observeGame(serverFacade.getAuthToken(), gameID);
                         System.out.println(SET_TEXT_COLOR_GREEN + "Observing game " + SET_TEXT_COLOR_YELLOW + gameID);
+                        Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
+                        GameData game = games.stream()
+                                .filter(g -> g.gameID().equals(gameID))
+                                .findFirst()
+                                .orElse(null);
+                        if (game == null) {
+                            throw new ResponseException("Game not found.");
+                        }
+                        displayGame(game);
                     } catch (ResponseException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Failed to observe game.");
                     }
@@ -184,13 +207,6 @@ public class ClientUI {
     }
 
     public static void displayGame(GameData game) {
-        // Display game information
-        System.out.println(SET_TEXT_COLOR_BLACK + "  Game Name: " + SET_TEXT_COLOR_BLUE + game.gameName());
-        System.out.println(SET_TEXT_COLOR_BLACK + "  White Player: " + SET_TEXT_COLOR_BLUE +
-                (game.whiteUsername() != null ? game.whiteUsername() : SET_TEXT_COLOR_LIGHT_GREY + "none"));
-        System.out.println(SET_TEXT_COLOR_BLACK + "  Black Player: " + SET_TEXT_COLOR_BLUE +
-                (game.blackUsername() != null ? game.blackUsername() : SET_TEXT_COLOR_LIGHT_GREY + "none"));
-
         // Display board from both perspectives
         ChessBoard board = game.game().getBoard();
         System.out.println(getBoardDisplay(board, ChessGame.TeamColor.WHITE));
