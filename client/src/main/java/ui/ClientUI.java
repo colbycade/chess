@@ -1,6 +1,9 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.GameData;
 
 import java.util.Collection;
@@ -15,6 +18,45 @@ public class ClientUI {
     public ClientUI(Integer port) {
         serverFacade = new ServerFacade(port);
         scanner = new Scanner(System.in);
+    }
+
+    public static String displayBoard(ChessBoard board) {
+        StringBuilder boardDisplay = new StringBuilder();
+        boardDisplay.append(ERASE_SCREEN);
+        boardDisplay.append(SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + SET_BG_COLOR_WHITE);
+        String columnLabels = "    a  b  c  d  e  f  g  h    " + RESET_ALL + "\n";
+        boardDisplay.append(columnLabels);
+        for (int row = 8; row >= 1; row--) {
+            boardDisplay.append(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + SET_BG_COLOR_WHITE);
+            boardDisplay.append(" ").append(row).append(" ").append(RESET_ALL).append(SET_TEXT_COLOR_BLACK);
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                String pieceString = getString(piece);
+                boardDisplay.append(SET_TEXT_BOLD).append((row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY);
+                boardDisplay.append(pieceString);
+            }
+            boardDisplay.append(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + SET_BG_COLOR_WHITE);
+            boardDisplay.append(" ").append(row).append(" ").append(RESET_ALL).append("\n");
+        }
+        boardDisplay.append(SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + SET_BG_COLOR_WHITE);
+        boardDisplay.append(columnLabels);
+        return boardDisplay.toString();
+    }
+
+    private static String getString(ChessPiece piece) {
+        ChessGame.TeamColor teamColor = piece != null ? piece.getTeamColor() : null;
+        ChessPiece.PieceType pieceType = piece != null ? piece.getPieceType() : null;
+        String pieceString = SET_TEXT_BOLD + (teamColor == ChessGame.TeamColor.WHITE ? SET_TEXT_COLOR_WHITE : SET_TEXT_COLOR_BLACK);
+        pieceString += switch (pieceType) {
+            case KING -> BLACK_KING;
+            case QUEEN -> BLACK_QUEEN;
+            case BISHOP -> BLACK_BISHOP;
+            case KNIGHT -> BLACK_KNIGHT;
+            case ROOK -> BLACK_ROOK;
+            case PAWN -> BLACK_PAWN;
+            case null -> EMPTY;
+        };
+        return pieceString;
     }
 
     public void start() {
@@ -98,9 +140,13 @@ public class ClientUI {
                     }
                     try {
                         Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
-                        System.out.println(SET_TEXT_COLOR_GREEN + "Available games:" + RESET_ALL);
+                        System.out.println(SET_TEXT_COLOR_GREEN + "\nAvailable games:\n" + RESET_ALL);
+                        int count = 0;
                         for (GameData game : games) {
-                            System.out.println(game.toString());
+                            count++;
+                            System.out.println(SET_TEXT_COLOR_MAGENTA + " Game " + SET_TEXT_COLOR_YELLOW + count + SET_TEXT_COLOR_MAGENTA + ": " + RESET_ALL);
+                            ChessBoard board = game.game().getBoard();
+                            System.out.println(displayBoard(board));
                         }
                     } catch (ResponseException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Failed to retrieve games.");
