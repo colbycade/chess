@@ -25,10 +25,17 @@ import static ui.EscapeSequences.*;
 
 public class ServerFacade {
 
+    private final String url;
     private final Integer port;
     private AuthData authData = null;
 
+    public ServerFacade(String url) {
+        this.url = url;
+        this.port = extractPort(url);
+    }
+
     public ServerFacade(Integer port) {
+        this.url = null;
         this.port = port;
     }
 
@@ -254,4 +261,14 @@ public class ServerFacade {
 
     // GAMEPLAY COMMANDS
 
+
+    // HELPER METHODS
+
+    private int extractPort(String url) {
+        try {
+            return new URI(url).getPort();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -32,7 +32,7 @@ public class ServerFacadeTests {
     public static void init() {
         // Start server using in-memory database for testing
         server = new Server(MemoryAuthDAO.getInstance(), MemoryGameDAO.getInstance(), MemoryUserDAO.getInstance());
-        int port = server.run(8080);
+        int port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade(port);
     }
