@@ -43,6 +43,7 @@ public class ClientUI {
                     }
                     if (parts.length != 4) {
                         System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "register <USERNAME> <PASSWORD> <EMAIL>");
+                        break;
                     }
                     String newUsername = parts[1];
                     String newPassword = parts[2];
@@ -81,6 +82,7 @@ public class ClientUI {
                     }
                     if (parts.length != 2) {
                         System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "create <NAME>");
+                        break;
                     }
                     try {
                         String gameName = parts[1];
@@ -221,7 +223,9 @@ public class ClientUI {
         boardDisplay.append(ERASE_SCREEN);
         boardDisplay.append(SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + SET_BG_COLOR_WHITE);
 
-        String columnLabels = "    a  b  c  d  e  f  g  h    " + RESET_ALL;
+        String whiteColumnLabels = "    a  b  c  d  e  f  g  h    " + RESET_ALL;
+        String blackColumnLabels = "    h  g  f  e  d  c  b  a    " + RESET_ALL;
+        String columnLabels = perspective == ChessGame.TeamColor.WHITE ? whiteColumnLabels : blackColumnLabels;
         boardDisplay.append(columnLabels).append("\n");
 
         int rowStart = perspective == ChessGame.TeamColor.WHITE ? 8 : 1;
