@@ -32,7 +32,7 @@ public class MemoryGameDAO implements GameDAO {
         if (gameName == null) {
             throw new BadRequestException("game name cannot be null.");
         }
-        int newGameID = ++gameIDCounter;
+        int newGameID = gameIDCounter++;
         ChessGame newGame = new ChessGame();
         GameData newGameData = new GameData(newGameID, null, null, gameName, newGame);
         games.put(newGameID, newGameData);
