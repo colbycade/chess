@@ -135,6 +135,9 @@ public class ServerFacadeTests {
 
         // Join game successful
         assertDoesNotThrow(() -> facade.joinGame(testAuth, ChessGame.TeamColor.WHITE, gameID));
+
+        GameData game = gameDAO.getGame(gameID);
+        assertEquals("player1", game.whiteUsername());
     }
 
     @Test
