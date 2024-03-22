@@ -215,6 +215,7 @@ public class ClientUI {
         System.out.println();
     }
 
+    // Create a string representation of the board
     public static String getBoardDisplay(ChessBoard board, ChessGame.TeamColor perspective) {
         StringBuilder boardDisplay = new StringBuilder();
         boardDisplay.append(ERASE_SCREEN);
