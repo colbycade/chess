@@ -6,6 +6,8 @@ import model.GameData;
 import java.util.Collection;
 import java.util.Scanner;
 
+import static ui.EscapeSequences.*;
+
 public class ClientUI {
     private final ServerFacade serverFacade;
     private final Scanner scanner;
@@ -17,10 +19,11 @@ public class ClientUI {
 
     public void start() {
         boolean quit = false;
-        System.out.println("Welcome to 240 Chess! Type 'help' to get started.");
+        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + SET_BG_COLOR_WHITE + "Welcome to 240 Chess! Type 'help' to get started.");
         while (!quit) {
+            System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_GREEN + SET_TEXT_FAINT);
             System.out.print(serverFacade.isLoggedIn() ? "[LOGGED_IN] " : "[LOGGED_OUT] ");
-            System.out.print(">>> ");
+            System.out.print(">>> " + RESET_ALL + " ");
             String command = scanner.nextLine().trim();
             String[] parts = command.split("\\s+");
 
@@ -36,12 +39,12 @@ public class ClientUI {
                         String email = parts[3];
                         try {
                             serverFacade.register(username, password, email);
-                            System.out.println("Registration successful!");
+                            System.out.println(SET_TEXT_COLOR_GREEN + "Registration successful!");
                         } catch (ResponseException e) {
-                            System.out.println("Registration failed. Please try again.");
+                            System.out.println(SET_TEXT_COLOR_RED + "Registration failed. Please try again.");
                         }
                     } else {
-                        System.out.println("Invalid command. Usage: register <USERNAME> <PASSWORD> <EMAIL>");
+                        System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "register <USERNAME> <PASSWORD> <EMAIL>");
                     }
                     break;
 
@@ -51,12 +54,12 @@ public class ClientUI {
                         String password = parts[2];
                         try {
                             serverFacade.login(username, password);
-                            System.out.println("Login successful!");
+                            System.out.println(SET_TEXT_COLOR_GREEN + "Login successful!");
                         } catch (ResponseException e) {
-                            System.out.println("Login failed. Please try again.");
+                            System.out.println(SET_TEXT_COLOR_RED + "Login failed. Please try again.");
                         }
                     } else {
-                        System.out.println("Invalid command. Usage: login <USERNAME> <PASSWORD>");
+                        System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "login <USERNAME> <PASSWORD>");
                     }
                     break;
 
@@ -65,12 +68,12 @@ public class ClientUI {
                         try {
                             String gameName = parts[1];
                             Integer gameID = serverFacade.createGame(serverFacade.getAuthToken(), gameName).gameID();
-                            System.out.println("Game created with ID: " + gameID.toString());
+                            System.out.println(SET_TEXT_COLOR_GREEN + "Game created with ID: " + SET_BG_COLOR_YELLOW + gameID.toString());
                         } catch (ResponseException e) {
-                            System.out.println("Failed to create game.");
+                            System.out.println(SET_TEXT_COLOR_RED + "Failed to create game.");
                         }
                     } else {
-                        System.out.println("Invalid command. Usage: create <NAME>");
+                        System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "create <NAME>");
                     }
                     break;
 
@@ -78,15 +81,15 @@ public class ClientUI {
                     if (parts.length == 1) {
                         try {
                             Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
-                            System.out.println("Available games:");
+                            System.out.println(SET_TEXT_COLOR_GREEN + "Available games:" + RESET_ALL);
                             for (GameData game : games) {
                                 System.out.println(game.toString());
                             }
                         } catch (ResponseException e) {
-                            System.out.println("Failed to retrieve games.");
+                            System.out.println(SET_TEXT_COLOR_RED + "Failed to retrieve games.");
                         }
                     } else {
-                        System.out.println("Invalid command. Usage: list");
+                        System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "list");
                         break;
                     }
 
@@ -96,12 +99,12 @@ public class ClientUI {
                             Integer gameID = Integer.parseInt(parts[1]);
                             ChessGame.TeamColor clientColor = ChessGame.TeamColor.valueOf(parts[2].toUpperCase());
                             serverFacade.joinGame(serverFacade.getAuthToken(), clientColor, gameID);
-                            System.out.println("Joined game " + gameID + " as " + clientColor);
+                            System.out.println(SET_TEXT_COLOR_GREEN + "Joined game " + SET_TEXT_COLOR_YELLOW + gameID + SET_TEXT_COLOR_GREEN + " as " + SET_TEXT_COLOR_YELLOW + clientColor);
                         } catch (ResponseException e) {
-                            System.out.println("Failed to join game.");
+                            System.out.println(SET_TEXT_COLOR_RED + "Failed to join game.");
                         }
                     } else {
-                        System.out.println("Invalid command. Usage: join <gameID> [WHITE|BLACK]");
+                        System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "join <gameID> [WHITE|BLACK]");
                     }
                     break;
 
@@ -110,12 +113,12 @@ public class ClientUI {
                         try {
                             Integer gameID = Integer.parseInt(parts[1]);
                             serverFacade.observeGame(serverFacade.getAuthToken(), gameID);
-                            System.out.println("Observing game " + gameID);
+                            System.out.println(SET_TEXT_COLOR_GREEN + "Observing game " + SET_TEXT_COLOR_YELLOW + gameID);
                         } catch (ResponseException e) {
-                            System.out.println("Failed to observe game.");
+                            System.out.println(SET_TEXT_COLOR_RED + "Failed to observe game.");
                         }
                     } else {
-                        System.out.println("Invalid command. Usage: observe <gameID>");
+                        System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "observe <gameID>");
                     }
                     break;
 
@@ -123,22 +126,22 @@ public class ClientUI {
                     if (parts.length == 1) {
                         try {
                             serverFacade.logout();
-                            System.out.println("Logged out.");
+                            System.out.println(SET_TEXT_COLOR_GREEN + "Logged out.");
                         } catch (ResponseException e) {
-                            System.out.println("Failed to logout.");
+                            System.out.println(SET_TEXT_COLOR_RED + "Failed to logout.");
                         }
                     } else {
-                        System.out.println("Invalid command. Usage: logout");
+                        System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "logout");
                     }
                     break;
 
                 case "quit":
                     quit = true;
-                    System.out.println("Exiting the program.");
+                    System.out.println(SET_TEXT_COLOR_RED + "Exiting the program.");
                     break;
 
                 default:
-                    System.out.println("Invalid command. Type 'help' for available commands.");
+                    System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Type " + SET_TEXT_COLOR_BLUE + "'help'" + SET_TEXT_COLOR_RED + "for available commands.");
             }
         }
     }

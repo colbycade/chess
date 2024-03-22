@@ -20,6 +20,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import static ui.EscapeSequences.*;
+
+
 public class ServerFacade {
 
     private final Integer port;
@@ -38,21 +41,19 @@ public class ServerFacade {
     }
 
     public void displayHelp() {
-        String preLoginHelp = """
-                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                    login <USERNAME> <PASSWORD> - to play chess
-                    quit - to quit
-                    help - with possible commands
-                """;
-        String postLoginHelp = """
-                    create <NAME> - a game
-                    list - all games
-                    join <gameID> [WHITE|BLACK] - to join a game
-                    observe <gameID> - a game
-                    logout - when you are done playing chess
-                    quit - to quit
-                    help - with possible commands
-                """;
+        String preLoginHelp =
+                SET_TEXT_COLOR_BLUE + "   register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" +
+                        SET_TEXT_COLOR_BLUE + "   login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" +
+                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + RESET_ALL;
+        String postLoginHelp =
+                SET_TEXT_COLOR_BLUE + "   create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
+                        SET_TEXT_COLOR_BLUE + "   list " + SET_TEXT_COLOR_MAGENTA + "- all games\n" +
+                        SET_TEXT_COLOR_BLUE + "   join <gameID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- to join a game\n" +
+                        SET_TEXT_COLOR_BLUE + "   observe <gameID> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
+                        SET_TEXT_COLOR_BLUE + "   logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done playing chess\n" +
+                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + RESET_ALL;
         System.out.println(authData == null ? preLoginHelp : postLoginHelp);
     }
 
