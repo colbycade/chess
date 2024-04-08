@@ -57,7 +57,8 @@ public class ClientUI {
     }
     
     private ClientState handleLoggedOut(String[] parts) {
-        switch (parts[0]) {
+        String command = parts[0];
+        switch (command) {
             // Handle pre-login commands
             
             case "register" -> {    // Handle registration
@@ -71,12 +72,14 @@ public class ClientUI {
             
             // Handle pre-game commands being used in the wrong state
             case "create", "list", "join", "observe", "logout" -> {
-            
+                System.out.println(SET_TEXT_COLOR_RED + "Please log in to use the command: "
+                        + SET_TEXT_COLOR_BLUE + command);
             }
             
             // Handle gameplay commands being used in the wrong state
             case "redraw", "highlight", "make_move", "resign", "leave" -> {
-            
+                System.out.println(SET_TEXT_COLOR_RED + "Please log in and join a game to use the command: "
+                        + SET_TEXT_COLOR_BLUE + command);
             }
             
             default -> System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Type " +
@@ -86,7 +89,8 @@ public class ClientUI {
     }
     
     private ClientState handleLoggedIn(String[] parts) {
-        switch (parts[0]) {
+        String command = parts[0];
+        switch (command) {
             // Handle pre-game commands
             
             case "create" -> {      // Create a new game
@@ -108,12 +112,13 @@ public class ClientUI {
             
             // Handle pre-login commands being used in the wrong state
             case "register", "login" -> {
-            
+                System.out.println(SET_TEXT_COLOR_RED + "You must first log out to " + SET_TEXT_COLOR_BLUE + command);
             }
             
             // Handle gameplay commands being used in the wrong state
             case "redraw", "highlight", "make_move", "resign", "leave" -> {
-            
+                System.out.println(SET_TEXT_COLOR_RED + "Please join a game to use the command: "
+                        + SET_TEXT_COLOR_BLUE + command);
             }
             
             default -> System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Type " +
@@ -123,7 +128,8 @@ public class ClientUI {
     }
     
     private ClientState handleGameplay(String[] parts) {
-        switch (parts[0]) {
+        String command = parts[0];
+        switch (command) {
             // Handle gameplay commands
             
             case "redraw" -> {      // Redraw the board
@@ -149,12 +155,15 @@ public class ClientUI {
             
             // Handle pre-login commands being used in the wrong state
             case "register", "login" -> {
-            
+                System.out.println(SET_TEXT_COLOR_RED
+                        + "You must leave the current game and log out to use the command: "
+                        + SET_TEXT_COLOR_BLUE + command);
             }
             
             // Handle pre-game commands being used in the wrong state
             case "create", "list", "join", "observe", "logout" -> {
-            
+                System.out.println(SET_TEXT_COLOR_RED + "You must leave the current game to use the command: "
+                        + SET_TEXT_COLOR_BLUE + command);
             }
             
             default -> System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Type " +
