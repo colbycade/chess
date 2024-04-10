@@ -21,9 +21,11 @@ public class WebSocketCommunicator extends Endpoint {
             .create();
     private final Session session;
     private final ServerFacade serverFacade;
+    private final ServerMessageObserver observer;
     
     public WebSocketCommunicator(Integer port, ServerMessageObserver observer, ServerFacade serverFacade) throws Exception {
         this.serverFacade = serverFacade;
+        this.observer = observer;
         URI uri = new URI("ws://localhost:" + port + "/connect");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.session = container.connectToServer(this, uri);
@@ -38,14 +40,14 @@ public class WebSocketCommunicator extends Endpoint {
     }
     
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+        System.out.println("Connected to websocket server!");
     }
     
     public void onClose(Session session, CloseReason closeReason) {
         System.out.println("Connection to server lost: " + closeReason.getReasonPhrase());
-        try {
-            serverFacade.leaveGame(serverFacade.getCurrGameData().gameID());
-        } catch (ResponseException e) {
-            System.out.println("Failed to leave upon loss of connection: " + e.getMessage());
+        if (observer instanceof ChessClient) {
+            ChessClient client = (ChessClient) observer;
+            client.stop();
         }
     }
     

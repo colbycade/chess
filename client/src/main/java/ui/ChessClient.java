@@ -15,6 +15,7 @@ import static ui.EscapeSequences.*;
 public class ChessClient implements ServerMessageObserver {
     private final ServerFacade serverFacade;
     private final Scanner scanner;
+    private boolean running = false;
     
     public ChessClient(Integer port) {
         serverFacade = new ServerFacade(port, this);
@@ -55,13 +56,17 @@ public class ChessClient implements ServerMessageObserver {
         GAMEPLAY
     }
     
+    public void stop() {
+        running = false;
+    }
+    
     public void start() {
-        boolean quit = false;
+        running = true;
         ClientState currentState = ClientState.LOGGED_OUT;
         
         System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_MAGENTA + SET_BG_COLOR_WHITE + "Welcome to 240 Chess! Type " +
                 SET_TEXT_COLOR_BLUE + "help " + SET_TEXT_COLOR_MAGENTA + "to get started." + RESET_ALL);
-        while (!quit) {
+        while (running) {
             System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_GREEN + SET_TEXT_FAINT);
             System.out.print(currentState == ClientState.LOGGED_IN ? " [LOGGED_IN]  " :
                     currentState == ClientState.LOGGED_OUT ? " [LOGGED_OUT] " : " [IN_GAME]    ");
@@ -73,13 +78,13 @@ public class ChessClient implements ServerMessageObserver {
                 // Shared commands
                 case "help" -> displayHelp(currentState);
                 case "quit" -> {
-                    quit = true;
                     System.out.println(SET_TEXT_COLOR_RED + "Exiting the program.");
                     try {
                         serverFacade.leaveGame(serverFacade.getCurrGameData().gameID());
                     } catch (ResponseException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Failed to leave game upon quiting.");
                     }
+                    stop();
                 }
                 // State-specific commands
                 default -> currentState = switch (currentState) {
