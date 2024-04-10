@@ -25,8 +25,10 @@ public class ChessClient implements ServerMessageObserver {
     
     @Override
     public void notify(ServerMessage message) {
+        System.out.println("Received message of type: " + message.getServerMessageType());
+        
         switch (message.getServerMessageType()) {
-            case LOAD_GAME -> loadGame(((LoadGame) message).game());
+            case LOAD_GAME -> loadGame(((LoadGame) message).gameData());
             case ERROR -> displayErrorMessage(((Error) message).errorMessage());
             case NOTIFICATION -> displayMessage(((Notification) message).message());
             default -> throw new IllegalStateException("Unexpected value: " + message.getServerMessageType());
@@ -203,9 +205,6 @@ public class ChessClient implements ServerMessageObserver {
                     if (gameData == null) {
                         throw new ResponseException("Game not found.");
                     }
-                    ChessBoard board = gameData.game().getBoard();
-                    UIUtility.displayBoard(board, ChessGame.TeamColor.WHITE);
-                    currGameData = gameData;
                     return ClientState.GAMEPLAY;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "observe <gameID>");
