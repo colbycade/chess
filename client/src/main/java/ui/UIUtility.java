@@ -46,13 +46,13 @@ public class UIUtility {
         String columnLabels = perspective == ChessGame.TeamColor.WHITE ? whiteColumnLabels : blackColumnLabels;
         boardDisplay.append(columnLabels).append("\n");
         
-        int rowStart = perspective == ChessGame.TeamColor.WHITE ? 8 : 1;
-        int rowEnd = perspective == ChessGame.TeamColor.WHITE ? 1 : 8;
-        int rowDirection = perspective == ChessGame.TeamColor.WHITE ? -1 : 1;
+        int rowStart = perspective == ChessGame.TeamColor.BLACK ? 1 : 8;
+        int rowEnd = perspective == ChessGame.TeamColor.BLACK ? 8 : 1;
+        int rowDirection = perspective == ChessGame.TeamColor.BLACK ? 1 : -1;
         
-        int colStart = perspective == ChessGame.TeamColor.WHITE ? 1 : 8;
-        int colEnd = perspective == ChessGame.TeamColor.WHITE ? 8 : 1;
-        int colDirection = perspective == ChessGame.TeamColor.WHITE ? 1 : -1;
+        int colStart = perspective == ChessGame.TeamColor.BLACK ? 8 : 1;
+        int colEnd = perspective == ChessGame.TeamColor.BLACK ? 1 : 8;
+        int colDirection = perspective == ChessGame.TeamColor.BLACK ? -1 : 1;
         
         for (int row = rowStart; row != rowEnd + rowDirection; row += rowDirection) {
             boardDisplay.append(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + SET_BG_COLOR_WHITE);
