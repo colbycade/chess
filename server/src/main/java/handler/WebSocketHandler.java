@@ -206,7 +206,6 @@ public class WebSocketHandler {
         
         // Notify other players
         String username = authDAO.getAuth(command.getAuthString()).username();
-        System.out.println(gameData);
         Notification notification;
         if (!Objects.equals(gameData.whiteUsername(), username) &&
                 !Objects.equals(gameData.blackUsername(), username)) {
