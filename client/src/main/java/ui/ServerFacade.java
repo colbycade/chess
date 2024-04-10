@@ -50,7 +50,7 @@ public class ServerFacade {
         this.port = port;
         httpCommunicator = new HttpCommunicator(port);
         try {
-            wsCommunicator = new WebSocketCommunicator(port, observer, this);
+            wsCommunicator = new WebSocketCommunicator(port, observer);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
