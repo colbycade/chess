@@ -4,19 +4,41 @@ import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.GameService;
 import webSocketMessages.userCommands.*;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WebSocketHandler {
     
     private final GameService gameService;
     private final Gson gson = new Gson();
+    private Map<Integer, Set<Session>> gameSessions;    // Map of game IDs to the set of sessions in the game
     
     public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
         this.gameService = new GameService(authDAO, gameDAO);
+    }
+    
+    @OnWebSocketConnect
+    public void onConnect(Session session) {
+        // Handle new WebSocket connection
+        gameSessions = new ConcurrentHashMap<>();
+    }
+    
+    @OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+        // Handle WebSocket connection close
+        // Remove the session from the game it was in
+        gameSessions.values().forEach(sessions -> sessions.remove(session));
     }
     
     @OnWebSocketMessage
@@ -30,7 +52,7 @@ public class WebSocketHandler {
             case MAKE_MOVE -> handleMakeMoveCommand(session, (MakeMove) command);
             case LEAVE -> handleLeaveCommand(session, (Leave) command);
             case RESIGN -> handleResignCommand(session, (Resign) command);
-            default -> sendMessage(session, "Unknown command type");
+            default -> session.getRemote().sendString("Unknown command type");
         }
     }
     
@@ -49,8 +71,41 @@ public class WebSocketHandler {
     private void handleResignCommand(Session session, Resign command) {
     }
     
-    private void sendMessage(Session session, String message) throws Exception {
-        session.getRemote().sendString(message);
+    private void sendMessage(Session session, String message) {
+        try {
+            session.getRemote().sendString(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void addSessionToGame(int gameID, Session session) {
+        gameSessions.computeIfAbsent(gameID, key -> new HashSet<>()).add(session);
+    }
+    
+    private void removeSessionFromGame(int gameID, Session session) {
+        gameSessions.computeIfPresent(gameID, (key, sessions) -> {
+            sessions.remove(session);
+            return sessions.isEmpty() ? null : sessions;
+        });
+    }
+    
+    private void sendMessageToOtherPlayers(int gameID, Session excludeSession, String message) {
+        // Send the message to all clients in the game except the excluded session
+        Set<Session> sessions = gameSessions.get(gameID);
+        if (sessions != null) {
+            sessions.stream()
+                    .filter(session -> !session.equals(excludeSession))
+                    .forEach(session -> sendMessage(session, message));
+        }
+    }
+    
+    private void sendMessageToAllPlayers(int gameID, String message) {
+        // Implement the logic to send the message to all clients in the game
+        Set<Session> sessions = gameSessions.get(gameID);
+        if (sessions != null) {
+            sessions.forEach(session -> sendMessage(session, message));
+        }
     }
 }
     
