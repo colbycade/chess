@@ -227,8 +227,7 @@ public class WebSocketHandler {
             sendMessage(session, new Error("Game is already over"));
             return;
         }
-        String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
-                gameData.whiteUsername();
+        String username = authDAO.getAuth(command.getAuthString()).username();
         
         // Mark game as over
         try {

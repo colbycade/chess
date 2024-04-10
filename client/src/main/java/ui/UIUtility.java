@@ -25,6 +25,9 @@ public class UIUtility {
         if (pieceColor != currColor) {
             throw new IllegalArgumentException("It is not " + pieceColor + "'s turn to move.");
         }
+        if (game.getWinner() != null) {
+            throw new IllegalArgumentException("No moves available. The game is over.");
+        }
         // get valid squares to highlight
         Collection<ChessMove> moves = game.validMoves(piecePosition);
         ArrayList<ChessPosition> endPositions = new ArrayList<>();

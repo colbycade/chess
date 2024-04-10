@@ -265,10 +265,11 @@ public class ChessClient implements ServerMessageObserver {
             }
             case "make_move" -> {   // Make a move
                 try {
-                    // Validate and parse move
+                    // Validate and parse move e4 e5 Bc4 Nc6 Qh5 Nf6 Qxf7#
                     ChessPosition currPos = UIUtility.parsePosition(parts[1]);
                     ChessPosition targetPos = UIUtility.parsePosition(parts[2]);
-                    ChessPiece.PieceType pieceType = serverFacade.getCurrGameData().game().getBoard().getPiece(currPos).getPieceType();
+                    ChessPiece piece = serverFacade.getCurrGameData().game().getBoard().getPiece(currPos);
+                    ChessPiece.PieceType pieceType = piece != null ? piece.getPieceType() : null;
                     ChessMove move;
                     if (pieceType == ChessPiece.PieceType.PAWN && targetPos.getRow() == 1 || targetPos.getRow() == 8) {
                         // Pawn promotion
