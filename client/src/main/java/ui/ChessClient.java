@@ -44,11 +44,11 @@ public class ChessClient implements ServerMessageObserver {
     }
     
     public void displayMessage(String message) {
-        System.out.print(SET_TEXT_COLOR_GREEN + message);
+        System.out.println(SET_TEXT_COLOR_GREEN + message);
     }
     
     public void displayErrorMessage(String message) {
-        System.out.print(SET_TEXT_COLOR_RED + "Error: " + message);
+        System.out.println(SET_TEXT_COLOR_RED + "Error: " + message);
     }
     
     private enum ClientState {
@@ -288,13 +288,13 @@ public class ChessClient implements ServerMessageObserver {
             }
             case "leave" -> {       // Leave the game (go back to pregame state)
                 try {
-                    throw new ResponseException("Not implemented.");
+                    serverFacade.leaveGame(currGameData.gameID());
+                    return ClientState.LOGGED_IN;
                 } catch (ResponseException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Failed to leave game.");
                 }
                 currColor = null;
                 currGameData = null;
-                return ClientState.LOGGED_IN;
             }
             
             // Handle pre-login commands being used in the wrong state

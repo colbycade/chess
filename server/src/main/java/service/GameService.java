@@ -103,6 +103,32 @@ public class GameService {
         gameDAO.updateGame(game);
     }
     
+    public void leaveGame(Leave request) throws DataAccessException {
+        verifyAuthToken(authDAO, request.getAuthString());
+        
+        // Get client's username
+        AuthData auth = authDAO.getAuth(request.getAuthString());
+        String username = auth.username();
+        
+        // Verify that the game exists
+        GameData game = gameDAO.getGame(request.gameID());
+        if (game == null) {
+            throw new BadRequestException("game does not exist");
+        }
+        
+        // Verify that the client is a player in the game
+        if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
+            throw new BadRequestException("client is not a player in the game");
+        }
+        
+        // Remove client from game
+        if (username.equals(game.whiteUsername())) {
+            gameDAO.updateGame(new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game()));
+        } else {
+            gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game()));
+        }
+    }
+    
     public void resignGame(Resign request) throws DataAccessException {
     
     }

@@ -93,7 +93,8 @@ public class WebSocketHandler {
         sendMessage(session, loadGame);
         
         // Notify other players
-        Notification notification = new Notification("Player " + username + " joined the game as " + command.playerColor());
+        Notification notification = new Notification("Player \u001b[38;5;12m" + username +
+                "\u001b[38;5;46m joined the game as \u001b[38;5;12m" + command.playerColor());
         sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
@@ -125,13 +126,30 @@ public class WebSocketHandler {
         String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
                 gameData.whiteUsername();
         LoadGame loadGame = new LoadGame(gameData);
-        sendMessageToAllPlayers(command.gameID(), new Notification("User " +
-                "\u001b[38;5;12m" + username + "\u001b[38;5;46m" + " made the move: " + "\u001b[38;5;12m" + move));
+        sendMessageToOtherPlayers(command.gameID(), session, new Notification("Player " +
+                "\u001b[38;5;12m" + username + "\u001b[38;5;46m made the move: \u001b[38;5;12m" + move));
         sendMessageToAllPlayers(command.gameID(), loadGame);
     }
     
-    private void handleLeaveCommand(Session session, Leave command) {
-    
+    private void handleLeaveCommand(Session session, Leave command) throws Exception {
+        GameData gameData = gameDAO.getGame(command.gameID());
+        String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
+                gameData.whiteUsername();
+        
+        // Remove from database
+        try {
+            gameService.leaveGame(command);
+        } catch (DataAccessException e) {
+            sendMessage(session, new Error("Failed to leave game"));
+            return;
+        }
+        
+        // Remove the session from the game
+        removeSessionFromGame(command.gameID(), session);
+        
+        // Notify other players
+        Notification notification = new Notification("\u001b[38;5;12m" + username + "\u001b[38;5;46m left the game");
+        sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
     private void handleResignCommand(Session session, Resign command) {
