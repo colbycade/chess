@@ -1,17 +1,20 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPosition;
 import model.GameData;
 
 import java.util.Collection;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
-import static ui.UIUtility.displayGame;
 
 public class ClientUI {
     private final ServerFacade serverFacade;
     private final Scanner scanner;
+    private GameData currGameData;
+    private ChessGame.TeamColor currColor;
     
     public ClientUI(Integer port) {
         serverFacade = new ServerFacade(port);
@@ -32,7 +35,8 @@ public class ClientUI {
                 SET_TEXT_COLOR_BLUE + "help " + SET_TEXT_COLOR_MAGENTA + "to get started." + RESET_ALL);
         while (!quit) {
             System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_GREEN + SET_TEXT_FAINT);
-            System.out.print(serverFacade.isLoggedIn() ? "[LOGGED_IN] " : "[LOGGED_OUT] ");
+            System.out.print(currentState == ClientState.LOGGED_IN ? "[LOGGED_IN] " :
+                    currentState == ClientState.LOGGED_OUT ? "[LOGGED_OUT] " : "[IN_GAME] " + " ");
             System.out.print(">>> " + RESET_ALL + " ");
             String command = scanner.nextLine().trim();
             String[] parts = command.split("\\s+");
@@ -151,14 +155,18 @@ public class ClientUI {
                     serverFacade.joinGame(serverFacade.getAuthToken(), clientColor, gameID);
                     System.out.println(SET_TEXT_COLOR_GREEN + "Joined game " + SET_TEXT_COLOR_YELLOW + gameID + SET_TEXT_COLOR_GREEN + " as " + SET_TEXT_COLOR_YELLOW + clientColor);
                     Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
-                    GameData game = games.stream()
+                    GameData gameData = games.stream()
                             .filter(g -> g.gameID().equals(gameID))
                             .findFirst()
                             .orElse(null);
-                    if (game == null) {
+                    if (gameData == null) {
                         throw new ResponseException("Game not found.");
                     }
-                    displayGame(game);
+                    ChessBoard board = gameData.game().getBoard();
+                    UIUtility.displayBoard(board, clientColor);
+                    currColor = clientColor;
+                    currGameData = gameData;
+                    return ClientState.GAMEPLAY;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "join <gameID> [WHITE|BLACK]");
                 } catch (ResponseException | NumberFormatException e) {
@@ -172,14 +180,17 @@ public class ClientUI {
                     serverFacade.observeGame(serverFacade.getAuthToken(), gameID);
                     System.out.println(SET_TEXT_COLOR_GREEN + "Observing game " + SET_TEXT_COLOR_YELLOW + gameID);
                     Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
-                    GameData game = games.stream()
+                    GameData gameData = games.stream()
                             .filter(g -> g.gameID().equals(gameID))
                             .findFirst()
                             .orElse(null);
-                    if (game == null) {
+                    if (gameData == null) {
                         throw new ResponseException("Game not found.");
                     }
-                    displayGame(game);
+                    ChessBoard board = gameData.game().getBoard();
+                    UIUtility.displayBoard(board, ChessGame.TeamColor.WHITE);
+                    currGameData = gameData;
+                    return ClientState.GAMEPLAY;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "observe <gameID>");
                 } catch (ResponseException | NumberFormatException e) {
@@ -215,30 +226,37 @@ public class ClientUI {
         String command = parts[0];
         switch (command) {
             // Handle gameplay commands
-            
-            case "redraw" -> {      // Redraw the board
-                // Check if command is valid
-                
-            }
-            
+            case "redraw" ->        // Redraw the board
+                    UIUtility.displayBoard(currGameData.game().getBoard(), currColor);
             case "highlight" -> {   // Highlight available moves
-                // Check if command is valid
-                
+                try {
+                    ChessPosition piecePosition = UIUtility.parsePosition(parts[1]);
+                    UIUtility.highlightMoves(currGameData.game(), piecePosition);
+                    
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE +
+                            "highlight <POSITION> " + SET_TEXT_COLOR_RED + "(e.g. e2)");
+                } catch (IllegalArgumentException e) {
+                    System.out.println(SET_TEXT_COLOR_RED + "Invalid command: " + e.getMessage());
+                }
             }
-            
             case "make_move" -> {   // Make a move
-                // Check if command is valid
-                
+                try {
+                    throw new ResponseException("Not implemented.");
+                } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+                    System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE +
+                            "make_move <CURRENT POSITION> <TARGET POSITION>");
+                } catch (ResponseException e) {
+                    System.out.println(SET_TEXT_COLOR_RED + "Failed to make move.");
+                }
             }
-            
             case "resign" -> {      // Resign the game (but don't leave)
-                // Check if command is valid
-                
-            }
             
+            }
             case "leave" -> {       // Leave the game (go back to pregame state)
-                // Check if command is valid
                 
+                currColor = null;
+                currGameData = null;
                 return ClientState.LOGGED_IN;
             }
             
