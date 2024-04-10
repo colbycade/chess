@@ -28,9 +28,12 @@ public class WebSocketCommunicator extends Endpoint {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.session = container.connectToServer(this, uri);
         this.session.setMaxIdleTimeout(20 * 60 * 1000); // 20 minutes
-        this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-            ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
-            observer.notify(serverMessage);
+        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+            @Override
+            public void onMessage(String message) {
+                ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
+                observer.notify(serverMessage);
+            }
         });
     }
     
