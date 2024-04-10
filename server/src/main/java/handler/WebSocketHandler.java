@@ -81,7 +81,7 @@ public class WebSocketHandler {
     public void onError(Session session, Throwable error) {
         // Handle WebSocket error
         System.out.println("WebSocket error: " + error.getMessage());
-        sendMessage(session, new Error("Error: " + error.getMessage()));
+        sendMessage(session, new Error("An unexpected error occurred"));
     }
     
     private void handleJoinPlayerCommand(Session session, JoinPlayer command) throws DataAccessException {
@@ -101,10 +101,20 @@ public class WebSocketHandler {
                 break;
             }
         }
-        
-        String username = command.playerColor() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
-        if (username == null) {
+        if (gameData == null) {
             sendMessage(session, new Error("Game not found"));
+            return;
+        }
+        
+        String username = authDAO.getAuth(command.getAuthString()).username();
+        String actualUser = command.playerColor() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() :
+                gameData.blackUsername();
+        if (actualUser == null) {
+            sendMessage(session, new Error("Failed to join game"));
+            return;
+        }
+        if (!actualUser.equals(username)) {
+            sendMessage(session, new Error("Attempted to join game as wrong user"));
             return;
         }
         
@@ -137,6 +147,10 @@ public class WebSocketHandler {
                 break;
             }
         }
+        if (gameData == null) {
+            sendMessage(session, new Error("Game not found"));
+            return;
+        }
         
         LoadGame loadGame = new LoadGame(gameData);
         sendMessage(session, loadGame);
@@ -144,8 +158,11 @@ public class WebSocketHandler {
         // Add root client's session to the game
         addSessionToGame(command.gameID(), session);
         
+        String username = authDAO.getAuth(command.getAuthString()).username();
+        
         // Notify other players
-        Notification notification = new Notification("Someone started observing this game!");
+        Notification notification = new Notification("\u001b[38;5;12m" + username +
+                "\u001b[38;5;46m started " + "observing this game!");
         sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
