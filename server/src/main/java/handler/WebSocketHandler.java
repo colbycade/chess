@@ -43,13 +43,13 @@ public class WebSocketHandler {
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
         this.gameService = new GameService(authDAO, gameDAO);
+        gameSessions = new ConcurrentHashMap<>();
     }
     
     @OnWebSocketConnect
     public void onConnect(Session session) {
         // Handle new WebSocket connection
         System.out.println("WebSocket connection opened: " + session.getRemoteAddress());
-        gameSessions = new ConcurrentHashMap<>();
     }
     
     @OnWebSocketClose
