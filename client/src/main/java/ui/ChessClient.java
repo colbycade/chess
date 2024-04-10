@@ -262,7 +262,7 @@ public class ChessClient implements ServerMessageObserver {
             }
             case "make_move" -> {   // Make a move
                 try {
-                    // Validate and parse move e4 e5 Bc4 Nc6 Qh5 Nf6 Qxf7#
+                    // Validate and parse move
                     ChessPosition currPos = UIUtility.parsePosition(parts[1]);
                     ChessPosition targetPos = UIUtility.parsePosition(parts[2]);
                     ChessPiece piece = serverFacade.getCurrGameData().game().getBoard().getPiece(currPos);
