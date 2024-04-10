@@ -29,8 +29,7 @@ public class WebSocketHandler {
     
     private final GameService gameService;
     private final AuthDAO authDAO;
-    private final GameDAO gameDAO;
-    Gson gson = new GsonBuilder()
+    final Gson gson = new GsonBuilder()
             .registerTypeAdapter(UserGameCommand.class, new UserGameCommandDeserializer())
             .registerTypeAdapter(UserGameCommand.class, new UserGameCommandSerializer())
             .create();
@@ -38,7 +37,6 @@ public class WebSocketHandler {
     
     public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
         this.authDAO = authDAO;
-        this.gameDAO = gameDAO;
         this.gameService = new GameService(authDAO, gameDAO);
         gameSessions = new ConcurrentHashMap<>();
     }
@@ -83,25 +81,8 @@ public class WebSocketHandler {
     
     private void handleJoinPlayerCommand(Session session, JoinPlayer command) throws DataAccessException {
         // Load the game state for root client
-        Collection<GameData> games;
-        try {
-            games = gameService.listGames(new ListGamesRequest(command.getAuthString())).games();
-        } catch (UnauthorizedException e) {
-            sendMessage(session, new Error("Unauthorized to list games"));
-            return;
-        }
-        
-        GameData gameData = null;
-        for (GameData game : games) {
-            if (game.gameID().equals(command.gameID())) {
-                gameData = game;
-                break;
-            }
-        }
-        if (gameData == null) {
-            sendMessage(session, new Error("Game not found"));
-            return;
-        }
+        GameData gameData = getGameData(session, command.getAuthString(), command.gameID());
+        if (gameData == null) return;
         
         String username = authDAO.getAuth(command.getAuthString()).username();
         String actualUser = command.playerColor() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() :
@@ -129,25 +110,8 @@ public class WebSocketHandler {
     
     private void handleJoinObserverCommand(Session session, JoinObserver command) throws DataAccessException {
         // Load the game state for root client
-        Collection<GameData> games;
-        try {
-            games = gameService.listGames(new ListGamesRequest(command.getAuthString())).games();
-        } catch (UnauthorizedException e) {
-            sendMessage(session, new Error("Unauthorized to list games"));
-            return;
-        }
-        
-        GameData gameData = null;
-        for (GameData game : games) {
-            if (game.gameID().equals(command.gameID())) {
-                gameData = game;
-                break;
-            }
-        }
-        if (gameData == null) {
-            sendMessage(session, new Error("Game not found"));
-            return;
-        }
+        GameData gameData = getGameData(session, command.getAuthString(), command.gameID());
+        if (gameData == null) return;
         
         LoadGame loadGame = new LoadGame(gameData);
         sendMessage(session, loadGame);
@@ -172,7 +136,8 @@ public class WebSocketHandler {
         ChessMove move = command.move();
         
         // Notify and load the updated game state for all players
-        GameData gameData = gameDAO.getGame(command.gameID());
+        GameData gameData = getGameData(session, command.getAuthString(), command.gameID());
+        if (gameData == null) return;
         String username = authDAO.getAuth(command.getAuthString()).username();
         LoadGame loadGame = new LoadGame(gameData);
         sendMessageToOtherPlayers(command.gameID(), session, new Notification(SET_TEXT_COLOR_GREEN +
@@ -194,7 +159,8 @@ public class WebSocketHandler {
     }
     
     private void handleLeaveCommand(Session session, Leave command) throws Exception {
-        GameData gameData = gameDAO.getGame(command.gameID());
+        GameData gameData = getGameData(session, command.getAuthString(), command.gameID());
+        if (gameData == null) return;
         
         // Remove from database
         try {
@@ -222,7 +188,8 @@ public class WebSocketHandler {
     }
     
     private void handleResignCommand(Session session, Resign command) throws Exception {
-        GameData gameData = gameDAO.getGame(command.gameID());
+        GameData gameData = getGameData(session, command.getAuthString(), command.gameID());
+        if (gameData == null) return;
         if (gameData.game().getWinner() != null) {
             sendMessage(session, new Error("Game is already over"));
             return;
@@ -290,6 +257,29 @@ public class WebSocketHandler {
         if (sessions != null) {
             sessions.forEach(session -> sendMessage(session, message));
         }
+    }
+    
+    private GameData getGameData(Session session, String authToken, Integer gameID) throws DataAccessException {
+        Collection<GameData> games;
+        try {
+            games = gameService.listGames(new ListGamesRequest(authToken)).games();
+        } catch (UnauthorizedException e) {
+            sendMessage(session, new Error("Unauthorized to list games"));
+            return null;
+        }
+        
+        GameData gameData = null;
+        for (GameData game : games) {
+            if (game.gameID().equals(gameID)) {
+                gameData = game;
+                break;
+            }
+        }
+        if (gameData == null) {
+            sendMessage(session, new Error("Game not found"));
+            return null;
+        }
+        return gameData;
     }
     
     static class UserGameCommandDeserializer implements JsonDeserializer<UserGameCommand> {

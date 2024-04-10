@@ -133,11 +133,9 @@ public class ChessClient implements ServerMessageObserver {
             // Handle pre-game commands being used in the wrong state
             case "create", "list", "join", "observe", "logout" -> System.out.println(SET_TEXT_COLOR_RED
                     + "Please log in to use the command: " + SET_TEXT_COLOR_BLUE + command);
-            
             // Handle gameplay commands being used in the wrong state
             case "redraw", "highlight", "make_move", "resign", "leave" -> System.out.println(SET_TEXT_COLOR_RED
                     + "Please log in and join a game to use the command: " + SET_TEXT_COLOR_BLUE + command);
-            
             default -> System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Type " +
                     SET_TEXT_COLOR_BLUE + "help " + SET_TEXT_COLOR_RED + "for available commands.");
         }
@@ -183,7 +181,6 @@ public class ChessClient implements ServerMessageObserver {
                 } catch (ResponseException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Failed to retrieve games.");
                 }
-                
             }
             case "join" -> {
                 // Join a game as a player
@@ -235,11 +232,9 @@ public class ChessClient implements ServerMessageObserver {
             // Handle pre-login commands being used in the wrong state
             case "register", "login" -> System.out.println(SET_TEXT_COLOR_RED + "You must first log out to "
                     + SET_TEXT_COLOR_BLUE + command);
-            
             // Handle gameplay commands being used in the wrong state
             case "redraw", "highlight", "make_move", "resign", "leave" -> System.out.println(SET_TEXT_COLOR_RED
                     + "Please join a game to use the command: " + SET_TEXT_COLOR_BLUE + command);
-            
             default -> System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Type " +
                     SET_TEXT_COLOR_BLUE + "help " + SET_TEXT_COLOR_RED + "for available commands.");
         }
@@ -307,11 +302,9 @@ public class ChessClient implements ServerMessageObserver {
             case "register", "login" -> System.out.println(SET_TEXT_COLOR_RED
                     + "You must leave the current game and log out to use the command: "
                     + SET_TEXT_COLOR_BLUE + command);
-            
             // Handle pre-game commands being used in the wrong state
             case "create", "list", "join", "observe", "logout" -> System.out.println(SET_TEXT_COLOR_RED
                     + "You must leave the current game to use the command: " + SET_TEXT_COLOR_BLUE + command);
-            
             default -> System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Type " +
                     SET_TEXT_COLOR_BLUE + "help " + SET_TEXT_COLOR_RED + "for available commands.");
         }
@@ -326,12 +319,12 @@ public class ChessClient implements ServerMessageObserver {
         }
     }
     
-    static String preLoginHelp =
+    static final String preLoginHelp =
             SET_TEXT_COLOR_BLUE + "   register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" +
                     SET_TEXT_COLOR_BLUE + "   login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" +
                     SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
                     SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
-    static String postLoginHelp =
+    static final String postLoginHelp =
             SET_TEXT_COLOR_BLUE + "   create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
                     SET_TEXT_COLOR_BLUE + "   list " + SET_TEXT_COLOR_MAGENTA + "- all games\n" +
                     SET_TEXT_COLOR_BLUE + "   join <gameID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- to join a game\n" +
@@ -339,7 +332,7 @@ public class ChessClient implements ServerMessageObserver {
                     SET_TEXT_COLOR_BLUE + "   logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done playing chess\n" +
                     SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
                     SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
-    static String inGameHelp =
+    static final String inGameHelp =
             SET_TEXT_COLOR_BLUE + "   redraw " + SET_TEXT_COLOR_MAGENTA + "- to redraw the board\n" +
                     SET_TEXT_COLOR_BLUE + "   highlight <POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to show available moves\n" +
                     SET_TEXT_COLOR_BLUE + "   make_move <CURRENT POSITION> <TARGET POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to move a piece\n" +

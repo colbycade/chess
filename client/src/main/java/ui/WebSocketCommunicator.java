@@ -20,33 +20,29 @@ public class WebSocketCommunicator extends Endpoint {
             .registerTypeAdapter(ServerMessage.class, new ServerMessageDeserializer())
             .create();
     private final Session session;
-    private final ServerFacade serverFacade;
     private final ServerMessageObserver observer;
     
-    public WebSocketCommunicator(Integer port, ServerMessageObserver observer, ServerFacade serverFacade) throws Exception {
-        this.serverFacade = serverFacade;
+    public WebSocketCommunicator(Integer port, ServerMessageObserver observer) throws Exception {
         this.observer = observer;
         URI uri = new URI("ws://localhost:" + port + "/connect");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.session = container.connectToServer(this, uri);
         this.session.setMaxIdleTimeout(20 * 60 * 1000); // 20 minutes
-        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-            @Override
-            public void onMessage(String message) {
-                ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
-                observer.notify(serverMessage);
-            }
+        this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
+            ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
+            observer.notify(serverMessage);
         });
     }
     
+    @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         System.out.println("Connected to websocket server!");
     }
     
+    @Override
     public void onClose(Session session, CloseReason closeReason) {
         System.out.println("Connection to server lost: " + closeReason.getReasonPhrase());
-        if (observer instanceof ChessClient) {
-            ChessClient client = (ChessClient) observer;
+        if (observer instanceof ChessClient client) {
             client.stop();
         }
     }
