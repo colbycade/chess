@@ -34,7 +34,7 @@ public class GameService {
         
         // Verify that the game name is not null
         if (request.gameName() == null) {
-            throw new BadRequestException("game name cannot be null");
+            throw new BadRequestException("Game name cannot be null");
         }
         
         // Create game
@@ -59,7 +59,13 @@ public class GameService {
         // Verify that the game exists
         GameData game = gameDAO.getGame(request.gameID());
         if (game == null) {
-            throw new BadRequestException("game does not exist");
+            throw new BadRequestException("Game does not exist");
+        }
+        
+        // Verify that the color is available
+        if ((request.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null) ||
+                (request.playerColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
+            throw new AlreadyTakenException("Color already taken");
         }
         
         // Update game data according to client's request
@@ -79,12 +85,12 @@ public class GameService {
         // Verify that the game exists
         GameData game = gameDAO.getGame(request.gameID());
         if (game == null) {
-            throw new BadRequestException("game does not exist");
+            throw new BadRequestException("Game does not exist");
         }
         
         // Verify that the client is a player in the game
         if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
-            throw new BadRequestException("client is not a player in the game");
+            throw new BadRequestException("Client is not a player in the game");
         }
         
         // Verify that the game is not over
@@ -118,12 +124,12 @@ public class GameService {
         // Verify that the game exists
         GameData game = gameDAO.getGame(request.gameID());
         if (game == null) {
-            throw new BadRequestException("game does not exist");
+            throw new BadRequestException("Game does not exist");
         }
         
         // Verify that the client is a player in the game
         if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
-            throw new BadRequestException("client is not a player in the game");
+            throw new BadRequestException("Client is not a player in the game");
         }
         
         // Remove client from game
@@ -144,12 +150,12 @@ public class GameService {
         // Verify that the game exists
         GameData game = gameDAO.getGame(request.gameID());
         if (game == null) {
-            throw new BadRequestException("game does not exist");
+            throw new BadRequestException("Game does not exist");
         }
         
         // Verify that the client is a player in the game
         if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
-            throw new BadRequestException("client is not a player in the game");
+            throw new BadRequestException("Client is not a player in the game");
         }
         
         // Resign game
@@ -165,12 +171,8 @@ public class GameService {
     
     // Helper methods
     
-    private static GameData getGameData(JoinGameRequest request, GameData game, String username) throws AlreadyTakenException {
+    private static GameData getGameData(JoinGameRequest request, GameData game, String username) {
         // If client supplies a color, check if available and update
-        if ((request.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null) ||
-                (request.playerColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
-            throw new AlreadyTakenException("color already taken");
-        }
         String newWhiteUsername = request.playerColor() == ChessGame.TeamColor.WHITE ? username : game.whiteUsername();
         String newBlackUsername = request.playerColor() == ChessGame.TeamColor.BLACK ? username : game.blackUsername();
         
