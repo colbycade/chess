@@ -79,10 +79,12 @@ public class ChessClient implements ServerMessageObserver {
                 case "help" -> displayHelp(currentState);
                 case "quit" -> {
                     System.out.println(SET_TEXT_COLOR_RED + "Exiting the program.");
-                    try {
-                        serverFacade.leaveGame(serverFacade.getCurrGameData().gameID());
-                    } catch (ResponseException e) {
-                        System.out.println(SET_TEXT_COLOR_RED + "Failed to leave game upon quiting.");
+                    if (serverFacade.getCurrGameData() != null) {
+                        try {
+                            serverFacade.leaveGame(serverFacade.getCurrGameData().gameID());
+                        } catch (ResponseException e) {
+                            System.out.println(SET_TEXT_COLOR_RED + "Failed to leave game upon quiting.");
+                        }
                     }
                     stop();
                 }

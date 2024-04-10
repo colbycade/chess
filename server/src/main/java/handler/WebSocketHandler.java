@@ -179,14 +179,16 @@ public class WebSocketHandler {
                 "Player " + SET_TEXT_COLOR_BLUE + username + SET_TEXT_COLOR_GREEN +
                 " made the move: " + SET_TEXT_COLOR_BLUE + move + RESET_ALL));
         sendMessageToAllPlayers(command.gameID(), loadGame);
+
+//        if (gameData.game().)
         
         // Check if the game is over
         if (gameData.game().getWinner() != null) {
             Notification gameOverNotification;
             if (gameData.game().getWinner() == ChessGame.TeamColor.DRAW) {
-                gameOverNotification = new Notification(SET_TEXT_COLOR_GREEN + "Game over! It's a draw!" + RESET_ALL);
+                gameOverNotification = new Notification(SET_TEXT_COLOR_GREEN + "Stalemate!" + RESET_ALL);
             } else {
-                gameOverNotification = new Notification(SET_TEXT_COLOR_GREEN + "Game over! Winner: " +
+                gameOverNotification = new Notification(SET_TEXT_COLOR_GREEN + "Checkmate! Winner: " +
                         SET_TEXT_COLOR_BLUE + gameData.game().getWinner() + RESET_ALL);
             }
             sendMessageToAllPlayers(command.gameID(), gameOverNotification);
