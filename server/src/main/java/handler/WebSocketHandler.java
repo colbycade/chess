@@ -22,6 +22,9 @@ public class WebSocketHandler {
     
     private final GameService gameService;
     private final Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(UserGameCommand.class, new UserGameCommandDeserializer())
+            .create();
     private Map<Integer, Set<Session>> gameSessions;    // Map of game IDs to the set of sessions in the game
     
     public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
@@ -31,12 +34,15 @@ public class WebSocketHandler {
     @OnWebSocketConnect
     public void onConnect(Session session) {
         // Handle new WebSocket connection
+        System.out.println("WebSocket connection opened: " + session.getRemoteAddress());
         gameSessions = new ConcurrentHashMap<>();
     }
     
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
         // Handle WebSocket connection close
+        System.out.println("WebSocket connection closed: " + session.getRemoteAddress());
+        System.out.println("Reason: " + reason);
         // Remove the session from the game it was in
         gameSessions.values().forEach(sessions -> sessions.remove(session));
     }
@@ -44,6 +50,7 @@ public class WebSocketHandler {
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
         UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
+        System.out.println("Received command of type: " + command.getCommandType());
         
         // Handle the command based on its type
         switch (command.getCommandType()) {
@@ -105,6 +112,22 @@ public class WebSocketHandler {
         Set<Session> sessions = gameSessions.get(gameID);
         if (sessions != null) {
             sessions.forEach(session -> sendMessage(session, message));
+        }
+    }
+    
+    static class UserGameCommandDeserializer implements JsonDeserializer<UserGameCommand> {
+        @Override
+        public UserGameCommand deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+            UserGameCommand.CommandType type = UserGameCommand.CommandType.valueOf(jsonObject.get("commandType").getAsString());
+            
+            return switch (type) {
+                case JOIN_PLAYER -> context.deserialize(jsonObject, JoinPlayer.class);
+                case JOIN_OBSERVER -> context.deserialize(jsonObject, JoinObserver.class);
+                case MAKE_MOVE -> context.deserialize(jsonObject, MakeMove.class);
+                case LEAVE -> context.deserialize(jsonObject, Leave.class);
+                case RESIGN -> context.deserialize(jsonObject, Resign.class);
+            };
         }
     }
 }

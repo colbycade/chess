@@ -2,30 +2,39 @@ package ui;
 
 import chess.ChessGame;
 import chess.ChessMove;
-import com.google.gson.Gson;
+import com.google.gson.*;
+import webSocketMessages.serverMessages.LoadGame;
+import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
 
 import javax.websocket.*;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 
 public class WebSocketCommunicator extends Endpoint {
     
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(ServerMessage.class, new ServerMessageDeserializer())
+            .create();
     public Session session;
-    private final ServerMessageObserver observer;
     
     public WebSocketCommunicator(Integer port, ServerMessageObserver observer) throws Exception {
         URI uri = new URI("ws://localhost:" + port + "/connect");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        container.setDefaultMaxSessionIdleTimeout(20 * 60 * 1000); // 20 minutes
         this.session = container.connectToServer(this, uri);
+        System.out.println("Connected to websocket server");
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+            @Override
             public void onMessage(String message) {
-                System.out.println(message);
+                ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
+                System.out.println("Received message of type: " + serverMessage.getServerMessageType());
+                observer.notify(serverMessage);
             }
         });
-        this.observer = observer;
     }
     
     public void onOpen(Session session, EndpointConfig endpointConfig) {
@@ -65,8 +74,18 @@ public class WebSocketCommunicator extends Endpoint {
         send(jsonCommand);
     }
     
-    private void handleReceivedMessage(String message) {
-        ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
-        observer.notify(serverMessage);
+    public static class ServerMessageDeserializer implements JsonDeserializer<ServerMessage> {
+        @Override
+        public ServerMessage deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+            ServerMessage.ServerMessageType type = ServerMessage.ServerMessageType.valueOf(jsonObject.get(
+                    "serverMessageType").getAsString());
+            
+            return switch (type) {
+                case NOTIFICATION -> context.deserialize(jsonObject, Notification.class);
+                case LOAD_GAME -> context.deserialize(jsonObject, LoadGame.class);
+                case ERROR -> context.deserialize(jsonObject, Error.class);
+            };
+        }
     }
 }
