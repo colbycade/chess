@@ -101,7 +101,12 @@ public class WebSocketHandler {
                 break;
             }
         }
+        
         String username = command.playerColor() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
+        if (username == null) {
+            sendMessage(session, new Error("Game not found"));
+            return;
+        }
         
         LoadGame loadGame = new LoadGame(gameData);
         sendMessage(session, loadGame);
