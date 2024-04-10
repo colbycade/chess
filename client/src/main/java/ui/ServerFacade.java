@@ -20,14 +20,19 @@ public class ServerFacade {
     
     private final String url;
     private final Integer port;
+    private final HttpCommunicator httpCommunicator;
+    private final WebSocketCommunicator wsCommunicator;
     private AuthData authData = null;
-    private HttpCommunicator httpCommunicator;
-    private WebSocketCommunicator wsCommunicator;
     
     public ServerFacade(Integer port) {
-        this.url = null; // not needed
+        this.url = null;
         this.port = port;
         httpCommunicator = new HttpCommunicator(port);
+        try {
+            wsCommunicator = new WebSocketCommunicator(port);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     // If given url, extract port from url
@@ -35,11 +40,18 @@ public class ServerFacade {
         this.url = url;
         this.port = extractPort(url);
         httpCommunicator = new HttpCommunicator(port);
+        try {
+            wsCommunicator = new WebSocketCommunicator(port);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public String getAuthToken() {
         return authData != null ? authData.authToken() : null;
     }
+    
+    // PRE-LOGIN COMMANDS (HTTP)
     
     public void register(String username, String password, String email) throws ResponseException {
         try {
@@ -63,7 +75,7 @@ public class ServerFacade {
         }
     }
     
-    // POST-LOGIN COMMANDS
+    // POST-LOGIN COMMANDS (HTTP)
     
     public CreateGameResponse createGame(String authToken, String gameName) throws ResponseException {
         try {
@@ -108,6 +120,8 @@ public class ServerFacade {
             throw new ResponseException("Failed to logout. Error: " + e.getMessage());
         }
     }
+    
+    // GAMEPLAY COMMANDS (WEBSOCKET)
     
     
     // HELPER METHODS
