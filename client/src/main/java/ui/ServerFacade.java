@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import model.AuthData;
 import model.request.JoinGameRequest;
 import model.request.LoginRequest;
@@ -138,6 +139,29 @@ public class ServerFacade {
     
     // GAMEPLAY COMMANDS (WEBSOCKET)
     
+    public void makeMove(Integer gameID, ChessMove move) throws ResponseException {
+        try {
+            wsCommunicator.sendMakeMoveCommand(getAuthToken(), gameID, move);
+        } catch (IOException e) {
+            throw new ResponseException("Failed to make move. Error: " + e.getMessage());
+        }
+    }
+    
+    public void leaveGame(Integer gameID) throws ResponseException {
+        try {
+            wsCommunicator.sendLeaveCommand(getAuthToken(), gameID);
+        } catch (IOException e) {
+            throw new ResponseException("Failed to leave game. Error: " + e.getMessage());
+        }
+    }
+    
+    public void resignGame(Integer gameID) throws ResponseException {
+        try {
+            wsCommunicator.sendResignCommand(getAuthToken(), gameID);
+        } catch (IOException e) {
+            throw new ResponseException("Failed to resign from game. Error: " + e.getMessage());
+        }
+    }
     
     // HELPER METHODS
     

@@ -1,17 +1,17 @@
 package handler;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.*;
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
+import exception.BadRequestException;
 import exception.DataAccessException;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.annotations.*;
 import service.GameService;
+import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -74,15 +74,22 @@ public class WebSocketHandler {
         }
     }
     
+    @OnWebSocketError
+    public void onError(Session session, Throwable error) {
+        // Handle WebSocket error
+        System.out.println("WebSocket error: " + error.getMessage());
+        sendMessage(session, new Error("Error: " + error.getMessage()));
+    }
+    
     private void handleJoinPlayerCommand(Session session, JoinPlayer command) throws DataAccessException {
         // Add the session to the game
         addSessionToGame(command.gameID(), session);
         
-        GameData game = gameDAO.getGame(command.gameID());
-        String username = command.playerColor() == ChessGame.TeamColor.WHITE ? game.whiteUsername() : game.blackUsername();
+        GameData gameData = gameDAO.getGame(command.gameID());
+        String username = command.playerColor() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
         
         // Load the game state for root client
-        LoadGame loadGame = new LoadGame(game);
+        LoadGame loadGame = new LoadGame(gameData);
         sendMessage(session, loadGame);
         
         // Notify other players
@@ -94,10 +101,9 @@ public class WebSocketHandler {
         // Add the session to the game
         addSessionToGame(command.gameID(), session);
         
-        GameData game = gameDAO.getGame(command.gameID());
-        
         // Load the game state for root client
-        LoadGame loadGame = new LoadGame(game);
+        GameData gameData = gameDAO.getGame(command.gameID());
+        LoadGame loadGame = new LoadGame(gameData);
         sendMessage(session, loadGame);
         
         // Notify other players
@@ -105,10 +111,27 @@ public class WebSocketHandler {
         sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
-    private void handleMakeMoveCommand(Session session, MakeMove command) {
+    private void handleMakeMoveCommand(Session session, MakeMove command) throws Exception {
+        try {
+            gameService.makeMove(command);
+        } catch (BadRequestException e) {
+            sendMessage(session, new Error(e.getMessage()));
+            return;
+        }
+        ChessMove move = command.move();
+        
+        // Notify and load the updated game state for all players
+        GameData gameData = gameDAO.getGame(command.gameID());
+        String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
+                gameData.whiteUsername();
+        LoadGame loadGame = new LoadGame(gameData);
+        sendMessageToAllPlayers(command.gameID(), new Notification("User " +
+                "\u001b[38;5;12m" + username + "\u001b[38;5;46m" + " made the move: " + "\u001b[38;5;12m" + move));
+        sendMessageToAllPlayers(command.gameID(), loadGame);
     }
     
     private void handleLeaveCommand(Session session, Leave command) {
+    
     }
     
     private void handleResignCommand(Session session, Resign command) {
@@ -117,7 +140,7 @@ public class WebSocketHandler {
     private void sendMessage(Session session, ServerMessage message) {
         try {
             String jsonServerMessage = gson.toJson(message);
-            System.out.println("Sending message of type: " + message.getServerMessageType() + "with content: " + jsonServerMessage);
+            System.out.println("Sending message of type: " + message.getServerMessageType() + " with content: " + jsonServerMessage);
             session.getRemote().sendString(jsonServerMessage);
         } catch (IOException e) {
             e.printStackTrace();

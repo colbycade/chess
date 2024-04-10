@@ -83,9 +83,8 @@ public class UIUtility {
         boardDisplay.append(SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + SET_BG_COLOR_WHITE);
         boardDisplay.append(columnLabels);
         
+        System.out.println();
         System.out.println(boardDisplay);
-        
-        
     }
     
     

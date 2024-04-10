@@ -19,25 +19,27 @@ public class WebSocketCommunicator extends Endpoint {
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(ServerMessage.class, new ServerMessageDeserializer())
             .create();
-    public Session session;
+    private final Session session;
     
     public WebSocketCommunicator(Integer port, ServerMessageObserver observer) throws Exception {
         URI uri = new URI("ws://localhost:" + port + "/connect");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        container.setDefaultMaxSessionIdleTimeout(20 * 60 * 1000); // 20 minutes
         this.session = container.connectToServer(this, uri);
-        System.out.println("Connected to websocket server");
+        this.session.setMaxIdleTimeout(20 * 60 * 1000); // 20 minutes
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             @Override
             public void onMessage(String message) {
                 ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
-                System.out.println("Received message of type: " + serverMessage.getServerMessageType());
                 observer.notify(serverMessage);
             }
         });
     }
     
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
+    
+    public void onClose(Session session, CloseReason closeReason) {
+        System.out.println("Connection to server lost: " + closeReason.getReasonPhrase());
     }
     
     public void send(String msg) throws IOException {

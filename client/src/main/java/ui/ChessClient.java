@@ -25,14 +25,16 @@ public class ChessClient implements ServerMessageObserver {
     
     @Override
     public void notify(ServerMessage message) {
-        System.out.println("Received message of type: " + message.getServerMessageType());
-        
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> loadGame(((LoadGame) message).gameData());
             case ERROR -> displayErrorMessage(((Error) message).errorMessage());
             case NOTIFICATION -> displayMessage(((Notification) message).message());
             default -> throw new IllegalStateException("Unexpected value: " + message.getServerMessageType());
         }
+        // Reprint prompt
+        System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_GREEN + SET_TEXT_FAINT);
+        System.out.print(" [IN_GAME]    ");
+        System.out.print(">>> " + RESET_ALL + " ");
     }
     
     public void loadGame(GameData gameData) {
@@ -42,11 +44,11 @@ public class ChessClient implements ServerMessageObserver {
     }
     
     public void displayMessage(String message) {
-        System.out.println(SET_TEXT_COLOR_GREEN + message);
+        System.out.print(SET_TEXT_COLOR_GREEN + message);
     }
     
     public void displayErrorMessage(String message) {
-        System.out.println(SET_TEXT_COLOR_RED + message);
+        System.out.print(SET_TEXT_COLOR_RED + "Error: " + message);
     }
     
     private enum ClientState {
@@ -270,12 +272,9 @@ public class ChessClient implements ServerMessageObserver {
                     }
                     // Make move
                     serverFacade.makeMove(currGameData.gameID(), move);
-                    System.out.println(SET_TEXT_COLOR_GREEN + "Move successful!");
-                    ChessBoard board = currGameData.game().getBoard();
-                    UIUtility.displayBoard(board, currColor);
                 } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE +
-                            "make_move <CURRENT POSITION> <TARGET POSITION>");
+                            "make_move <CURRENT POSITION> <TARGET POSITION> [<PROMOTION TYPE>]");
                 } catch (ResponseException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Failed to make move.");
                 }
