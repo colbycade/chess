@@ -21,10 +21,7 @@ import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -37,7 +34,7 @@ public class WebSocketHandler {
             .registerTypeAdapter(UserGameCommand.class, new UserGameCommandDeserializer())
             .registerTypeAdapter(UserGameCommand.class, new UserGameCommandSerializer())
             .create();
-    private Map<Integer, Set<Session>> gameSessions;    // Map of game IDs to the set of sessions in the game
+    private final Map<Integer, Set<Session>> gameSessions;    // Map of game IDs to the set of sessions in the game
     
     public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
         this.authDAO = authDAO;
@@ -158,9 +155,8 @@ public class WebSocketHandler {
         // Add root client's session to the game
         addSessionToGame(command.gameID(), session);
         
-        String username = authDAO.getAuth(command.getAuthString()).username();
-        
         // Notify other players
+        String username = authDAO.getAuth(command.getAuthString()).username();
         Notification notification = new Notification(SET_TEXT_COLOR_BLUE + username +
                 SET_TEXT_COLOR_GREEN + " started observing this game!" + RESET_ALL);
         sendMessageToOtherPlayers(command.gameID(), session, notification);
@@ -177,8 +173,7 @@ public class WebSocketHandler {
         
         // Notify and load the updated game state for all players
         GameData gameData = gameDAO.getGame(command.gameID());
-        String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
-                gameData.whiteUsername();
+        String username = authDAO.getAuth(command.getAuthString()).username();
         LoadGame loadGame = new LoadGame(gameData);
         sendMessageToOtherPlayers(command.gameID(), session, new Notification(SET_TEXT_COLOR_GREEN +
                 "Player " + SET_TEXT_COLOR_BLUE + username + SET_TEXT_COLOR_GREEN +
@@ -187,7 +182,7 @@ public class WebSocketHandler {
         
         // Check if the game is over
         if (gameData.game().getWinner() != null) {
-            Notification gameOverNotification = null;
+            Notification gameOverNotification;
             if (gameData.game().getWinner() == ChessGame.TeamColor.DRAW) {
                 gameOverNotification = new Notification(SET_TEXT_COLOR_GREEN + "Game over! It's a draw!" + RESET_ALL);
             } else {
@@ -200,8 +195,6 @@ public class WebSocketHandler {
     
     private void handleLeaveCommand(Session session, Leave command) throws Exception {
         GameData gameData = gameDAO.getGame(command.gameID());
-        String username = gameData.game().getWinner() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
-                gameData.whiteUsername();
         
         // Remove from database
         try {
@@ -211,17 +204,30 @@ public class WebSocketHandler {
             return;
         }
         
+        // Notify other players
+        String username = authDAO.getAuth(command.getAuthString()).username();
+        System.out.println(gameData);
+        Notification notification;
+        if (!Objects.equals(gameData.whiteUsername(), username) &&
+                !Objects.equals(gameData.blackUsername(), username)) {
+            notification = new Notification(SET_TEXT_COLOR_BLUE + username +
+                    SET_TEXT_COLOR_GREEN + " stopped observing the game" + RESET_ALL);
+        } else {
+            notification = new Notification(SET_TEXT_COLOR_BLUE + username +
+                    SET_TEXT_COLOR_GREEN + " left the game" + RESET_ALL);
+        }
+        sendMessageToOtherPlayers(command.gameID(), session, notification);
+        
         // Remove the session from the game
         removeSessionFromGame(command.gameID(), session);
-        
-        // Notify other players
-        Notification notification = new Notification(SET_TEXT_COLOR_BLUE + username
-                + SET_TEXT_COLOR_GREEN + " left the game" + RESET_ALL);
-        sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
     private void handleResignCommand(Session session, Resign command) throws Exception {
         GameData gameData = gameDAO.getGame(command.gameID());
+        if (gameData.game().getWinner() != null) {
+            sendMessage(session, new Error("Game is already over"));
+            return;
+        }
         String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
                 gameData.whiteUsername();
         
@@ -245,10 +251,13 @@ public class WebSocketHandler {
             System.out.println("Sending message of type: " + message.getServerMessageType());
             if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
                 LoadGame loadGame = (LoadGame) message;
-                System.out.println("with board state: \n" + loadGame.gameData().game().getBoard());
+                System.out.println("    with board state: \n" + loadGame.gameData().game().getBoard());
             } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
                 Notification notification = (Notification) message;
-                System.out.println("with message: " + notification.message());
+                System.out.println("    with message: " + notification.message());
+            } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+                Error error = (Error) message;
+                System.out.println("    with error message: " + error.errorMessage());
             }
             session.getRemote().sendString(jsonServerMessage);
         } catch (IOException e) {

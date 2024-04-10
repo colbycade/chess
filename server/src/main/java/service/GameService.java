@@ -127,9 +127,9 @@ public class GameService {
             throw new BadRequestException("Game does not exist");
         }
         
-        // Verify that the client is a player in the game
+        // If client is not a player in the game, they are an observer so gameData should not be updated
         if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
-            throw new BadRequestException("Client is not a player in the game");
+            return;
         }
         
         // Remove client from game
