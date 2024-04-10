@@ -144,8 +144,15 @@ public class WebSocketHandler {
                 "Player " + SET_TEXT_COLOR_BLUE + username + SET_TEXT_COLOR_GREEN +
                 " made the move: " + SET_TEXT_COLOR_BLUE + move + RESET_ALL));
         sendMessageToAllPlayers(command.gameID(), loadGame);
-
-//        if (gameData.game().)
+        
+        // Check if opponent is now in check
+        ChessGame.TeamColor opponent =
+                gameData.game().getBoard().getPiece(move.getEndPosition()).getTeamColor() == ChessGame.TeamColor.WHITE ?
+                        ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+        if (gameData.game().isInCheck(opponent)) {
+            sendMessageToAllPlayers(command.gameID(), new Notification(
+                    SET_TEXT_COLOR_GREEN + opponent + " is in check!" + RESET_ALL));
+        }
         
         // Check if the game is over
         if (gameData.game().getWinner() != null) {
