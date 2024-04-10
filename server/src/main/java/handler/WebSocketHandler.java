@@ -125,8 +125,8 @@ public class WebSocketHandler {
         addSessionToGame(command.gameID(), session);
         
         // Notify other players
-        Notification notification = new Notification("Player \u001b[38;5;12m" + username +
-                "\u001b[38;5;46m joined the game as \u001b[38;5;12m" + command.playerColor());
+        Notification notification = new Notification(SET_TEXT_COLOR_GREEN + "Player " + SET_TEXT_COLOR_BLUE + username +
+                SET_TEXT_COLOR_GREEN + " joined the game as " + SET_TEXT_COLOR_BLUE + command.playerColor() + RESET_ALL);
         sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
@@ -161,8 +161,8 @@ public class WebSocketHandler {
         String username = authDAO.getAuth(command.getAuthString()).username();
         
         // Notify other players
-        Notification notification = new Notification("\u001b[38;5;12m" + username +
-                "\u001b[38;5;46m started " + "observing this game!");
+        Notification notification = new Notification(SET_TEXT_COLOR_BLUE + username +
+                SET_TEXT_COLOR_GREEN + " started observing this game!" + RESET_ALL);
         sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
@@ -180,17 +180,19 @@ public class WebSocketHandler {
         String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
                 gameData.whiteUsername();
         LoadGame loadGame = new LoadGame(gameData);
-        sendMessageToOtherPlayers(command.gameID(), session, new Notification("Player " +
-                "\u001b[38;5;12m" + username + "\u001b[38;5;46m made the move: \u001b[38;5;12m" + move));
+        sendMessageToOtherPlayers(command.gameID(), session, new Notification(SET_TEXT_COLOR_GREEN +
+                "Player " + SET_TEXT_COLOR_BLUE + username + SET_TEXT_COLOR_GREEN +
+                " made the move: " + SET_TEXT_COLOR_BLUE + move + RESET_ALL));
         sendMessageToAllPlayers(command.gameID(), loadGame);
         
         // Check if the game is over
         if (gameData.game().getWinner() != null) {
             Notification gameOverNotification = null;
             if (gameData.game().getWinner() == ChessGame.TeamColor.DRAW) {
-                gameOverNotification = new Notification("Game over! It's a draw!");
+                gameOverNotification = new Notification(SET_TEXT_COLOR_GREEN + "Game over! It's a draw!" + RESET_ALL);
             } else {
-                gameOverNotification = new Notification("Game over! Winner: \u001b[38;5;12m" + gameData.game().getWinner());
+                gameOverNotification = new Notification(SET_TEXT_COLOR_GREEN + "Game over! Winner: " +
+                        SET_TEXT_COLOR_BLUE + gameData.game().getWinner() + RESET_ALL);
             }
             sendMessageToAllPlayers(command.gameID(), gameOverNotification);
         }
@@ -213,7 +215,8 @@ public class WebSocketHandler {
         removeSessionFromGame(command.gameID(), session);
         
         // Notify other players
-        Notification notification = new Notification("\u001b[38;5;12m" + username + "\u001b[38;5;46m left the game");
+        Notification notification = new Notification(SET_TEXT_COLOR_BLUE + username
+                + SET_TEXT_COLOR_GREEN + " left the game" + RESET_ALL);
         sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
@@ -231,14 +234,22 @@ public class WebSocketHandler {
         }
         
         // Notify other players
-        Notification notification = new Notification("\u001b[38;5;12m" + username + "\u001b[38;5;46m resigned the game");
+        Notification notification = new Notification(SET_TEXT_COLOR_BLUE + username +
+                SET_TEXT_COLOR_GREEN + " resigned the game" + RESET_ALL);
         sendMessageToAllPlayers(command.gameID(), notification);
     }
     
     private void sendMessage(Session session, ServerMessage message) {
         try {
             String jsonServerMessage = gson.toJson(message);
-            System.out.println("Sending message of type: " + message.getServerMessageType() + " with content: " + jsonServerMessage);
+            System.out.println("Sending message of type: " + message.getServerMessageType());
+            if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+                LoadGame loadGame = (LoadGame) message;
+                System.out.println("with board state: \n" + loadGame.gameData().game().getBoard());
+            } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+                Notification notification = (Notification) message;
+                System.out.println("with message: " + notification.message());
+            }
             session.getRemote().sendString(jsonServerMessage);
         } catch (IOException e) {
             e.printStackTrace();
@@ -325,6 +336,12 @@ public class WebSocketHandler {
         }
     }
     
+    // ANSI escape codes for colored text in notifications
+    private static final String UNICODE_ESCAPE = "\u001b";
+    private static final String RESET_ALL = UNICODE_ESCAPE + "[0m";
+    private static final String SET_TEXT_COLOR = UNICODE_ESCAPE + "[38;5;";
+    private static final String SET_TEXT_COLOR_GREEN = SET_TEXT_COLOR + "46m";
+    private static final String SET_TEXT_COLOR_BLUE = SET_TEXT_COLOR + "12m";
 }
     
     
