@@ -46,24 +46,8 @@ public class ServerFacade {
     public boolean isLoggedIn() {
         return authData != null;
     }
-
-    public void displayHelp() {
-        String preLoginHelp =
-                SET_TEXT_COLOR_BLUE + "   register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" +
-                        SET_TEXT_COLOR_BLUE + "   login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" +
-                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
-                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + RESET_ALL;
-        String postLoginHelp =
-                SET_TEXT_COLOR_BLUE + "   create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
-                        SET_TEXT_COLOR_BLUE + "   list " + SET_TEXT_COLOR_MAGENTA + "- all games\n" +
-                        SET_TEXT_COLOR_BLUE + "   join <gameID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- to join a game\n" +
-                        SET_TEXT_COLOR_BLUE + "   observe <gameID> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
-                        SET_TEXT_COLOR_BLUE + "   logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done playing chess\n" +
-                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
-                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + RESET_ALL;
-        System.out.println(authData == null ? preLoginHelp : postLoginHelp);
-    }
-
+    
+    
     // PRE-LOGIN COMMANDS
 
     public void register(String username, String password, String email) throws ResponseException {

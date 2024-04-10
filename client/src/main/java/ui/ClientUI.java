@@ -43,7 +43,7 @@ public class ClientUI {
             
             switch (parts[0]) {
                 // Shared commands
-                case "help" -> serverFacade.displayHelp();
+                case "help" -> displayHelp(currentState);
                 case "quit" -> {
                     quit = true;
                     System.out.println(SET_TEXT_COLOR_RED + "Exiting the program.");
@@ -273,5 +273,35 @@ public class ClientUI {
                     SET_TEXT_COLOR_BLUE + "help " + SET_TEXT_COLOR_RED + "for available commands.");
         }
         return ClientState.GAMEPLAY;
+    }
+    
+    private static void displayHelp(ClientState currentState) {
+        String preLoginHelp =
+                SET_TEXT_COLOR_BLUE + "   register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" +
+                        SET_TEXT_COLOR_BLUE + "   login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" +
+                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
+        String postLoginHelp =
+                SET_TEXT_COLOR_BLUE + "   create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
+                        SET_TEXT_COLOR_BLUE + "   list " + SET_TEXT_COLOR_MAGENTA + "- all games\n" +
+                        SET_TEXT_COLOR_BLUE + "   join <gameID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- to join a game\n" +
+                        SET_TEXT_COLOR_BLUE + "   observe <gameID> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
+                        SET_TEXT_COLOR_BLUE + "   logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done playing chess\n" +
+                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
+        String inGameHelp =
+                SET_TEXT_COLOR_BLUE + "   redraw " + SET_TEXT_COLOR_MAGENTA + "- to redraw the board\n" +
+                        SET_TEXT_COLOR_BLUE + "   highlight <POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to show available moves\n" +
+                        SET_TEXT_COLOR_BLUE + "   make_move <CURRENT POSITION> <TARGET POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to move a piece\n" +
+                        SET_TEXT_COLOR_BLUE + "   resign " + SET_TEXT_COLOR_MAGENTA + "- to resign from the game (without leaving)\n" +
+                        SET_TEXT_COLOR_BLUE + "   leave " + SET_TEXT_COLOR_MAGENTA + "- to leave the game\n" +
+                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
+        
+        switch (currentState) {
+            case LOGGED_OUT -> System.out.println(preLoginHelp);
+            case LOGGED_IN -> System.out.println(postLoginHelp);
+            case GAMEPLAY -> System.out.println(inGameHelp);
+        }
     }
 }
