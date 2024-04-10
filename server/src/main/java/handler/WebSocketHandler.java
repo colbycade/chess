@@ -7,7 +7,9 @@ import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
 import exception.BadRequestException;
 import exception.DataAccessException;
+import exception.UnauthorizedException;
 import model.GameData;
+import model.request.ListGamesRequest;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import service.GameService;
@@ -19,6 +21,7 @@ import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -82,15 +85,29 @@ public class WebSocketHandler {
     }
     
     private void handleJoinPlayerCommand(Session session, JoinPlayer command) throws DataAccessException {
-        // Add the session to the game
-        addSessionToGame(command.gameID(), session);
+        // Load the game state for root client
+        Collection<GameData> games;
+        try {
+            games = gameService.listGames(new ListGamesRequest(command.getAuthString())).games();
+        } catch (UnauthorizedException e) {
+            sendMessage(session, new Error("Unauthorized to list games"));
+            return;
+        }
         
-        GameData gameData = gameDAO.getGame(command.gameID());
+        GameData gameData = null;
+        for (GameData game : games) {
+            if (game.gameID().equals(command.gameID())) {
+                gameData = game;
+                break;
+            }
+        }
         String username = command.playerColor() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
         
-        // Load the game state for root client
         LoadGame loadGame = new LoadGame(gameData);
         sendMessage(session, loadGame);
+        
+        // Add root client's session to the game
+        addSessionToGame(command.gameID(), session);
         
         // Notify other players
         Notification notification = new Notification("Player \u001b[38;5;12m" + username +
@@ -99,13 +116,28 @@ public class WebSocketHandler {
     }
     
     private void handleJoinObserverCommand(Session session, JoinObserver command) throws DataAccessException {
-        // Add the session to the game
-        addSessionToGame(command.gameID(), session);
-        
         // Load the game state for root client
-        GameData gameData = gameDAO.getGame(command.gameID());
+        Collection<GameData> games;
+        try {
+            games = gameService.listGames(new ListGamesRequest(command.getAuthString())).games();
+        } catch (UnauthorizedException e) {
+            sendMessage(session, new Error("Unauthorized to list games"));
+            return;
+        }
+        
+        GameData gameData = null;
+        for (GameData game : games) {
+            if (game.gameID().equals(command.gameID())) {
+                gameData = game;
+                break;
+            }
+        }
+        
         LoadGame loadGame = new LoadGame(gameData);
         sendMessage(session, loadGame);
+        
+        // Add root client's session to the game
+        addSessionToGame(command.gameID(), session);
         
         // Notify other players
         Notification notification = new Notification("Someone started observing this game!");
