@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import chess.ChessMove;
 import model.AuthData;
+import model.GameData;
 import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.RegisterRequest;
@@ -24,6 +25,8 @@ public class ServerFacade {
     private final HttpCommunicator httpCommunicator;
     private final WebSocketCommunicator wsCommunicator;
     private AuthData authData = null;
+    private GameData currGameData;
+    private ChessGame.TeamColor currColor;
     
     // If given url, extract port from url
     public ServerFacade(String url) {
@@ -47,7 +50,7 @@ public class ServerFacade {
         this.port = port;
         httpCommunicator = new HttpCommunicator(port);
         try {
-            wsCommunicator = new WebSocketCommunicator(port, observer);
+            wsCommunicator = new WebSocketCommunicator(port, observer, this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -55,6 +58,18 @@ public class ServerFacade {
     
     public String getAuthToken() {
         return authData != null ? authData.authToken() : null;
+    }
+    
+    public GameData getCurrGameData() {
+        return currGameData;
+    }
+    
+    public void setCurrGameData(GameData currGameData) {
+        this.currGameData = currGameData;
+    }
+    
+    public ChessGame.TeamColor getClientColor() {
+        return currColor;
     }
     
     // PRE-LOGIN COMMANDS (HTTP)
@@ -105,6 +120,7 @@ public class ServerFacade {
             // Send http request to join game
             JoinGameRequest requestBody = new JoinGameRequest(authToken, clientColor, gameID);
             httpCommunicator.sendPutRequest("/game", authToken, requestBody);
+            currColor = clientColor;
             
             // Send websocket request to join game
             if (wsCommunicator != null) {
@@ -154,6 +170,8 @@ public class ServerFacade {
     public void leaveGame(Integer gameID) throws ResponseException {
         try {
             wsCommunicator.sendLeaveCommand(getAuthToken(), gameID);
+            currColor = null;
+            currGameData = null;
         } catch (IOException e) {
             throw new ResponseException("Failed to leave game. Error: " + e.getMessage());
         }

@@ -15,8 +15,6 @@ import static ui.EscapeSequences.*;
 public class ChessClient implements ServerMessageObserver {
     private final ServerFacade serverFacade;
     private final Scanner scanner;
-    private GameData currGameData;
-    private ChessGame.TeamColor currColor;
     
     public ChessClient(Integer port) {
         serverFacade = new ServerFacade(port, this);
@@ -39,8 +37,8 @@ public class ChessClient implements ServerMessageObserver {
     
     public void loadGame(GameData gameData) {
         ChessBoard board = gameData.game().getBoard();
-        UIUtility.displayBoard(board, currColor);
-        currGameData = gameData;
+        UIUtility.displayBoard(board, serverFacade.getClientColor());
+        serverFacade.setCurrGameData(gameData);
     }
     
     public void displayMessage(String message) {
@@ -77,6 +75,11 @@ public class ChessClient implements ServerMessageObserver {
                 case "quit" -> {
                     quit = true;
                     System.out.println(SET_TEXT_COLOR_RED + "Exiting the program.");
+                    try {
+                        serverFacade.leaveGame(serverFacade.getCurrGameData().gameID());
+                    } catch (ResponseException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Failed to leave game upon quiting.");
+                    }
                 }
                 // State-specific commands
                 default -> currentState = switch (currentState) {
@@ -185,7 +188,6 @@ public class ChessClient implements ServerMessageObserver {
                     serverFacade.joinGame(serverFacade.getAuthToken(), clientColor, gameID);
                     System.out.println(SET_TEXT_COLOR_GREEN + "Joined game " + SET_TEXT_COLOR_YELLOW + gameID +
                             SET_TEXT_COLOR_GREEN + " as " + SET_TEXT_COLOR_YELLOW + clientColor);
-                    currColor = clientColor;
                     return ClientState.GAMEPLAY;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "join <gameID> [WHITE|BLACK]");
@@ -244,11 +246,11 @@ public class ChessClient implements ServerMessageObserver {
         switch (command) {
             // Handle gameplay commands
             case "redraw" ->        // Redraw the board
-                    UIUtility.displayBoard(currGameData.game().getBoard(), currColor);
+                    UIUtility.displayBoard(serverFacade.getCurrGameData().game().getBoard(), serverFacade.getClientColor());
             case "highlight" -> {   // Highlight available moves
                 try {
                     ChessPosition piecePosition = UIUtility.parsePosition(parts[1]);
-                    UIUtility.highlightMoves(currGameData.game(), piecePosition);
+                    UIUtility.highlightMoves(serverFacade.getCurrGameData().game(), piecePosition);
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE +
                             "highlight <POSITION> " + SET_TEXT_COLOR_RED + "(e.g. e2)");
@@ -261,7 +263,7 @@ public class ChessClient implements ServerMessageObserver {
                     // Validate and parse move
                     ChessPosition currPos = UIUtility.parsePosition(parts[1]);
                     ChessPosition targetPos = UIUtility.parsePosition(parts[2]);
-                    ChessPiece.PieceType pieceType = currGameData.game().getBoard().getPiece(currPos).getPieceType();
+                    ChessPiece.PieceType pieceType = serverFacade.getCurrGameData().game().getBoard().getPiece(currPos).getPieceType();
                     ChessMove move;
                     if (pieceType == ChessPiece.PieceType.PAWN && targetPos.getRow() == 1 || targetPos.getRow() == 8) {
                         // Pawn promotion
@@ -271,7 +273,7 @@ public class ChessClient implements ServerMessageObserver {
                         move = new ChessMove(currPos, targetPos, null);
                     }
                     // Make move
-                    serverFacade.makeMove(currGameData.gameID(), move);
+                    serverFacade.makeMove(serverFacade.getCurrGameData().gameID(), move);
                 } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE +
                             "make_move <CURRENT POSITION> <TARGET POSITION> [<PROMOTION TYPE>]");
@@ -281,20 +283,18 @@ public class ChessClient implements ServerMessageObserver {
             }
             case "resign" -> {      // Resign the game (but don't leave)
                 try {
-                    serverFacade.resignGame(currGameData.gameID());
+                    serverFacade.resignGame(serverFacade.getCurrGameData().gameID());
                 } catch (ResponseException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Failed to resign from game.");
                 }
             }
             case "leave" -> {       // Leave the game (go back to pregame state)
                 try {
-                    serverFacade.leaveGame(currGameData.gameID());
+                    serverFacade.leaveGame(serverFacade.getCurrGameData().gameID());
                     return ClientState.LOGGED_IN;
                 } catch (ResponseException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Failed to leave game.");
                 }
-                currColor = null;
-                currGameData = null;
             }
             
             // Handle pre-login commands being used in the wrong state
