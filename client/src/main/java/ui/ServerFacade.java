@@ -107,7 +107,9 @@ public class ServerFacade {
             httpCommunicator.sendPutRequest("/game", authToken, requestBody);
             
             // Send websocket request to join game
-            wsCommunicator.sendJoinPlayerCommand(authToken, gameID, clientColor);
+            if (wsCommunicator != null) {
+                wsCommunicator.sendJoinPlayerCommand(authToken, gameID, clientColor);
+            }
             
         } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to join game. Error: " + e.getMessage());
@@ -121,7 +123,9 @@ public class ServerFacade {
             httpCommunicator.sendPutRequest("/game", authToken, requestBody);
             
             // Send websocket request to join game as observer
-            wsCommunicator.sendJoinObserverCommand(authToken, gameID);
+            if (wsCommunicator != null) {
+                wsCommunicator.sendJoinObserverCommand(authToken, gameID);
+            }
             
         } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to join game. Error: " + e.getMessage());
