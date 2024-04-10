@@ -87,6 +87,11 @@ public class GameService {
             throw new BadRequestException("client is not a player in the game");
         }
         
+        // Verify that the game is not over
+        if (game.game().getWinner() != null) {
+            throw new BadRequestException("Game is over");
+        }
+        
         // Verify that it is the client's turn
         ChessGame.TeamColor currentColor = game.game().getTeamTurn();
         if (currentColor == ChessGame.TeamColor.WHITE && !username.equals(game.whiteUsername()) ||
@@ -130,7 +135,31 @@ public class GameService {
     }
     
     public void resignGame(Resign request) throws DataAccessException {
-    
+        verifyAuthToken(authDAO, request.getAuthString());
+        
+        // Get client's username
+        AuthData auth = authDAO.getAuth(request.getAuthString());
+        String username = auth.username();
+        
+        // Verify that the game exists
+        GameData game = gameDAO.getGame(request.gameID());
+        if (game == null) {
+            throw new BadRequestException("game does not exist");
+        }
+        
+        // Verify that the client is a player in the game
+        if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
+            throw new BadRequestException("client is not a player in the game");
+        }
+        
+        // Resign game
+        if (username.equals(game.whiteUsername())) {
+            game.game().setWinner(ChessGame.TeamColor.BLACK);
+        } else {
+            game.game().setWinner(ChessGame.TeamColor.WHITE);
+        }
+        gameDAO.updateGame(game);
+        
     }
     
     

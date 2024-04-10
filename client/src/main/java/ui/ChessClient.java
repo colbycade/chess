@@ -281,7 +281,7 @@ public class ChessClient implements ServerMessageObserver {
             }
             case "resign" -> {      // Resign the game (but don't leave)
                 try {
-                    throw new ResponseException("Not implemented.");
+                    serverFacade.resignGame(currGameData.gameID());
                 } catch (ResponseException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Failed to resign from game.");
                 }

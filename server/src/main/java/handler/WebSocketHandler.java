@@ -129,11 +129,22 @@ public class WebSocketHandler {
         sendMessageToOtherPlayers(command.gameID(), session, new Notification("Player " +
                 "\u001b[38;5;12m" + username + "\u001b[38;5;46m made the move: \u001b[38;5;12m" + move));
         sendMessageToAllPlayers(command.gameID(), loadGame);
+        
+        // Check if the game is over
+        if (gameData.game().getWinner() != null) {
+            Notification gameOverNotification = null;
+            if (gameData.game().getWinner() == ChessGame.TeamColor.DRAW) {
+                gameOverNotification = new Notification("Game over! It's a draw!");
+            } else {
+                gameOverNotification = new Notification("Game over! Winner: \u001b[38;5;12m" + gameData.game().getWinner());
+            }
+            sendMessageToAllPlayers(command.gameID(), gameOverNotification);
+        }
     }
     
     private void handleLeaveCommand(Session session, Leave command) throws Exception {
         GameData gameData = gameDAO.getGame(command.gameID());
-        String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
+        String username = gameData.game().getWinner() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
                 gameData.whiteUsername();
         
         // Remove from database
@@ -152,7 +163,22 @@ public class WebSocketHandler {
         sendMessageToOtherPlayers(command.gameID(), session, notification);
     }
     
-    private void handleResignCommand(Session session, Resign command) {
+    private void handleResignCommand(Session session, Resign command) throws Exception {
+        GameData gameData = gameDAO.getGame(command.gameID());
+        String username = gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.blackUsername() :
+                gameData.whiteUsername();
+        
+        // Mark game as over
+        try {
+            gameService.resignGame(command);
+        } catch (DataAccessException e) {
+            sendMessage(session, new Error("Failed to resign game"));
+            return;
+        }
+        
+        // Notify other players
+        Notification notification = new Notification("\u001b[38;5;12m" + username + "\u001b[38;5;46m resigned the game");
+        sendMessageToAllPlayers(command.gameID(), notification);
     }
     
     private void sendMessage(Session session, ServerMessage message) {
