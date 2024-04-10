@@ -1,8 +1,8 @@
-import ui.ClientUI;
+import ui.ChessClient;
 
 public class Main {
     public static void main(String[] args) {
-        ClientUI clientUI = new ClientUI(8080);
-        clientUI.start();
+        ChessClient chessClient = new ChessClient(8080);
+        chessClient.start();
     }
 }
