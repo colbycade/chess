@@ -24,24 +24,29 @@ public class ServerFacade {
     private final WebSocketCommunicator wsCommunicator;
     private AuthData authData = null;
     
-    public ServerFacade(Integer port) {
-        this.url = null;
-        this.port = port;
-        httpCommunicator = new HttpCommunicator(port);
-        try {
-            wsCommunicator = new WebSocketCommunicator(port);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
     // If given url, extract port from url
     public ServerFacade(String url) {
         this.url = url;
         this.port = extractPort(url);
         httpCommunicator = new HttpCommunicator(port);
+        wsCommunicator = null;
+    }
+    
+    // No websocket capabilities (for testing)
+    public ServerFacade(Integer port) {
+        this.url = null;
+        this.port = port;
+        httpCommunicator = new HttpCommunicator(port);
+        wsCommunicator = null;
+    }
+    
+    // Start server with websocket capabilities
+    public ServerFacade(Integer port, ServerMessageObserver observer) {
+        this.url = null;
+        this.port = port;
+        httpCommunicator = new HttpCommunicator(port);
         try {
-            wsCommunicator = new WebSocketCommunicator(port);
+            wsCommunicator = new WebSocketCommunicator(port, observer);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -96,8 +101,13 @@ public class ServerFacade {
     
     public void joinGame(String authToken, ChessGame.TeamColor clientColor, Integer gameID) throws ResponseException {
         try {
+            // Send http request to join game
             JoinGameRequest requestBody = new JoinGameRequest(authToken, clientColor, gameID);
             httpCommunicator.sendPutRequest("/game", authToken, requestBody);
+            
+            // Send websocket request to join game
+            wsCommunicator.sendJoinPlayerCommand(authToken, gameID, clientColor);
+            
         } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to join game. Error: " + e.getMessage());
         }
@@ -105,8 +115,13 @@ public class ServerFacade {
     
     public void observeGame(String authToken, Integer gameID) throws ResponseException {
         try {
+            // Send http request to join game as observer
             JoinGameRequest requestBody = new JoinGameRequest(authToken, null, gameID);
             httpCommunicator.sendPutRequest("/game", authToken, requestBody);
+            
+            // Send websocket request to join game as observer
+            wsCommunicator.sendJoinObserverCommand(authToken, gameID);
+            
         } catch (IOException | URISyntaxException e) {
             throw new ResponseException("Failed to join game. Error: " + e.getMessage());
         }

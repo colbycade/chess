@@ -1,24 +1,50 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPosition;
+import chess.*;
 import model.GameData;
+import webSocketMessages.serverMessages.LoadGame;
+import webSocketMessages.serverMessages.Error;
+import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
 
 import java.util.Collection;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class ClientUI {
+public class ChessClient implements ServerMessageObserver {
     private final ServerFacade serverFacade;
     private final Scanner scanner;
     private GameData currGameData;
     private ChessGame.TeamColor currColor;
     
-    public ClientUI(Integer port) {
-        serverFacade = new ServerFacade(port);
+    public ChessClient(Integer port) {
+        serverFacade = new ServerFacade(port, this);
         scanner = new Scanner(System.in);
+    }
+    
+    @Override
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> loadGame(((LoadGame) message).game());
+            case ERROR -> displayErrorMessage(((Error) message).errorMessage());
+            case NOTIFICATION -> displayMessage(((Notification) message).message());
+            default -> throw new IllegalStateException("Unexpected value: " + message.getServerMessageType());
+        }
+    }
+    
+    public void loadGame(GameData gameData) {
+        ChessBoard board = gameData.game().getBoard();
+        UIUtility.displayBoard(board, currColor);
+        currGameData = gameData;
+    }
+    
+    public void displayMessage(String message) {
+        System.out.println(SET_TEXT_COLOR_GREEN + message);
+    }
+    
+    public void displayErrorMessage(String message) {
+        System.out.println(SET_TEXT_COLOR_RED + message);
     }
     
     private enum ClientState {
@@ -35,8 +61,8 @@ public class ClientUI {
                 SET_TEXT_COLOR_BLUE + "help " + SET_TEXT_COLOR_MAGENTA + "to get started." + RESET_ALL);
         while (!quit) {
             System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_GREEN + SET_TEXT_FAINT);
-            System.out.print(currentState == ClientState.LOGGED_IN ? "[LOGGED_IN] " :
-                    currentState == ClientState.LOGGED_OUT ? "[LOGGED_OUT] " : "[IN_GAME] " + " ");
+            System.out.print(currentState == ClientState.LOGGED_IN ? " [LOGGED_IN]  " :
+                    currentState == ClientState.LOGGED_OUT ? " [LOGGED_OUT] " : " [IN_GAME]    ");
             System.out.print(">>> " + RESET_ALL + " ");
             String command = scanner.nextLine().trim();
             String[] parts = command.split("\\s+");
@@ -153,19 +179,9 @@ public class ClientUI {
                     Integer gameID = Integer.parseInt(parts[1]);
                     ChessGame.TeamColor clientColor = ChessGame.TeamColor.valueOf(parts[2].toUpperCase());
                     serverFacade.joinGame(serverFacade.getAuthToken(), clientColor, gameID);
-                    System.out.println(SET_TEXT_COLOR_GREEN + "Joined game " + SET_TEXT_COLOR_YELLOW + gameID + SET_TEXT_COLOR_GREEN + " as " + SET_TEXT_COLOR_YELLOW + clientColor);
-                    Collection<GameData> games = serverFacade.listGames(serverFacade.getAuthToken()).games();
-                    GameData gameData = games.stream()
-                            .filter(g -> g.gameID().equals(gameID))
-                            .findFirst()
-                            .orElse(null);
-                    if (gameData == null) {
-                        throw new ResponseException("Game not found.");
-                    }
-                    ChessBoard board = gameData.game().getBoard();
-                    UIUtility.displayBoard(board, clientColor);
+                    System.out.println(SET_TEXT_COLOR_GREEN + "Joined game " + SET_TEXT_COLOR_YELLOW + gameID +
+                            SET_TEXT_COLOR_GREEN + " as " + SET_TEXT_COLOR_YELLOW + clientColor);
                     currColor = clientColor;
-                    currGameData = gameData;
                     return ClientState.GAMEPLAY;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE + "join <gameID> [WHITE|BLACK]");
@@ -232,7 +248,6 @@ public class ClientUI {
                 try {
                     ChessPosition piecePosition = UIUtility.parsePosition(parts[1]);
                     UIUtility.highlightMoves(currGameData.game(), piecePosition);
-                    
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE +
                             "highlight <POSITION> " + SET_TEXT_COLOR_RED + "(e.g. e2)");
@@ -242,7 +257,23 @@ public class ClientUI {
             }
             case "make_move" -> {   // Make a move
                 try {
-                    throw new ResponseException("Not implemented.");
+                    // Validate and parse move
+                    ChessPosition currPos = UIUtility.parsePosition(parts[1]);
+                    ChessPosition targetPos = UIUtility.parsePosition(parts[2]);
+                    ChessPiece.PieceType pieceType = currGameData.game().getBoard().getPiece(currPos).getPieceType();
+                    ChessMove move;
+                    if (pieceType == ChessPiece.PieceType.PAWN && targetPos.getRow() == 1 || targetPos.getRow() == 8) {
+                        // Pawn promotion
+                        ChessPiece.PieceType promotionType = ChessPiece.PieceType.valueOf(parts[3]);
+                        move = new ChessMove(currPos, targetPos, promotionType);
+                    } else {
+                        move = new ChessMove(currPos, targetPos, null);
+                    }
+                    // Make move
+                    serverFacade.makeMove(currGameData.gameID(), move);
+                    System.out.println(SET_TEXT_COLOR_GREEN + "Move successful!");
+                    ChessBoard board = currGameData.game().getBoard();
+                    UIUtility.displayBoard(board, currColor);
                 } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
                     System.out.println(SET_TEXT_COLOR_RED + "Invalid command. Usage: " + SET_TEXT_COLOR_BLUE +
                             "make_move <CURRENT POSITION> <TARGET POSITION>");
@@ -251,10 +282,18 @@ public class ClientUI {
                 }
             }
             case "resign" -> {      // Resign the game (but don't leave)
-            
+                try {
+                    throw new ResponseException("Not implemented.");
+                } catch (ResponseException e) {
+                    System.out.println(SET_TEXT_COLOR_RED + "Failed to resign from game.");
+                }
             }
             case "leave" -> {       // Leave the game (go back to pregame state)
-                
+                try {
+                    throw new ResponseException("Not implemented.");
+                } catch (ResponseException e) {
+                    System.out.println(SET_TEXT_COLOR_RED + "Failed to leave game.");
+                }
                 currColor = null;
                 currGameData = null;
                 return ClientState.LOGGED_IN;
@@ -276,32 +315,33 @@ public class ClientUI {
     }
     
     private static void displayHelp(ClientState currentState) {
-        String preLoginHelp =
-                SET_TEXT_COLOR_BLUE + "   register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" +
-                        SET_TEXT_COLOR_BLUE + "   login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" +
-                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
-                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
-        String postLoginHelp =
-                SET_TEXT_COLOR_BLUE + "   create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
-                        SET_TEXT_COLOR_BLUE + "   list " + SET_TEXT_COLOR_MAGENTA + "- all games\n" +
-                        SET_TEXT_COLOR_BLUE + "   join <gameID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- to join a game\n" +
-                        SET_TEXT_COLOR_BLUE + "   observe <gameID> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
-                        SET_TEXT_COLOR_BLUE + "   logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done playing chess\n" +
-                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
-                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
-        String inGameHelp =
-                SET_TEXT_COLOR_BLUE + "   redraw " + SET_TEXT_COLOR_MAGENTA + "- to redraw the board\n" +
-                        SET_TEXT_COLOR_BLUE + "   highlight <POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to show available moves\n" +
-                        SET_TEXT_COLOR_BLUE + "   make_move <CURRENT POSITION> <TARGET POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to move a piece\n" +
-                        SET_TEXT_COLOR_BLUE + "   resign " + SET_TEXT_COLOR_MAGENTA + "- to resign from the game (without leaving)\n" +
-                        SET_TEXT_COLOR_BLUE + "   leave " + SET_TEXT_COLOR_MAGENTA + "- to leave the game\n" +
-                        SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
-                        SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
-        
         switch (currentState) {
             case LOGGED_OUT -> System.out.println(preLoginHelp);
             case LOGGED_IN -> System.out.println(postLoginHelp);
             case GAMEPLAY -> System.out.println(inGameHelp);
         }
     }
+    
+    static String preLoginHelp =
+            SET_TEXT_COLOR_BLUE + "   register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" +
+                    SET_TEXT_COLOR_BLUE + "   login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" +
+                    SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                    SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
+    static String postLoginHelp =
+            SET_TEXT_COLOR_BLUE + "   create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
+                    SET_TEXT_COLOR_BLUE + "   list " + SET_TEXT_COLOR_MAGENTA + "- all games\n" +
+                    SET_TEXT_COLOR_BLUE + "   join <gameID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- to join a game\n" +
+                    SET_TEXT_COLOR_BLUE + "   observe <gameID> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" +
+                    SET_TEXT_COLOR_BLUE + "   logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done playing chess\n" +
+                    SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                    SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
+    static String inGameHelp =
+            SET_TEXT_COLOR_BLUE + "   redraw " + SET_TEXT_COLOR_MAGENTA + "- to redraw the board\n" +
+                    SET_TEXT_COLOR_BLUE + "   highlight <POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to show available moves\n" +
+                    SET_TEXT_COLOR_BLUE + "   make_move <CURRENT POSITION> <TARGET POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to move a piece\n" +
+                    "      * If move involves a pawn promotion, add 'Q', 'R', 'N', or 'B' after target position, e.g., f7 f8 Q'\n" +
+                    SET_TEXT_COLOR_BLUE + "   resign " + SET_TEXT_COLOR_MAGENTA + "- to resign from the game (without leaving)\n" +
+                    SET_TEXT_COLOR_BLUE + "   leave " + SET_TEXT_COLOR_MAGENTA + "- to leave the game\n" +
+                    SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
+                    SET_TEXT_COLOR_BLUE + "   help " + SET_TEXT_COLOR_MAGENTA + "- list possible commands\n" + RESET_ALL;
 }

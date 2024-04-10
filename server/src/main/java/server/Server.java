@@ -37,7 +37,7 @@ public class Server {
         Spark.staticFiles.location("web");
         
         // Setup WebSocket
-        Spark.webSocket("/connect", WebSocketHandler.class);
+        Spark.webSocket("/connect", new WebSocketHandler(authDAO, gameDAO));
         
         // Register endpoints
         Spark.post("/user", new RegisterHandler(authDAO, userDAO));
