@@ -15,30 +15,30 @@ import static service.AuthUtil.verifyAuthToken;
 public class UserService {
     private final AuthDAO authDAO;
     private final UserDAO userDAO;
-
+    
     public UserService(AuthDAO authDAO, UserDAO userDAO) {
         this.authDAO = authDAO;
         this.userDAO = userDAO;
     }
-
-    public RegisterResponse register(RegisterRequest request) throws DataAccessException {
+    
+    public synchronized RegisterResponse register(RegisterRequest request) throws DataAccessException {
         if (request.username() == null || request.password() == null || request.email() == null) {
             throw new BadRequestException("missing required fields");
         }
-
+        
         // Check if user already exists
         if (userDAO.getUser(request.username()) != null) {
             throw new AlreadyTakenException("user already exists");
         }
-
+        
         // Create user and auth token
         userDAO.insertUser(new UserData(request.username(), request.password(), request.email()));
         AuthData authData = authDAO.createAuth(request.username());
-
+        
         return new RegisterResponse(request.username(), authData.authToken());
     }
-
-    public LoginResponse login(LoginRequest request) throws DataAccessException {
+    
+    public synchronized LoginResponse login(LoginRequest request) throws DataAccessException {
         // Check that user exists and password is correct when hashed
         try {
             UserData user = userDAO.getUser(request.username());
@@ -49,23 +49,23 @@ public class UserService {
             if (!userDAO.isMatch(request.password(), storedHashedPassword)) {
                 throw new UnauthorizedException("incorrect password");
             }
-
+            
             // Create auth token
             AuthData authData = authDAO.createAuth(request.username());
             return new LoginResponse(user.username(), authData.authToken());
-
+            
         } catch (DataAccessException e) {
             throw new UnauthorizedException(e.getMessage());
         }
     }
-
-    public void logout(LogoutRequest request) throws DataAccessException {
+    
+    public synchronized void logout(LogoutRequest request) throws DataAccessException {
         verifyAuthToken(authDAO, request.authToken());
-
+        
         // Delete the auth token
         authDAO.deleteAuth(request.authToken());
     }
-
+    
     public void clearService() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();

@@ -29,7 +29,7 @@ public class GameService {
         this.gameDAO = gameDAO;
     }
     
-    public CreateGameResponse createGame(CreateGameRequest request) throws DataAccessException {
+    public synchronized CreateGameResponse createGame(CreateGameRequest request) throws DataAccessException {
         verifyAuthToken(authDAO, request.authToken());
         
         // Verify that the game name is not null
@@ -42,14 +42,14 @@ public class GameService {
         return new CreateGameResponse(gameID);
     }
     
-    public ListGamesResponse listGames(ListGamesRequest request) throws DataAccessException {
+    public synchronized ListGamesResponse listGames(ListGamesRequest request) throws DataAccessException {
         verifyAuthToken(authDAO, request.authToken());
         
         // Get games
         return new ListGamesResponse(gameDAO.listGames());
     }
     
-    public void joinGame(JoinGameRequest request) throws DataAccessException {
+    public synchronized void joinGame(JoinGameRequest request) throws DataAccessException {
         verifyAuthToken(authDAO, request.authToken());
         
         // Get client's username
@@ -75,7 +75,7 @@ public class GameService {
     
     // Gameplay commands
     
-    public void makeMove(MakeMove request) throws DataAccessException {
+    public synchronized void makeMove(MakeMove request) throws DataAccessException {
         verifyAuthToken(authDAO, request.getAuthString());
         
         // Get client's username
@@ -114,7 +114,7 @@ public class GameService {
         gameDAO.updateGame(game);
     }
     
-    public void leaveGame(Leave request) throws DataAccessException {
+    public synchronized void leaveGame(Leave request) throws DataAccessException {
         verifyAuthToken(authDAO, request.getAuthString());
         
         // Get client's username
@@ -140,7 +140,7 @@ public class GameService {
         }
     }
     
-    public void resignGame(Resign request) throws DataAccessException {
+    public synchronized void resignGame(Resign request) throws DataAccessException {
         verifyAuthToken(authDAO, request.getAuthString());
         
         // Get client's username
