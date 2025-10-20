@@ -10,10 +10,10 @@ import java.util.Arrays;
  */
 public class ChessBoard {
     private final ChessPiece[][] board = new ChessPiece[8][8];
-
+    
     public ChessBoard() {
     }
-
+    
     // Copy constructor
     public ChessBoard(ChessBoard otherBoard) {
         for (int row = 1; row < 9; row++) {
@@ -23,7 +23,7 @@ public class ChessBoard {
             }
         }
     }
-
+    
     /**
      * @return Unicode String representation of ChessBoard object
      */
@@ -46,11 +46,11 @@ public class ChessBoard {
         }
         sb.append("  +-----------------+\n"); // Buffer
         sb.append("    a b c d e f g h\n"); // Column labels
-
+        
         return sb.toString();
     }
-
-
+    
+    
     /**
      * Adds a chess piece to the chessboard
      *
@@ -60,11 +60,11 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[8 - position.getRow()][position.getColumn() - 1] = piece;
     }
-
-    public void removePiece(ChessPosition position) {
+    
+    public void clearPosition(ChessPosition position) {
         board[8 - position.getRow()][position.getColumn() - 1] = null;
     }
-
+    
     /**
      * Gets a chess piece on the chessboard
      *
@@ -75,11 +75,11 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         return board[8 - position.getRow()][position.getColumn() - 1];
     }
-
+    
     public boolean squareIsEmpty(ChessPosition position) {
         return this.getPiece(position) == null;
     }
-
+    
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
@@ -88,7 +88,7 @@ public class ChessBoard {
         // Clear the board
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
-                removePiece(new ChessPosition(row, col));
+                clearPosition(new ChessPosition(row, col));
             }
         }
         // Set up white pieces
@@ -103,8 +103,8 @@ public class ChessBoard {
         this.addPiece(new ChessPosition(1, 6), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
         this.addPiece(new ChessPosition(1, 4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
         this.addPiece(new ChessPosition(1, 5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
-
-
+        
+        
         // Set up black pieces
         for (int col = 1; col <= 8; col++) {
             this.addPiece(new ChessPosition(7, col), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
@@ -118,9 +118,9 @@ public class ChessBoard {
         this.addPiece(new ChessPosition(8, 6), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
         this.addPiece(new ChessPosition(8, 4), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
         this.addPiece(new ChessPosition(8, 5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
-
+        
     }
-
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -128,7 +128,7 @@ public class ChessBoard {
         ChessBoard that = (ChessBoard) o;
         return Arrays.deepEquals(board, that.board);
     }
-
+    
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
