@@ -15,3 +15,6 @@ curlTest
 
 # Build artifacts
 *.jar
+
+# Database config
+db.properties
