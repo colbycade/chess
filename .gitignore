@@ -12,3 +12,6 @@ out/
 
 # Custom files
 curlTest
+
+# Build artifacts
+*.jar
