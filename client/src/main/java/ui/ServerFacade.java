@@ -20,40 +20,49 @@ import java.util.Map;
 
 public class ServerFacade {
     
-    private final String url;
+    private final String host;
     private final Integer port;
+    private final String url;
     private final HttpCommunicator httpCommunicator;
     private final WebSocketCommunicator wsCommunicator;
     private AuthData authData = null;
     private GameData currGameData;
     private ChessGame.TeamColor currColor;
     
-    // If given url, extract port from url
-    public ServerFacade(String url) {
-        this.url = url;
-        this.port = extractPort(url);
-        httpCommunicator = new HttpCommunicator(port);
+    // No websocket capabilities (for testing)
+    public ServerFacade(Integer port) {
+        this.host = "localhost";
+        this.port = port;
+        this.url = "http://" + host + ":" + port;
+        httpCommunicator = new HttpCommunicator(host, port);
         wsCommunicator = null;
     }
     
-    // No websocket capabilities (for testing)
-    public ServerFacade(Integer port) {
-        this.url = null;
-        this.port = port;
-        httpCommunicator = new HttpCommunicator(port);
-        wsCommunicator = null;
+    // Parse url if given
+    public ServerFacade(String url) {
+        this.url = url;
+        this.host = extractHost(url);
+        this.port = extractPort(url);
+        this.httpCommunicator = new HttpCommunicator(host, port);
+        this.wsCommunicator = null;
     }
     
     // Start server with websocket capabilities
-    public ServerFacade(Integer port, ServerMessageObserver observer) {
-        this.url = null;
+    public ServerFacade(String host, int port, ServerMessageObserver observer) {
+        this.host = host;
         this.port = port;
-        httpCommunicator = new HttpCommunicator(port);
+        this.url = "ws://" + host + ":" + port + "/connect";
+        this.httpCommunicator = new HttpCommunicator(host, port);
+        WebSocketCommunicator temp = null;
         try {
-            wsCommunicator = new WebSocketCommunicator(port, observer);
+            temp = new WebSocketCommunicator(host, port, observer);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.err.println("\nERROR: Unable to connect to the chess server at " + this.url);
+            System.err.println("Reason: " + e.getMessage());
+            System.err.println("Make sure the server is running and reachable.");
+            System.exit(1);
         }
+        this.wsCommunicator = temp;
     }
     
     public String getAuthToken() {
@@ -190,6 +199,14 @@ public class ServerFacade {
     private int extractPort(String url) {
         try {
             return new URI(url).getPort();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private String extractHost(String url) {
+        try {
+            return new URI(url).getHost();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

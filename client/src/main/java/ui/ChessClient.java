@@ -17,8 +17,8 @@ public class ChessClient implements ServerMessageObserver {
     private final Scanner scanner;
     private boolean running = false;
     
-    public ChessClient(Integer port) {
-        serverFacade = new ServerFacade(port, this);
+    public ChessClient(String host, int port) {
+        serverFacade = new ServerFacade(host, port, this);
         scanner = new Scanner(System.in);
     }
     

@@ -12,13 +12,19 @@ import java.net.URISyntaxException;
 
 public class HttpCommunicator {
     private final Integer port;
+    private final String host;
     
-    public HttpCommunicator(Integer port) {
+    public HttpCommunicator(String host, Integer port) {
+        this.host = host;
         this.port = port;
     }
     
+    private URI buildURI(String path) throws URISyntaxException {
+        return new URI("http://" + host + ":" + port + path);
+    }
+    
     public <T> T sendPostRequest(String path, String authToken, Object requestBody, Class<T> responseType) throws IOException, URISyntaxException {
-        URI uri = new URI("http://localhost:" + port + path);
+        URI uri = buildURI(path);
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("POST");
         http.setDoOutput(true);
@@ -39,7 +45,7 @@ public class HttpCommunicator {
     }
     
     public <T> T sendGetRequest(String path, String authToken, Class<T> responseType) throws IOException, URISyntaxException {
-        URI uri = new URI("http://localhost:" + port + path);
+        URI uri = buildURI(path);
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("GET");
         http.setRequestProperty("Content-Type", "application/json");
@@ -52,7 +58,7 @@ public class HttpCommunicator {
     }
     
     public void sendPutRequest(String path, String authToken, Object requestBody) throws IOException, URISyntaxException {
-        URI uri = new URI("http://localhost:" + port + path);
+        URI uri = buildURI(path);
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("PUT");
         http.setDoOutput(true);
@@ -68,7 +74,7 @@ public class HttpCommunicator {
     }
     
     public void sendDeleteRequest(String path, String authToken) throws IOException, URISyntaxException {
-        URI uri = new URI("http://localhost:" + port + path);
+        URI uri = buildURI(path);
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("DELETE");
         http.setDoOutput(true);

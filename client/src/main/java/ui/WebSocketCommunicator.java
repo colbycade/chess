@@ -22,9 +22,9 @@ public class WebSocketCommunicator extends Endpoint {
     private final Session session;
     private final ServerMessageObserver observer;
     
-    public WebSocketCommunicator(Integer port, ServerMessageObserver observer) throws Exception {
+    public WebSocketCommunicator(String host, Integer port, ServerMessageObserver observer) throws Exception {
         this.observer = observer;
-        URI uri = new URI("ws://localhost:" + port + "/connect");
+        URI uri = new URI("ws://" + host + ":" + port + "/connect");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.session = container.connectToServer(this, uri);
         this.session.setMaxIdleTimeout(20 * 60 * 1000); // 20 minutes
