@@ -1,14 +1,14 @@
 package server;
 
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
-import dataAccess.inMemoryDatabase.MemoryAuthDAO;
-import dataAccess.inMemoryDatabase.MemoryGameDAO;
-import dataAccess.inMemoryDatabase.MemoryUserDAO;
-import dataAccess.mySQLDatabase.MySQLAuthDAO;
-import dataAccess.mySQLDatabase.MySQLGameDAO;
-import dataAccess.mySQLDatabase.MySQLUserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.UserDAO;
+import dataaccess.inmemorydb.MemoryAuthDAO;
+import dataaccess.inmemorydb.MemoryGameDAO;
+import dataaccess.inmemorydb.MemoryUserDAO;
+import dataaccess.mysqldb.MySQLAuthDAO;
+import dataaccess.mysqldb.MySQLGameDAO;
+import dataaccess.mysqldb.MySQLUserDAO;
 
 public class Main {
     public static void main(String[] args) {

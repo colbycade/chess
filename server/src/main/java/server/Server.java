@@ -1,12 +1,12 @@
 package server;
 
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
-import dataAccess.mySQLDatabase.MySQLAuthDAO;
-import dataAccess.mySQLDatabase.MySQLGameDAO;
-import dataAccess.mySQLDatabase.MySQLUserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.UserDAO;
+import dataaccess.mysqldb.MySQLAuthDAO;
+import dataaccess.mysqldb.MySQLGameDAO;
+import dataaccess.mysqldb.MySQLUserDAO;
 import exception.*;
 import handler.*;
 import spark.*;

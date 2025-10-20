@@ -1,8 +1,8 @@
 package handler;
 
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
 import exception.DataAccessException;
 import service.GameService;
 import model.request.JoinGameRequest;
@@ -16,11 +16,11 @@ import java.util.Map;
 public class JoinGameHandler implements Route {
     private final GameService gameService;
     private final Gson gson = new Gson();
-
+    
     public JoinGameHandler(AuthDAO authDAO, GameDAO gameDAO) {
         this.gameService = new GameService(authDAO, gameDAO);
     }
-
+    
     @Override
     public Object handle(Request req, Response res) throws DataAccessException {
         String authToken = req.headers("authorization");

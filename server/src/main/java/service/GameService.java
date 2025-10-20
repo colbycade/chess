@@ -2,8 +2,8 @@ package service;
 
 import chess.ChessGame;
 import chess.InvalidMoveException;
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.DataAccessException;
@@ -14,9 +14,9 @@ import model.request.JoinGameRequest;
 import model.request.ListGamesRequest;
 import model.response.CreateGameResponse;
 import model.response.ListGamesResponse;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.MakeMove;
-import webSocketMessages.userCommands.Resign;
+import websocket.commands.Leave;
+import websocket.commands.MakeMove;
+import websocket.commands.Resign;
 
 import static service.AuthUtil.verifyAuthToken;
 

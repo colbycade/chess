@@ -1,9 +1,9 @@
-package clientTests;
+package clienttests;
 
 import chess.ChessGame;
-import dataAccess.inMemoryDatabase.MemoryAuthDAO;
-import dataAccess.inMemoryDatabase.MemoryGameDAO;
-import dataAccess.inMemoryDatabase.MemoryUserDAO;
+import dataaccess.inmemorydb.MemoryAuthDAO;
+import dataaccess.inmemorydb.MemoryGameDAO;
+import dataaccess.inmemorydb.MemoryUserDAO;
 import model.GameData;
 import model.UserData;
 import model.response.CreateGameResponse;

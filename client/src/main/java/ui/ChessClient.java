@@ -2,10 +2,10 @@ package ui;
 
 import chess.*;
 import model.GameData;
-import webSocketMessages.serverMessages.LoadGame;
-import webSocketMessages.serverMessages.Error;
-import webSocketMessages.serverMessages.Notification;
-import webSocketMessages.serverMessages.ServerMessage;
+import websocket.messages.LoadGame;
+import websocket.messages.Error;
+import websocket.messages.Notification;
+import websocket.messages.ServerMessage;
 
 import java.util.Collection;
 import java.util.Scanner;

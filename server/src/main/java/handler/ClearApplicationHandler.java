@@ -1,8 +1,8 @@
 package handler;
 
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.UserDAO;
 import exception.DataAccessException;
 import service.GameService;
 import service.UserService;
@@ -13,12 +13,12 @@ import spark.Route;
 public class ClearApplicationHandler implements Route {
     private final GameService gameService;
     private final UserService userService;
-
+    
     public ClearApplicationHandler(GameDAO gameDAO, AuthDAO authDAO, UserDAO userDAO) {
         this.gameService = new GameService(authDAO, gameDAO);
         this.userService = new UserService(authDAO, userDAO);
     }
-
+    
     @Override
     public Object handle(Request req, Response res) throws DataAccessException {
         userService.clearService();

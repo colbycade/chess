@@ -3,11 +3,11 @@ package ui;
 import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.*;
-import webSocketMessages.serverMessages.LoadGame;
-import webSocketMessages.serverMessages.Notification;
-import webSocketMessages.serverMessages.Error;
-import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.*;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
+import websocket.messages.Error;
+import websocket.messages.ServerMessage;
+import websocket.commands.*;
 
 import javax.websocket.*;
 import java.io.IOException;
