@@ -34,9 +34,9 @@ public class Server {
         Gson gson = new Gson();
         Spark.port(desiredPort);
         
-        Spark.staticFiles.location("web");
-        
         // Setup WebSocket
+        Spark.staticFiles.location("web");
+        Spark.webSocketIdleTimeoutMillis(15 * 60 * 1000); // 15 minutes
         Spark.webSocket("/connect", new WebSocketHandler(authDAO, gameDAO));
         
         // Register endpoints

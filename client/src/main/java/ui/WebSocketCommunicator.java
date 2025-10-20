@@ -44,7 +44,20 @@ public class WebSocketCommunicator extends Endpoint {
     
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        System.out.println("Connection to server lost: " + closeReason.getReasonPhrase());
+        String reasonPhrase = closeReason.getReasonPhrase();
+        String displayMessage;
+        
+        // Check if the close reason is due to idle timeout
+        if (reasonPhrase != null && reasonPhrase.toLowerCase().contains("idle timeout")) {
+            displayMessage = "Connection timed out due to inactivity. Please reconnect.";
+        } else if (reasonPhrase == null || reasonPhrase.trim().isEmpty()) {
+            displayMessage = "Connection closed by the server (no reason given).";
+        } else {
+            // For any other reason, display what the server sent.
+            displayMessage = reasonPhrase;
+        }
+        
+        System.out.println("Connection to server lost: " + displayMessage);
         if (observer instanceof ChessClient client) {
             client.stop();
         }
