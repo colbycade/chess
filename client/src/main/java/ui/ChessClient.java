@@ -338,7 +338,7 @@ public class ChessClient implements ServerMessageObserver {
             SET_TEXT_COLOR_BLUE + "   redraw " + SET_TEXT_COLOR_MAGENTA + "- to redraw the board\n" +
                     SET_TEXT_COLOR_BLUE + "   highlight <POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to show available moves\n" +
                     SET_TEXT_COLOR_BLUE + "   make_move <CURRENT POSITION> <TARGET POSITION> " + SET_TEXT_COLOR_MAGENTA + "- to move a piece\n" +
-                    "      * If move involves a pawn promotion, add 'Q', 'R', 'N', or 'B' after target position, e.g., f7 f8 Q'\n" +
+                    "      * If move involves a pawn promotion, add 'Q', 'R', 'N', or 'B' after target position, e.g., 'f7 f8 Q'\n" +
                     SET_TEXT_COLOR_BLUE + "   resign " + SET_TEXT_COLOR_MAGENTA + "- to resign from the game (without leaving)\n" +
                     SET_TEXT_COLOR_BLUE + "   leave " + SET_TEXT_COLOR_MAGENTA + "- to leave the game\n" +
                     SET_TEXT_COLOR_BLUE + "   quit " + SET_TEXT_COLOR_MAGENTA + "- to quit\n" +
