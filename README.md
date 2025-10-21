@@ -1,7 +1,6 @@
 # ♕ BYU CS 240 Chess
 
-This is a project for BYU CS 240 (Advanced Programming Concepts) that implements a multiplayer chess server and a 
-command line chess client.  
+This is a project created for the BYU CS 240 (Advanced Programming Concepts) course.  
 
 This project demonstrates mastery of proper software design, client/server architecture, networking using HTTP and 
 WebSocket, database persistence, unit testing, serialization, concurrency, and security.  
